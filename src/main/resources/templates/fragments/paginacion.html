@@ -1,0 +1,70 @@
+<!-- templates/fragments/paginacion.html -->
+
+<!-- Paginación -->
+<div th:fragment="paginacion" class="mt-8 flex justify-center"
+     th:with="
+        startPage=${page.number - 2 < 0 ? 0 : page.number - 2},
+        endPage=${page.number + 2 > page.totalPages - 1 ? page.totalPages - 1 : page.number + 2}
+        ">
+    <ul class="flex items-center gap-1">
+
+        <!-- Primera -->
+        <li>
+            <a class="pagination-link px-3 py-1 rounded-lg text-text-secondary hover:bg-[#f4ede7]"
+               href="?page=0"
+               th:classappend="${page.first} ? 'opacity-50 pointer-events-none'"
+               th:text="#{paginacion.primera}">
+            </a>
+        </li>
+
+        <!-- Anterior -->
+        <li>
+            <a class="pagination-link px-3 py-1 rounded-lg text-text-secondary hover:bg-[#f4ede7]"
+               th:href="'?page=' + ${page.number - 1}"
+               th:classappend="${page.first} ? 'opacity-50 pointer-events-none'">
+                ←
+            </a>
+        </li>
+
+        <!-- Ellipsis inicial -->
+        <li th:if="${startPage > 0}">
+            <span class="px-2 text-text-secondary">…</span>
+        </li>
+
+        <!-- Páginas -->
+        <li th:each="i : ${#numbers.sequence(startPage, endPage)}">
+            <a class="pagination-link w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors"
+               th:href="'?page=' + ${i}"
+               th:text="${i + 1}"
+               th:class="${i == page.number}
+           ? 'bg-primary text-[#1c140d] font-bold'
+           : 'text-text-secondary hover:bg-[#f4ede7]'">
+            </a>
+        </li>
+
+
+
+        <!-- Ellipsis final -->
+        <li th:if="${endPage < page.totalPages - 1}">
+            <span class="px-2 text-text-secondary">…</span>
+        </li>
+
+        <!-- Siguiente -->
+        <li>
+            <a class="pagination-link px-3 py-1 rounded-lg text-text-secondary hover:bg-[#f4ede7]"
+               th:href="'?page=' + ${page.number + 1}"
+               th:classappend="${page.last} ? 'opacity-50 pointer-events-none'">
+                →
+            </a>
+        </li>
+
+        <!-- Última -->
+        <li>
+            <a class="pagination-link px-3 py-1 rounded-lg text-text-secondary hover:bg-[#f4ede7]"
+               th:href="'?page=' + ${page.totalPages - 1}"
+               th:classappend="${page.last} ? 'opacity-50 pointer-events-none'"
+               th:text="#{paginacion.ultima}">
+            </a>
+        </li>
+    </ul>
+</div>

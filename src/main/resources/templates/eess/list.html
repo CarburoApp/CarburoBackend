@@ -1,0 +1,355 @@
+<!-- templates/estaciones/list.html -->
+<!DOCTYPE html>
+<html lang="es" class="light">
+<head>
+    <th:block th:replace="~{fragments/head :: head}"></th:block>
+    <title th:text="#{app.name} + ' - ' + #{eess.list.title}"></title>
+
+    <!-- Scripts -->
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+          rel="stylesheet"/>
+    <script id="tailwind-config">
+    tailwind.config = {
+    darkMode: "class",
+    theme: {
+    extend: {
+    colors: {
+    "primary": "#f48c25",
+    "background-light": "#fcfaf8",
+    "background-dark": "#221910",
+    "surface": "#ffffff",
+    "border-color": "#f4ede7",
+    "text-main": "#1c140d",
+    "text-secondary": "#9c7349",
+    },
+    fontFamily: {
+    "display": ["Inter", "sans-serif"],
+    "body": ["Inter", "sans-serif"],
+    },
+    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+    },
+    },
+    }
+    </script>
+    <style>
+        /* Custom scrollbar for filter lists */
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+
+        body {
+        font-family: 'Inter', sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+    </style>
+
+
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
+
+<!-- Header -->
+<th:block th:replace="~{fragments/header :: header}"></th:block>
+
+<!-- Contenido principal -->
+<div class="flex flex-1 w-full max-w-[1400px] mx-auto px-4 py-6 md:px-8 gap-8">
+    <!-- Left Sidebar: Filters -->
+    <aside class="hidden lg:flex flex-col w-80 min-w-[320px] gap-6 shrink-0 h-fit sticky top-24">
+        <div class="bg-surface rounded-xl border border-border-color p-5 shadow-sm">
+            <div class="flex items-center gap-2 mb-6 border-b border-border-color pb-4">
+                <span class="material-symbols-outlined text-primary">filter_list</span>
+                <h3 class="text-lg font-bold text-text-main" th:text="#{eess.list.filtros}"></h3>
+            </div>
+
+            <form id="formFiltros" method="get" th:action="@{/estacionesDeServicio/list}">
+
+                <div class="flex flex-col gap-5">
+                    <!-- Search Text -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs font-bold text-text-secondary uppercase tracking-wider"
+                               for="filtro_buscador"
+                               th:text="#{eess.list.filtros.buscar}"></label>
+                        <div class="flex w-full items-stretch rounded-lg h-10 bg-[#f4ede7]">
+                            <div class="text-[#9c7349] flex items-center justify-center pl-3 pr-1">
+                                <span class="material-symbols-outlined text-[20px]">search</span>
+                            </div>
+                            <input id="filtro_buscador" type="text" name="busqueda" th:value="${busqueda}"
+                                   class="w-full bg-transparent border-none focus:ring-0 text-sm placeholder:text-[#9c7349]/70 text-text-main"
+                                   th:placeholder="#{eess.list.filtros.buscar.placeholder}"/>
+                        </div>
+                    </div>
+
+                    <!-- Location Filters -->
+                    <div class="flex flex-col gap-3">
+
+                        <!-- Label global del bloque -->
+                        <legend class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-1"
+                                th:text="#{eess.list.filtros.ubicacion}">
+                        </legend>
+
+
+                        <label class="text-sm font-medium text-text-main" for="filtro_ccaa"
+                               th:text="#{eess.list.filtros.ubicacion.ccaa}"></label>
+                        <select id="filtro_ccaa" name="comunidadSeleccionada" th:value="${comunidadSeleccionada}"
+                                class="w-full h-10 rounded-lg border border-[#e8dbce] bg-[#fcfaf8] text-sm text-text-main
+                               focus:ring-1 focus:ring-primary focus:border-primary">
+                            <option th:value="0" th:text="#{eess.list.filtros.indiferente}"
+                                    th:selected="${comunidadSeleccionada == '0'}"></option>
+                            <option th:each="comunidad : ${comunidades}"
+                                    th:value="${comunidad.getId()}"
+                                    th:text="${comunidad.getDenominacion()}"
+                                    th:selected="${comunidad.getId()} == ${comunidadSeleccionada}"></option>
+                        </select>
+
+                        <label class="text-sm font-medium text-text-main" for="filtro_provincia"
+                               th:text="#{eess.list.filtros.ubicacion.provincia}"></label>
+                        <select id="filtro_provincia" name="provinciaSeleccionada" th:value="${provinciaSeleccionada}"
+                                class="w-full h-10 rounded-lg border border-[#e8dbce] bg-[#fcfaf8] text-sm text-text-main
+                               focus:ring-1 focus:ring-primary focus:border-primary"
+                                th:disabled="${comunidadSeleccionada == '0'}">
+                            <option th:value="0" th:text="#{eess.list.filtros.indiferente}"></option>
+                            <option th:each="provincia : ${provincias}" th:value="${provincia.getId()}"
+                                    th:text="${provincia.getDenominacion()}"
+                                    th:selected="${provincia.getId() == provinciaSeleccionada}"></option>
+                        </select>
+
+                        <label class="text-sm font-medium text-text-main" for="filtro_municipio"
+                               th:text="#{eess.list.filtros.ubicacion.municipio}"></label>
+                        <select id="filtro_municipio" name="municipioSeleccionado" th:value="${municipioSeleccionado}"
+                                class="w-full h-10 rounded-lg border border-[#e8dbce] bg-[#fcfaf8] text-sm text-text-main
+                               focus:ring-1 focus:ring-primary focus:border-primary"
+                                th:disabled="${provinciaSeleccionada == '0'}">
+                            <option th:value="0" th:text="#{eess.list.filtros.indiferente}"></option>
+                            <option th:each="municipio : ${municipios}" th:value="${municipio.getId()}"
+                                    th:text="${municipio.getDenominacion()}"
+                                    th:selected="${municipio.getId() == municipioSeleccionado}"></option>
+                        </select>
+                    </div>
+
+                    <!-- Order By TODO ELIMINAR SI FINALMENTE NO SE USO
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs font-bold text-text-secondary uppercase tracking-wider" for="ordenacion"
+                               th:text="#{eess.list.filtros.ordenar.label}"></label>
+                        <select id="ordenacion" name="ordenSeleccionado" th:value="${ordenSeleccionado}" class="w-full h-10 rounded-lg border border-[#e8dbce] bg-[#fcfaf8] text-sm text-text-main
+                               focus:ring-1 focus:ring-primary focus:border-primary">
+                            <option th:value="price_asc" th:text="#{eess.list.filtros.orden.precio.asc}"
+                                    th:selected="${ordenSeleccionado == 'price_asc'}"></option>
+                            <option th:value="price_desc" th:text="#{eess.list.filtros.orden.precio.desc}"
+                                    th:selected="${ordenSeleccionado == 'price_desc'}"></option>
+                            <option th:value="name_asc" th:text="#{eess.list.filtros.orden.alfabetico.asc}"
+                                    th:selected="${ordenSeleccionado == 'name_asc'}"></option>
+                            <option th:value="name_desc" th:text="#{eess.list.filtros.orden.alfabetico.desc}"
+                                    th:selected="${ordenSeleccionado == 'name_desc'}"></option>
+                        </select>
+                    </div>
+                    -->
+
+                    <!-- Status Slider -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs font-bold text-text-secondary uppercase tracking-wider"
+                               for="filtro_estado"
+                               th:text="#{eess.list.filtros.estado}"></label>
+
+                        <style>
+                            /* Ocultar inputs radio de los filtros visuales */
+                            .oculto {
+                                display: none !important;
+                                width: 0 !important;
+                                height: 0 !important;
+                                margin: 0 !important;
+                                padding: 0 !important;
+                                border: 0 !important;
+                            }
+                        </style>
+
+                        <!-- Inputs radio ocultos -->
+                        <input type="radio" name="estadoSeleccionado" value="ABIERTO" class="oculto"
+                               th:checked="${estadoSeleccionado=='ABIERTO'}" hidden>
+                        <input type="radio" name="estadoSeleccionado" value="CERRADO" class="oculto"
+                               th:checked="${estadoSeleccionado=='CERRADO'}" hidden>
+                        <input type="radio" name="estadoSeleccionado" value="INDEFERENTE" class="oculto"
+                               th:checked="${estadoSeleccionado=='INDEFERENTE'}" hidden>
+
+                        <!-- Botones visuales -->
+                        <div id="filtro_estado" class="flex bg-[#f4ede7] p-1 rounded-lg">
+                            <button type="button" data-value="ABIERTO"
+                                    class="flex-1 py-1.5 text-xs font-medium rounded-md hover:bg-white/50 transition-colors"
+                                    th:classappend="${estadoSeleccionado=='ABIERTO'} ? ' bg-white text-primary shadow-sm' : ''"
+                                    th:text="#{eess.estado.abierto}"></button>
+
+                            <button type="button" data-value="CERRADO"
+                                    class="flex-1 py-1.5 text-xs font-medium rounded-md hover:bg-white/50 transition-colors"
+                                    th:classappend="${estadoSeleccionado=='CERRADO'} ? ' bg-white text-primary shadow-sm' : ''"
+                                    th:text="#{eess.estado.cerrado}"></button>
+
+                            <button type="button" data-value="INDEFERENTE"
+                                    class="flex-1 py-1.5 text-xs font-medium rounded-md hover:bg-white/50 transition-colors"
+                                    th:classappend="${estadoSeleccionado=='INDEFERENTE'} ? ' bg-white text-primary shadow-sm' : ''"
+                                    th:text="#{eess.list.estado.indiferente}"></button>
+                        </div>
+                    </div>
+
+
+                    <!-- Fuel Types -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs font-bold text-text-secondary uppercase tracking-wider"
+                               for="filtro_combustibles_disponibles"
+                               th:text="#{eess.list.filtros.combustibles}"></label>
+                        <div id="filtro_combustibles_disponibles"
+                             class="h-32 overflow-y-auto custom-scrollbar border border-[#e8dbce] rounded-lg p-3 bg-[#fcfaf8]">
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2 cursor-pointer"
+                                       th:each="combustibledto : ${combustibles}">
+                                    <input class="rounded text-primary focus:ring-primary border-[#e8dbce]"
+                                           type="checkbox" name="combustibles"
+                                           th:checked="${combustibledto.isSeleccionado}"
+                                           th:value="${combustibledto.getCodigo()}"
+                                           th:text="${#messages.msg('combustible.' + combustibledto.getCodigo().toLowerCase())}"/>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Brand -->
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs font-bold text-text-secondary uppercase tracking-wider" for="filtro_marca"
+                               th:text="#{eess.list.filtros.marca}"></label>
+                        <select id="filtro_marca" name="marcaSeleccionada" th:value="${marcaSeleccionada}" class="w-full h-10 rounded-lg border border-[#e8dbce] bg-[#fcfaf8] text-sm text-text-main
+                               focus:ring-1 focus:ring-primary focus:border-primary"
+                        >
+                            <option th:value="0NOTSELECTED" th:text="#{eess.list.filtros.indiferente}"></option>
+                            <option th:each="marca : ${marcas}" th:value="${marca}" th:text="${marca}"
+                                    th:selected="${marca == marcaSeleccionada}"></option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col min-w-0">
+        <!-- Breadcrumbs -->
+        <div class="flex flex-wrap gap-2 py-2 mb-4 text-sm">
+            <a class="text-text-secondary font-medium hover:underline" href="/home"
+               th:text="#{header.nav.boton.inicio}"></a>
+            <span class="text-text-secondary font-medium">/</span>
+            <a class="text-text-secondary font-medium hover:underline" href="/estacionesDeServicio/list"
+               th:text="#{eess.list.title}"></a>
+        </div>
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8 border-b border-border-color pb-4">
+            <div>
+                <h1 class="text-text-main text-3xl font-bold leading-tight mb-2" th:text="#{eess.list.title}"></h1>
+                <p class="text-text-secondary text-sm"
+                   th:text="#{eess.list.introduccion(${page.numberOfElements},${page.totalElements})}"></p>
+            </div>
+            <!-- Mobile Filter Toggle (Visible only on small screens) -->
+            <button class="lg:hidden flex items-center gap-2 px-4 py-2 bg-white border border-[#e8dbce] rounded-lg shadow-sm text-sm font-medium"
+                    th:text="#{eess.list.filtros}">
+                <span class="material-symbols-outlined">filter_list</span>
+            </button>
+        </div>
+        <!-- Results List -->
+        <div class="flex flex-col gap-4">
+            <!-- Station Card -->
+            <article th:each="estacion : ${page}"
+                     class="bg-surface rounded-xl border border-[#e8dbce] shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden group"
+                     th:classappend="${estacion.isAbierto()} ? '' : 'opacity-90'">
+                <a th:href="@{/estacionesDeServicio/{id}(id=${estacion.id})}" class="block h-full">
+                    <div class="p-6">
+                        <!-- Card Header -->
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="size-10 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                                    <span class="material-symbols-outlined">local_gas_station</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-text-main group-hover:text-primary transition-colors"
+                                    th:text="${estacion.getRotulo()}">Marca</h3>
+                            </div>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f4ede7] text-text-secondary"
+                                  th:text="'ID: ' + ${estacion.getId()}">ID</span>
+                        </div>
+
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <!-- Info Column -->
+                            <div class="flex flex-col gap-1.5">
+                                <div class="flex items-start gap-2">
+                                    <span class="material-symbols-outlined text-text-secondary text-[20px] mt-0.5">location_on</span>
+                                    <div>
+                                        <p class="text-text-main font-medium" th:text="${estacion.getDireccion()}">
+                                            Dirección</p>
+                                        <p class="text-text-secondary text-sm"
+                                           th:text="${estacion.getLocalidad()} + ', ' + ${estacion.getCodigoPostal}">
+                                            Localidad, CP</p>
+                                        <p class="text-text-secondary text-xs mt-1 uppercase tracking-wide"
+                                           th:text="${estacion.getMunicipio().getDenominacion()} + ', ' + ${estacion.getProvincia().getDenominacion()}">
+                                            Provincia, Comunidad</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Status Column -->
+                            <div class="flex flex-col gap-1.5 items-start md:items-end text-left md:text-right">
+                                <div class="flex items-center gap-1.5 font-bold text-lg"
+                                     th:classappend="${estacion.isAbierto()} ? 'text-green-600' : 'text-red-600'">
+                        <span th:classappend="${estacion.isAbierto()} ? 'w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse' : 'material-symbols-outlined text-[20px]'"
+                              th:text="${estacion.isAbierto()} ? '' : 'block'">Estado</span>
+                                    <span th:text="${estacion.isAbierto()}    ? #{eess.estado.abierto}    : #{eess.estado.cerrado}"></span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-sm text-text-secondary">
+                                    <span class="material-symbols-outlined text-[18px]">schedule</span>
+                                    <span th:text="${estacion.getHorario()}"></span>
+                                </div>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 mt-1"
+                                      th:text="${#messages.msg(estacion.getVenta().getCodigoMensaje())}"></span>
+
+                            </div>
+                        </div>
+
+                        <!-- Fuels Section -->
+                        <div class="border-t border-[#f4ede7] pt-4">
+                            <p class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-3"
+                               th:text="#{eess.list.combustible.precios}"></p>
+                            <div class="flex flex-wrap gap-3">
+                                <div th:each="precioCombustible : ${estacion.getPreciosCombustibles()}"
+                                     class="flex flex-col items-center justify-center bg-[#fcfaf8] border border-[#e8dbce] rounded-lg p-3 min-w-[100px] hover:border-primary/50 transition-colors">
+                                <span class="text-xs text-text-secondary mb-1"
+                                      th:text="${#messages.msg('combustible.' + precioCombustible.getCombustible().getCodigo().toLowerCase())}"></span>
+                                    <span class="text-lg font-bold text-primary font-mono"
+                                          th:text="${#numbers.formatDecimal(precioCombustible.getPrecio(), 1, 'COMMA', 3, 'POINT')} + ' €'"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </article>
+        </div>
+
+        <!-- Paginacion -->
+        <th:block th:replace="~{fragments/paginacion :: paginacion}"></th:block>
+
+    </main>
+</div>
+
+<!-- Footer -->
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script src="/script/filtros_path_eess_list.js"></script>
+
+</body>
+</html>

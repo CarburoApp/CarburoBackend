@@ -1,0 +1,29 @@
+<!-- templates/fragments/head.html -->
+
+<!--head-->
+<th:block th:fragment="head">
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <!-- FAVICON -->
+    <link rel="icon" type="image/ico" th:href="@{/images/Logo.ico}"/>
+
+    <!-- Tailwind y fuentes -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+          rel="stylesheet"/>
+
+    <!-- JS files: jQuery primero y luego Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- CSS propio -->
+    <link rel="stylesheet" th:href="@{/css/styles.css}"/>
+
+    <!-- Scripts -->
+    <script src="/script/idioma.js"></script>
+    <script th:src="@{/script/paginacion.js}"></script>
+</th:block>
+<!--/head-->

@@ -1,0 +1,32 @@
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #fcfaf8;
+    color: #1c140d;
+}
+
+.footer {
+    background-color: #ffffff;
+    border-top: 1px solid #f4ede7;
+    padding: 1.5rem 0;
+    text-align: center;
+}
+
+.border-border-color {
+    border-color: #f4ede7;
+}
+
+.text-text-main {
+    color: #1c140d;
+}
+
+.text-text-secondary {
+    color: #9c7349;
+}
+
+.bg-primary {
+    background-color: #f48c25;
+}
+
+.text-primary {
+    color: #f48c25;
+}

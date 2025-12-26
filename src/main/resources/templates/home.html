@@ -1,0 +1,93 @@
+<!-- templates/home.html -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <th:block th:replace="~{fragments/head :: head}"></th:block>
+    <title th:text="#{app.name} + ' - ' + #{home.title}"></title>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
+
+<!-- Header -->
+<th:block th:replace="~{fragments/header :: header}"></th:block>
+
+<!-- Contenido principal -->
+<main class="flex-1 flex flex-col min-w-0 gap-8">
+
+    <!-- Hero principal -->
+    <section class="bg-background-dark rounded-2xl p-8 md:p-12 relative overflow-hidden shadow-lg group">
+        <div class="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-primary/10 rounded-full blur-[60px] translate-y-1/2 -translate-x-1/4"></div>
+
+        <div class="relative z-10 max-w-2xl">
+            <h1 class="text-white text-3xl md:text-5xl font-bold leading-tight mb-4 tracking-tight">
+                <span th:text="#{home.hero.titulo}"></span>
+                <span class="text-primary" th:text="#{home.hero.destacado}"></span>
+            </h1>
+            <p class="text-white/70 text-lg mb-8 max-w-lg" th:text="#{home.hero.descripcion}"></p>
+
+            <!-- Buscador -->
+            <div class="bg-surface p-2 rounded-xl flex flex-col sm:flex-row gap-2 shadow-xl max-w-xl">
+                <div class="flex-1 relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary">
+                        <span class="material-symbols-outlined">search</span>
+                    </div>
+                    <input class="block w-full pl-10 pr-3 py-3 border-none rounded-lg bg-gray-50 focus:ring-2 focus:ring-primary text-text-main placeholder-text-secondary/60 font-medium"
+                           th:placeholder="#{home.buscar.placeholder}" type="text"/>
+                </div>
+                <button class="bg-primary hover:bg-primary/90 text-text-main font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2">
+                    <span th:text="#{home.buscar.boton}"></span>
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cards de características -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-surface p-6 rounded-xl border border-border-color shadow-sm hover:shadow-md transition-all hover:-translate-y-1 duration-200">
+            <div class="w-12 h-12 rounded-lg bg-green-50 text-green-600 flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-2xl">update</span>
+            </div>
+            <h3 class="text-lg font-bold text-text-main mb-2" th:text="#{home.card.precios.actualizados}"></h3>
+            <p class="text-sm text-text-secondary" th:text="#{home.card.precios.actualizados.desc}"></p>
+        </div>
+
+        <div class="bg-surface p-6 rounded-xl border border-border-color shadow-sm hover:shadow-md transition-all hover:-translate-y-1 duration-200">
+            <div class="w-12 h-12 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-2xl">tune</span>
+            </div>
+            <h3 class="text-lg font-bold text-text-main mb-2" th:text="#{home.card.precios.filtros}"></h3>
+            <p class="text-sm text-text-secondary" th:text="#{home.card.precios.filtros.desc}"></p>
+        </div>
+
+        <div class="bg-surface p-6 rounded-xl border border-border-color shadow-sm hover:shadow-md transition-all hover:-translate-y-1 duration-200">
+            <div class="w-12 h-12 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-2xl">near_me</span>
+            </div>
+            <h3 class="text-lg font-bold text-text-main mb-2" th:text="#{home.card.precios.cercanas}"></h3>
+            <p class="text-sm text-text-secondary" th:text="#{home.card.precios.cercanas.desc}"></p>
+        </div>
+    </section>
+
+    <!-- Sección favoritos -->
+    <section
+            class="bg-border-color rounded-2xl p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 border border-[#e8dbce]">
+        <div class="flex-1">
+            <h3 class="text-2xl font-bold text-text-main mb-2" th:text="#{home.seccion.alerta.titulo}"></h3>
+            <p class="text-text-secondary" th:text="#{home.seccion.alerta.descripcion}"></p>
+        </div>
+        <div class="flex gap-4 shrink-0">
+            <button class="bg-surface hover:bg-white text-text-main border border-[#d6c4b5] font-bold py-3 px-6 rounded-lg transition-colors">
+                <span th:text="#{home.seccion.alerta.explorar}"></span>
+            </button>
+            <button class="bg-primary hover:bg-primary/90 text-text-main font-bold py-3 px-6 rounded-lg transition-colors shadow-sm">
+                <span th:text="#{home.seccion.alerta.crear}"></span>
+            </button>
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

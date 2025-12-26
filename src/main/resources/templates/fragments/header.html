@@ -1,0 +1,94 @@
+<!-- templates/fragments/header.html -->
+<header th:fragment="header"
+        class="flex items-center justify-between whitespace-nowrap border-b border-solid border-border-color bg-background-light px-10 py-3 sticky top-0 z-50">
+
+    <!-- Logo -->
+    <a href="/home">
+        <div class="flex items-center gap-4 text-text-main">
+            <div class="size-8 text-primary flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl">local_gas_station</span>
+            </div>
+            <h2 class="text-text-main text-xl font-bold leading-tight tracking-[-0.015em]"
+                th:text="#{header.logo.nombre}"></h2>
+        </div>
+    </a>
+
+
+    <!-- Navegación -->
+    <div class="flex flex-1 justify-end gap-8 items-center">
+        <nav class="hidden md:flex items-center gap-9">
+            <a class="text-primary text-sm font-bold leading-normal transition-colors" href="/home"
+               th:text="#{header.nav.boton.inicio}"></a>
+            <a class="text-text-main text-sm font-medium leading-normal hover:text-primary transition-colors"
+               href="/estacionesDeServicio/list" th:text="#{header.nav.boton.estaciones}"></a>
+            <a class="text-text-main text-sm font-medium leading-normal hover:text-primary transition-colors"
+               href="/contacto" th:text="#{header.nav.contacto}"></a>
+        </nav>
+
+        <!-- Botones -->
+        <div class="flex gap-2 items-center">
+            <!-- IDIOMA -->
+            <li class="nav-item dropdown relative">
+                <a class="nav-link dropdown-toggle flex items-center gap-1 cursor-pointer" href="#" id="btnLanguage"
+                   role="button">
+                    <svg class="w-3 h-3 ml-1 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                              d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                    <span th:text="#{header.nav.boton.idioma}"></span>
+                </a>
+
+                <!-- Dropdown -->
+                <div id="languageDropdownMenuButton"
+                     class="dropdown-menu absolute mt-2 right-0 w-36 bg-white border rounded-lg shadow-lg hidden z-50">
+                    <!-- Lista de idiomas -->
+                    <a class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100" value="ES">
+                        <span th:text="#{language.es}"></span>
+                    </a>
+                    <a class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100" value="EN">
+                        <span th:text="#{language.en}"></span>
+                    </a>
+                    <a class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100" value="FR">
+                        <span th:text="#{language.fr}"></span>
+                    </a>
+                    <a class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100" value="IT">
+                        <span th:text="#{language.it}"></span>
+                    </a>
+                    <a class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100" value="PT">
+                        <span th:text="#{language.pt}"></span>
+                    </a>
+                    <a class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100" value="CA">
+                        <span th:text="#{language.ca}"></span>
+                    </a>
+                    <a class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100" value="GL">
+                        <span th:text="#{language.gl}"></span>
+                    </a>
+                    <a class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100" value="EU">
+                        <span th:text="#{language.eu}"></span>
+                    </a>
+                    <a class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100" value="OC">
+                        <span th:text="#{language.oc}"></span>
+                    </a>
+                    <a class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100" value="AST">
+                        <span th:text="#{language.ast}"></span>
+                    </a>
+                    <a class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100" value="AR">
+                        <span th:text="#{language.ar}"></span>
+                    </a>
+                </div>
+            </li>
+
+
+            <!-- Botón registrarse -->
+            <button onclick="location.href='/register'" class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary hover:bg-primary/90 transition-colors text-text-main text-sm font-bold">
+                <span class="truncate" th:text="#{header.nav.boton.registrarse}"></span>
+            </button>
+
+            <!-- Botón iniciar sesión -->
+            <button onclick="location.href='/login'" class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-border-color hover:bg-[#ebdccf] transition-colors text-text-main text-sm font-bold">
+                <span class="truncate" th:text="#{header.nav.boton.iniciar}"></span>
+            </button>
+        </div>
+    </div>
+</header>
