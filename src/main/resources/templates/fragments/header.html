@@ -28,9 +28,14 @@
         <!-- Botones -->
         <div class="flex gap-2 items-center">
             <!-- IDIOMA -->
-            <li class="nav-item dropdown relative">
-                <a class="nav-link dropdown-toggle flex items-center gap-1 cursor-pointer" href="#" id="btnLanguage"
-                   role="button">
+            <div class="nav-item dropdown relative">
+                <a class="nav-link dropdown-toggle flex items-center gap-1 cursor-pointer"
+                   href="#"
+                   id="btnLanguage"
+                   role="button"
+                   tabindex="0"
+                   aria-haspopup="true"
+                   aria-expanded="false">
                     <svg class="w-3 h-3 ml-1 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                               d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z"
@@ -77,7 +82,7 @@
                         <span th:text="#{language.ar}"></span>
                     </a>
                 </div>
-            </li>
+            </div>
 
 
             <!-- Botón registrarse -->

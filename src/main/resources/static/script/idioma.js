@@ -22,3 +22,11 @@ $(document).ready(function () {
         }
     });
 });
+$('#btnLanguage').on('click keydown', function(e) {
+    if (e.type === 'click' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const menu = $('#languageDropdownMenuButton');
+        menu.toggle();
+        $(this).attr('aria-expanded', !menu.hasClass('hidden'));
+    }
+});
