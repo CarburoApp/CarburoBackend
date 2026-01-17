@@ -180,17 +180,24 @@ public class EstacionDeServicioService {
 	 */
 	private List<EstacionDeServicio> filtrarPorBusqueda(
 			List<EstacionDeServicio> estaciones, String busqueda) {
-		if (busqueda != null && !busqueda.isBlank()) {
-			String busq = busqueda.toLowerCase();
-			return estaciones.stream()
-					.filter(e -> e.getRotulo().toLowerCase().contains(busq) ||
-							String.valueOf(e.getId()).equals(busq) ||
-							e.getLocalidad().toLowerCase().contains(busq) ||
-							e.getMunicipio().getDenominacion().toLowerCase()
-									.contains(busq)).collect(Collectors.toList());
-		}
-		return estaciones;
+		if (busqueda == null || busqueda.isBlank()) return estaciones;
+
+		String busq = busqueda.toLowerCase();
+
+		return estaciones.stream().filter(e -> {
+			String rotulo = e.getRotulo().toLowerCase();
+			String direccion = e.getDireccion().toLowerCase();
+			String localidad = e.getLocalidad().toLowerCase();
+			String municipio = e.getMunicipio().getDenominacion().toLowerCase();
+			String cp = String.valueOf(e.getCodigoPostal());
+			String id = String.valueOf(e.getId());
+
+			return rotulo.contains(busq) || direccion.contains(busq) ||
+					localidad.contains(busq) || municipio.contains(busq) ||
+					cp.contains(busq) || id.equals(busq);
+		}).collect(Collectors.toList());
 	}
+
 
 	/**
 	 * Filtra estaciones que tengan al menos uno de los combustibles seleccionados

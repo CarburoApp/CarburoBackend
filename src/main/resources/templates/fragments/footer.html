@@ -1,10 +1,12 @@
 <!-- templates/fragments/footer.html -->
 <footer th:fragment="footer" class="border-t border-border-color bg-surface py-6 mt-4">
   <div class="max-w-[1400px] mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
+    <a th:href="@{/}">
     <div class="flex items-center gap-3">
       <span class="material-symbols-outlined text-primary text-2xl">local_gas_station</span>
       <span class="font-bold text-text-main" th:text="#{app.name}"></span>
     </div>
+    </a>
     <p class="text-text-secondary text-sm font-medium"
        th:text="#{app.copy} + ' ' + ${#dates.format(#dates.createNow(), 'yyyy')}"></p>
     <div class="flex gap-6">

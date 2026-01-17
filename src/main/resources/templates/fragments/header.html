@@ -1,9 +1,9 @@
 <!-- templates/fragments/header.html -->
 <header th:fragment="header"
-        class="flex items-center justify-between whitespace-nowrap border-b border-solid border-border-color bg-background-light px-10 py-3 sticky top-0 z-50">
+        class="flex flex-wrap items-center justify-between whitespace-nowrap border-b border-solid border-border-color bg-background-light px-10 py-3 sticky top-0 z-50">
 
     <!-- Logo -->
-    <a href="/">
+    <a th:href="@{/}">
         <div class="flex items-center gap-4 text-text-main">
             <div class="size-8 text-primary flex items-center justify-center">
                 <span class="material-symbols-outlined text-4xl">local_gas_station</span>
@@ -13,9 +13,18 @@
         </div>
     </a>
 
+    <!-- Botón hamburguesa móvil -->
+    <button class="md:hidden flex items-center px-2 py-1 text-text-main ml-auto"
+            onclick="document.getElementById('mobileMenu').classList.toggle('hidden')">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+    </button>
 
-    <!-- Navegación -->
-    <div class="flex flex-1 justify-end gap-8 items-center">
+    <!-- Navegación y botones (desktop) -->
+    <div class="hidden md:flex flex-1 justify-end gap-8 items-center">
+        <!-- Menú principal -->
         <nav class="hidden md:flex items-center gap-9">
             <a th:href="@{/}"
                th:class="${pagina == 'inicio'} ? 'text-primary text-sm font-bold leading-normal transition-colors' :
@@ -31,7 +40,6 @@
                th:class="${pagina == 'contacto'} ? 'text-primary text-sm font-bold leading-normal transition-colors' :
                'text-main text-sm font-medium leading-normal hover:text-primary transition-colors'"
                th:text="#{header.nav.contacto}"></a>
-
         </nav>
 
         <!-- Botones -->
@@ -39,10 +47,7 @@
             <!-- IDIOMA -->
             <div class="nav-item dropdown relative">
                 <button class="nav-link dropdown-toggle flex items-center gap-1 cursor-pointer hover:text-primary"
-                   id="btnLanguage"
-                   tabindex="0"
-                   aria-haspopup="true"
-                        aria-expanded="false"
+                        id="btnLanguage" tabindex="0" aria-haspopup="true" aria-expanded="false"
                         onclick="toggleDropdown()">
                     <svg class="w-3 h-3 ml-1 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
@@ -57,63 +62,109 @@
                      class="dropdown-menu absolute mt-2 right-0 w-36 bg-white border rounded-lg shadow-lg hidden z-50">
                     <!-- Lista de idiomas como botones -->
                     <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
-                            data-value="ES">
-                        <span th:text="#{language.es}"></span>
-                    </button>
+                            data-value="ES"><span th:text="#{language.es}"></span></button>
                     <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
-                            data-value="EN">
-                        <span th:text="#{language.en}"></span>
-                    </button>
+                            data-value="EN"><span th:text="#{language.en}"></span></button>
                     <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
-                            data-value="FR">
-                        <span th:text="#{language.fr}"></span>
-                    </button>
+                            data-value="FR"><span th:text="#{language.fr}"></span></button>
                     <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
-                            data-value="IT">
-                        <span th:text="#{language.it}"></span>
-                    </button>
+                            data-value="IT"><span th:text="#{language.it}"></span></button>
                     <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
-                            data-value="PT">
-                        <span th:text="#{language.pt}"></span>
-                    </button>
+                            data-value="PT"><span th:text="#{language.pt}"></span></button>
                     <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
-                            data-value="CA">
-                        <span th:text="#{language.ca}"></span>
-                    </button>
+                            data-value="CA"><span th:text="#{language.ca}"></span></button>
                     <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
-                            data-value="GL">
-                        <span th:text="#{language.gl}"></span>
-                    </button>
+                            data-value="GL"><span th:text="#{language.gl}"></span></button>
                     <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
-                            data-value="EU">
-                        <span th:text="#{language.eu}"></span>
-                    </button>
+                            data-value="EU"><span th:text="#{language.eu}"></span></button>
                     <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
-                            data-value="OC">
-                        <span th:text="#{language.oc}"></span>
-                    </button>
+                            data-value="OC"><span th:text="#{language.oc}"></span></button>
                     <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
-                            data-value="AST">
-                        <span th:text="#{language.ast}"></span>
-                    </button>
+                            data-value="AST"><span th:text="#{language.ast}"></span></button>
                     <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
-                            data-value="AR">
-                        <span th:text="#{language.ar}"></span>
-                    </button>
-
+                            data-value="AR"><span th:text="#{language.ar}"></span></button>
                 </div>
             </div>
 
-
             <!-- Botón registrarse -->
-            <button onclick="location.href='/register'" class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary hover:bg-primary/90 transition-colors text-text-main text-sm font-bold">
+            <button onclick="location.href='/register'"
+                    class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary hover:bg-primary/90 transition-colors text-text-main text-sm font-bold">
                 <span class="truncate" th:text="#{header.nav.boton.registrarse}"></span>
             </button>
 
             <!-- Botón iniciar sesión -->
-            <button onclick="location.href='/login'" class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-border-color hover:bg-[#ebdccf] transition-colors text-text-main text-sm font-bold">
+            <button onclick="location.href='/login'"
+                    class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-border-color hover:bg-[#ebdccf] transition-colors text-text-main text-sm font-bold">
                 <span class="truncate" th:text="#{header.nav.boton.iniciar}"></span>
             </button>
+        </div>
+    </div>
+
+    <!-- Menú móvil -->
+    <div id="mobileMenu" class="w-full md:hidden hidden mt-2 flex-col gap-2">
+        <!-- Navegación móvil -->
+        <nav class="flex flex-col gap-2">
+            <a th:href="@{/}"
+               class="text-main text-sm font-medium hover:text-primary transition-colors"
+               th:text="#{header.nav.boton.inicio}"></a>
+            <a th:href="@{/estacionDeServicio/list}"
+               class="text-main text-sm font-medium hover:text-primary transition-colors"
+               th:text="#{header.nav.boton.estaciones}"></a>
+            <a th:href="@{/contacto}"
+               class="text-main text-sm font-medium hover:text-primary transition-colors"
+               th:text="#{header.nav.contacto}"></a>
+        </nav>
+
+        <!-- Botones móvil -->
+        <div class="flex flex-col gap-2 mt-2">
+            <!-- Registrarse -->
+            <button onclick="location.href='/register'"
+                    class="flex w-full justify-center rounded-lg h-10 px-4 bg-primary hover:bg-primary/90 transition-colors text-text-main text-sm font-bold"
+                    th:text="#{header.nav.boton.registrarse}"></button>
+
+            <!-- Iniciar sesión -->
+            <button onclick="location.href='/login'"
+                    class="flex w-full justify-center rounded-lg h-10 px-4 bg-border-color hover:bg-[#ebdccf] transition-colors text-text-main text-sm font-bold"
+                    th:text="#{header.nav.boton.iniciar}"></button>
+
+            <!-- Dropdown idioma móvil -->
+            <div class="nav-item dropdown relative mt-2">
+                <button class="nav-link dropdown-toggle flex items-center gap-1 cursor-pointer hover:text-primary w-full justify-center"
+                        id="btnLanguageMobile" tabindex="0" aria-haspopup="true" aria-expanded="false"
+                        onclick="toggleDropdown('languageDropdownMobile')">
+                    <span th:text="#{header.nav.boton.idioma}"></span>
+                    <svg class="w-3 h-3 ml-1 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                              d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                </button>
+                <div id="languageDropdownMobile"
+                     class="dropdown-menu absolute mt-2 right-0 w-36 bg-white border rounded-lg shadow-lg hidden z-50">
+                    <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
+                            data-value="ES"><span th:text="#{language.es}"></span></button>
+                    <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
+                            data-value="EN"><span th:text="#{language.en}"></span></button>
+                    <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
+                            data-value="FR"><span th:text="#{language.fr}"></span></button>
+                    <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
+                            data-value="IT"><span th:text="#{language.it}"></span></button>
+                    <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
+                            data-value="PT"><span th:text="#{language.pt}"></span></button>
+                    <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
+                            data-value="CA"><span th:text="#{language.ca}"></span></button>
+                    <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
+                            data-value="GL"><span th:text="#{language.gl}"></span></button>
+                    <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
+                            data-value="EU"><span th:text="#{language.eu}"></span></button>
+                    <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
+                            data-value="OC"><span th:text="#{language.oc}"></span></button>
+                    <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
+                            data-value="AST"><span th:text="#{language.ast}"></span></button>
+                    <button class="dropdown-item flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left"
+                            data-value="AR"><span th:text="#{language.ar}"></span></button>
+                </div>
+            </div>
         </div>
     </div>
 </header>
