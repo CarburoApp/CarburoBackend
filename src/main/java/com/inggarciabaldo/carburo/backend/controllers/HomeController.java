@@ -117,7 +117,7 @@ public class HomeController {
 	 *
 	 * @return un string de redirección a "/".
 	 */
-	@RequestMapping(value = {"/{path:[^.]*}", "/**/{path:[^.]*}"})
+	@GetMapping("/{path:[^.]{1,100}}")
 	public String doGetBase(@PathVariable(required = false) String path ) {
 		return "redirect:/";
 	}
