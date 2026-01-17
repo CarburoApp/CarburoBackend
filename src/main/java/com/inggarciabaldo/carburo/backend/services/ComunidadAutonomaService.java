@@ -19,9 +19,9 @@ public class ComunidadAutonomaService {
 	}
 
 	public List<ComunidadAutonoma> getComunidadesAutonomas() {
-		List<ComunidadAutonoma> CCAA = new ArrayList<>();
-		comunidadAutonomaRepository.findAll().forEach(CCAA::add);
-		return CCAA;
+		List<ComunidadAutonoma> ccaa = new ArrayList<>();
+		comunidadAutonomaRepository.findAll().forEach(ccaa::add);
+		return ccaa;
 	}
 
 	public Optional<ComunidadAutonoma> getComunidadAutonomaById(short idCCAA) {

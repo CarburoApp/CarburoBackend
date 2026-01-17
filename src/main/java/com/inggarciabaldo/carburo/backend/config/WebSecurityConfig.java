@@ -12,7 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class WebSecurityConfig {
 
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) {
 		http.csrf(csrf -> {})
 
 				.authorizeHttpRequests(auth -> auth
@@ -39,7 +39,7 @@ public class WebSecurityConfig {
 
 	@Bean
 	public AuthenticationManager authenticationManager(
-			AuthenticationConfiguration authConfig) throws Exception {
+			AuthenticationConfiguration authConfig) {
 		return authConfig.getAuthenticationManager();
 	}
 }

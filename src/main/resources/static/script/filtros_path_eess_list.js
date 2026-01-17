@@ -17,8 +17,11 @@ inputBusqueda.addEventListener('keydown', e => {
 // Status slider: actualizar radio oculto y enviar
 document.querySelectorAll('#filtro_estado button').forEach(btn => {
     btn.addEventListener('click', () => {
-        const value = btn.getAttribute('data-value');
-        form.querySelector(`input[name="estadoSeleccionado"][value="${value}"]`).checked = true;
+        const value = btn.dataset.value;
+        const radio = form.querySelector(`input[name="estadoSeleccionado"][value="${value}"]`);
+        if (radio) {
+            radio.checked = true;
+        }
         form.submit();
     });
 });

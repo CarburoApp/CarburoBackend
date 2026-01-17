@@ -12,7 +12,7 @@ $(document).ready(function () {
         let languageSelectedText = $(this).text().trim();
         let languageSelectedValue = $(this).data("value");
         $("#btnLanguage span").text(languageSelectedText);
-        window.location.replace('?lang=' + languageSelectedValue);
+        globalThis.location.replace('?lang=' + languageSelectedValue);
     });
 
     // Cerrar dropdown al click fuera

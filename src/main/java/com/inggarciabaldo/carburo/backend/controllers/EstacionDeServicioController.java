@@ -96,7 +96,7 @@ public class EstacionDeServicioController {
 		List<CombustibleDto> combustiblesDTO = combustibleService.getCombustiblesDto();
 
 		// Si no hay selección, simplemente pasamos la lista tal cual
-		if (!(combustibles == null) && combustibles.length > 0)
+		if (combustibles != null && combustibles.length > 0)
 			// Recorremos la lista de DTOs
 			for (CombustibleDto dto : combustiblesDTO)
 				// Si el código del DTO está en el array de parámetros "combustibles", lo marcamos

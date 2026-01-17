@@ -132,8 +132,8 @@ public class ComunidadAutonoma {
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
-		if (!(o instanceof ComunidadAutonoma CA)) return false;
-		return Objects.equals(id, CA.id);
+		if (!(o instanceof ComunidadAutonoma ca)) return false;
+		return Objects.equals(id, ca.id);
 	}
 
 	/**

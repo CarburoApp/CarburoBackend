@@ -1,9 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const currentParams = new URLSearchParams(window.location.search);
+    const currentParams = new URLSearchParams(globalThis.location.search);
 
     document.querySelectorAll(".pagination-link").forEach(link => {
         // Construimos un objeto URL completo usando window.location.origin
-        const url = new URL(link.href, window.location.origin);
+        const url = new URL(link.href, globalThis.location.origin);
         const page = url.searchParams.get("page");
 
         if (page !== null) {
