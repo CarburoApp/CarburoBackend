@@ -1,93 +1,203 @@
 <!-- templates/home.html -->
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="light">
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
     <title th:text="#{app.name} + ' - ' + #{home.title}"></title>
+
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f48c25",
+                        "background-light": "#fcfaf8",
+                        "background-dark": "#221910",
+                        "surface": "#ffffff",
+                        "border-color": "#f4ede7",
+                        "text-main": "#1c140d",
+                        "text-secondary": "#9c7349",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+
+
 </head>
+
 <body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
 
 <!-- Header -->
 <th:block th:replace="~{fragments/header :: header}"></th:block>
 
-<!-- Contenido principal -->
-<main class="flex-1 flex flex-col min-w-0 gap-8">
+<!-- Contenido principal con layout asimétrico -->
+<main class="flex-auto flex flex-col md:flex-row gap-8 px-4 py-4 max-w-[1400px] mx-auto">
 
-    <!-- Hero principal -->
-    <section class="bg-background-dark rounded-2xl p-8 md:p-12 relative overflow-hidden shadow-lg group">
-        <div class="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
-        <div class="absolute bottom-0 left-0 w-48 h-48 bg-primary/10 rounded-full blur-[60px] translate-y-1/2 -translate-x-1/4"></div>
+    <!-- Columna izquierda: hero + búsqueda + estación -->
+    <div class="flex-1 flex flex-col gap-6">
 
-        <div class="relative z-10 max-w-2xl">
-            <h1 class="text-white text-3xl md:text-5xl font-bold leading-tight mb-4 tracking-tight">
-                <span th:text="#{home.hero.titulo}"></span>
-                <span class="text-primary" th:text="#{home.hero.destacado}"></span>
-            </h1>
-            <p class="text-white/70 text-lg mb-8 max-w-lg" th:text="#{home.hero.descripcion}"></p>
+        <!-- Hero y búsqueda -->
+        <section class="py-2 bg-gradient-to-b from-white to-background-light">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-4xl md:text-6xl font-bold text-text-main leading-tight mb-2 tracking-tight">
+                    <span th:text="#{home.titulo1}"></span>
+                    <span class="text-primary" th:text="#{home.titulo2}"></span>
+                    <span th:text="#{home.titulo3}"></span>
+                </h1>
+                <p class="text-lg text-text-secondary mb-1 max-w-xl mx-auto" th:text="#{home.subtitulo}"></p>
+                <div class="relative max-w-2xl mx-auto">
+                    <form class="flex items-center bg-surface border border-border-color shadow-xl rounded-2xl p-2 focus-within:ring-2 focus-within:ring-primary/20 transition-all"
+                          th:action="@{/estacionesDeServicio/list}" method="get">
+                        <div class="flex-auto flex items-center px-4">
+                            <span class="material-symbols-outlined text-text-secondary mr-3">search</span>
+                            <input class="w-full border-none focus:ring-0 text-text-main bg-transparent placeholder:text-text-secondary/50 py-3"
+                                   type="text"
+                                   name="busqueda"
+                                   th:placeholder="#{home.buscar.placeholder}" />
+                        </div>
 
-            <!-- Buscador -->
-            <div class="bg-surface p-2 rounded-xl flex flex-col sm:flex-row gap-2 shadow-xl max-w-xl">
-                <div class="flex-1 relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-text-secondary">
-                        <span class="material-symbols-outlined">search</span>
+                        <button type="submit"
+                                class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-2 rounded-xl transition-colors"
+                                th:text="#{home.buscar.boton}">
+                        </button>
+                    </form>
+                    <div class="mt-4 flex flex-wrap justify-center gap-2"
+                         th:if="${busquedasPopulares != null and !#maps.isEmpty(busquedasPopulares)}">
+                        <span class="text-xs text-text-secondary font-medium" th:text="#{home.busqueda.popular}"></span>
+                        <a th:each="entry : ${busquedasPopulares}"
+                           th:href="@{${entry.value}}"
+                           th:text="${entry.key}"
+                           class="text-xs text-primary hover:underline font-bold">
+                        </a>
                     </div>
-                    <input class="block w-full pl-10 pr-3 py-3 border-none rounded-lg bg-gray-50 focus:ring-2 focus:ring-primary text-text-main placeholder-text-secondary/60 font-medium"
-                           th:placeholder="#{home.buscar.placeholder}" type="text"/>
                 </div>
-                <button class="bg-primary hover:bg-primary/90 text-text-main font-bold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2">
-                    <span th:text="#{home.buscar.boton}"></span>
-                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                </button>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Cards de características -->
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-surface p-6 rounded-xl border border-border-color shadow-sm hover:shadow-md transition-all hover:-translate-y-1 duration-200">
-            <div class="w-12 h-12 rounded-lg bg-green-50 text-green-600 flex items-center justify-center mb-4">
-                <span class="material-symbols-outlined text-2xl">update</span>
+        <!-- Estación más cercana -->
+        <section class="py-2">
+            <!-- Estación más cercana -->
+            <div class="flex items-center gap-3 mb-2">
+                <span class="material-symbols-outlined text-primary text-3xl">near_me</span>
+                <h2 class="text-2xl font-bold text-text-main" th:text="#{home.eess.cercana}"></h2>
             </div>
-            <h3 class="text-lg font-bold text-text-main mb-2" th:text="#{home.card.precios.actualizados}"></h3>
-            <p class="text-sm text-text-secondary" th:text="#{home.card.precios.actualizados.desc}"></p>
-        </div>
 
-        <div class="bg-surface p-6 rounded-xl border border-border-color shadow-sm hover:shadow-md transition-all hover:-translate-y-1 duration-200">
-            <div class="w-12 h-12 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mb-4">
-                <span class="material-symbols-outlined text-2xl">tune</span>
+            <div class="max-w-4xl" th:fragment="estacionCercanaFragment" id="estacionCercanaFragment">
+                <article
+                        class="bg-surface rounded-xl border border-[#e8dbce] shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden group"
+                        id="estacion-container">
+
+                    <div th:if="${estacionCercana != null}" th:replace="fragments/estacionDeServicio"></div>
+
+                    <!-- Si no hay estación, mostramos mensaje bonito -->
+                    <div th:if="${estacionCercana == null}"
+                         class="flex flex-col items-center justify-center py-12 space-y-4" id="loading-estacion">
+                        <!-- Mensaje principal -->
+                        <p class="text-lg font-semibold text-text-primary">
+                            Estamos calculando cuál es tu estación más cercana...
+                        </p>
+                        <!-- Mensaje secundario opcional -->
+                        <p class="text-text-secondary text-sm text-center max-w-md">
+                            Esto puede tardar unos segundos. ¡Gracias por tu paciencia!
+                        </p>
+                        <!-- Placeholder visual tipo tarjeta vacía -->
+                        <div class="w-full h-2 bg-gray-100 rounded-lg border border-dashed border-gray-300 animate-pulse"></div>
+                    </div>
+                </article>
             </div>
-            <h3 class="text-lg font-bold text-text-main mb-2" th:text="#{home.card.precios.filtros}"></h3>
-            <p class="text-sm text-text-secondary" th:text="#{home.card.precios.filtros.desc}"></p>
-        </div>
+        </section>
 
-        <div class="bg-surface p-6 rounded-xl border border-border-color shadow-sm hover:shadow-md transition-all hover:-translate-y-1 duration-200">
-            <div class="w-12 h-12 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center mb-4">
-                <span class="material-symbols-outlined text-2xl">near_me</span>
+    </div>
+
+    <!-- Columna derecha: secciones inferiores apiladas -->
+    <div class="flex flex-col gap-6 md:w-1/4">
+        <div class="flex flex-col items-center text-center p-6 bg-surface rounded-2xl border border-border-color shadow-sm">
+            <div class="size-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-6">
+                <span class="material-symbols-outlined text-3xl">update</span>
             </div>
-            <h3 class="text-lg font-bold text-text-main mb-2" th:text="#{home.card.precios.cercanas}"></h3>
-            <p class="text-sm text-text-secondary" th:text="#{home.card.precios.cercanas.desc}"></p>
+            <h3 class="text-lg font-bold text-text-main mb-3" th:text="#{home.precios.tiempo.real}"></h3>
+            <p class="text-text-secondary text-sm" th:text="#{home.precios.tiempo.real.descripcion}"></p>
         </div>
-    </section>
 
-    <!-- Sección favoritos -->
-    <section
-            class="bg-border-color rounded-2xl p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 border border-[#e8dbce]">
-        <div class="flex-1">
-            <h3 class="text-2xl font-bold text-text-main mb-2" th:text="#{home.seccion.alerta.titulo}"></h3>
-            <p class="text-text-secondary" th:text="#{home.seccion.alerta.descripcion}"></p>
+        <div class="flex flex-col items-center text-center p-6 bg-surface rounded-2xl border border-border-color shadow-sm">
+            <div class="size-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-6">
+                <span class="material-symbols-outlined text-3xl">favorite</span>
+            </div>
+            <h3 class="text-lg font-bold text-text-main mb-3" th:text="#{home.favoritos}"></h3>
+            <p class="text-text-secondary text-sm" th:text="#{home.favoritos.descripcion}"></p>
         </div>
-        <div class="flex gap-4 shrink-0">
-            <button class="bg-surface hover:bg-white text-text-main border border-[#d6c4b5] font-bold py-3 px-6 rounded-lg transition-colors">
-                <span th:text="#{home.seccion.alerta.explorar}"></span>
-            </button>
-            <button class="bg-primary hover:bg-primary/90 text-text-main font-bold py-3 px-6 rounded-lg transition-colors shadow-sm">
-                <span th:text="#{home.seccion.alerta.crear}"></span>
-            </button>
+
+        <div class="flex flex-col items-center text-center p-6 bg-surface rounded-2xl border border-border-color shadow-sm">
+            <div class="size-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-6">
+                <span class="material-symbols-outlined text-3xl">history</span>
+            </div>
+            <h3 class="text-lg font-bold text-text-main mb-3" th:text="#{home.historial.repostajes}"></h3>
+            <p class="text-text-secondary text-sm" th:text="#{home.historial.repostajes.descripcion}"></p>
         </div>
-    </section>
+    </div>
+
 </main>
 
 <!-- Footer -->
 <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<!-- Geolocalización del usuario -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (!("geolocation" in navigator)) return;
+
+        const geoOptions = {
+            enableHighAccuracy: true,
+            timeout: 15000,    // 15 segundos
+            maximumAge: 300000 // 5 minutos
+        };
+
+        navigator.geolocation.getCurrentPosition(
+            function (position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+
+                fetch("/home/ubicacion", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                    body: `lat=${lat}&lon=${lon}`
+                })
+                    .then(res => res.text())
+                    .then(html => {
+                        const container = document.getElementById("estacion-container");
+                        container.innerHTML = html; // insertamos fragmento Thymeleaf
+                        // Ocultar loader siempre
+                        const loader = document.getElementById("loading-estacion");
+                        if (loader) loader.remove();
+                    })
+                    .catch(err => console.error("Error en fetch:", err));
+
+            },
+            function (error) {
+                console.error("Error al obtener la ubicación:", error);
+                const container = document.getElementById("estacion-container");
+                container.innerHTML = `<div class="text-center text-text-secondary text-lg font-medium mt-4">
+                No hemos podido localizar la estación más cercana.
+            </div>`;
+            },
+            geoOptions
+        );
+
+    });
+</script>
+
+
 </body>
 </html>

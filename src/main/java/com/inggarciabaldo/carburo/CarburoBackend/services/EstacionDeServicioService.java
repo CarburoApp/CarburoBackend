@@ -46,6 +46,26 @@ public class EstacionDeServicioService {
 		return estacionDeServicioRepository.findAll(pageable);
 	}
 
+
+	/**
+	 * Obtiene la estación de servicio más cercana a una ubicación dada.
+	 *
+	 * <p>La búsqueda se realiza utilizando coordenadas geográficas
+	 * en sistema WGS84 (latitud y longitud). El cálculo de proximidad
+	 * se delega al repositorio, que hace uso de funciones espaciales
+	 * de PostGIS.</p>
+	 *
+	 * @param latitud  latitud del punto de referencia (WGS84)
+	 * @param longitud longitud del punto de referencia (WGS84)
+	 * @return la estación de servicio más cercana a las coordenadas indicadas,
+	 *         o {@code null} si no existe ninguna
+	 */
+	public EstacionDeServicio getEstacionDeServicioMasProxima(double latitud, double longitud) {
+		return estacionDeServicioRepository.findEstacionDeServicioMasCercana(latitud, longitud);
+	}
+
+
+
 	/**
 	 * Devuelve las estaciones de servicio de una Comunidad Autónoma específica
 	 */
@@ -273,4 +293,5 @@ public class EstacionDeServicioService {
 																			   end) : Collections.emptyList();
 		return new PageImpl<>(subList, pageable, estaciones.size());
 	}
+
 }

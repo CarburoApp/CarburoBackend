@@ -43,4 +43,24 @@ public interface EstacionDeServicioRepository extends CrudRepository<EstacionDeS
 	 */
 	@Query("SELECT e FROM EstacionDeServicio e WHERE e.provincia.comunidadAutonoma.id = :ccaaId")
 	List<EstacionDeServicio> findEstacionDeServicioByComunidadAutonoma(@Param("ccaaId") Short ccaaId);
+
+
+	/**
+	 * Devuelve la estación de servicio más cercana a unas coordenadas dadas.
+	 *
+	 * <p>Utiliza funciones espaciales de PostGIS y el operador de distancia
+	 * optimizado {@code <->}, que hace uso del índice GIST sobre el campo
+	 * {@code coordenadas}.</p>
+	 *
+	 * @param lat latitud WGS84
+	 * @param lon longitud WGS84
+	 * @return estación de servicio más cercana o null si no existe
+	 */
+	@Query(
+			value = " SELECT * FROM eess ORDER BY coordenadas<-> ST_SetSRID(ST_MakePoint(:lon, :lat), 4326)::geography LIMIT 1",
+			nativeQuery = true
+	)
+	EstacionDeServicio findEstacionDeServicioMasCercana(@Param("lat") double lat,
+														@Param("lon") double lon);
+
 }
