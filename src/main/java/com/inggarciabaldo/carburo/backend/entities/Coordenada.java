@@ -2,7 +2,6 @@ package com.inggarciabaldo.carburo.backend.entities;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.PostLoad;
 import jakarta.persistence.Transient;
 import lombok.Getter;
 import org.locationtech.jts.geom.Coordinate;

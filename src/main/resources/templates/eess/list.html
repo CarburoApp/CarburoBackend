@@ -141,18 +141,6 @@
                                for="filtro_estado"
                                th:text="#{eess.list.filtros.estado}"></label>
 
-                        <style>
-                            /* Ocultar inputs radio de los filtros visuales */
-                            .oculto {
-                                display: none !important;
-                                width: 0 !important;
-                                height: 0 !important;
-                                margin: 0 !important;
-                                padding: 0 !important;
-                                border: 0 !important;
-                            }
-                        </style>
-
                         <!-- Inputs radio ocultos -->
                         <label for="filtro_abierto" class="sr-only" th:text="#{eess.estado.abierto}"></label>
                         <input type="radio" name="estadoSeleccionado" value="ABIERTO" class="oculto" id="filtro_abierto"
