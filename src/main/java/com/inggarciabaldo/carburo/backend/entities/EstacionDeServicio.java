@@ -231,7 +231,7 @@ public class EstacionDeServicio {
 
 		// Patrón para capturar días y intervalos: "L-V: 06:00-22:00 y 23:00-23:30"
 		Pattern pattern = Pattern.compile(
-				"([A-Z\\-]+):\\s*([0-9]{1,2}:[0-9]{2}-[0-9]{1,2}:[0-9]{2}(?:\\s*y\\s*[0-9]{1,2}:[0-9]{2}-[0-9]{1,2}:[0-9]{2})*)");
+				"([A-Z\\-]+):\\s*([0-9]{1,2}:[0-9]{2}-[0-9]{1,2}:[0-9]{2}(?:\\s*y\\s*[0-9]{1,2}:[0-9]{2}-[0-9]{1,2}:[0-9]{2}){0,10})");
 		Matcher matcher = pattern.matcher(h);
 
 		// Formatter flexible: acepta horas con 1 o 2 dígitos
