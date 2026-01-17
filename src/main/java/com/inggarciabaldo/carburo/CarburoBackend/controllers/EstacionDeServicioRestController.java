@@ -23,7 +23,7 @@ public class EstacionDeServicioRestController {
 	 *
 	 * @return String con cada estación en una línea
 	 */
-	@GetMapping("/api/estacionesDeServicio/top10")
+	@GetMapping("/api/estacionDeServicio/top10")
 	public String getTop10Estaciones() {
 		List<EstacionDeServicio> estaciones = estacionDeServicioService.getEstacionesDeServicio();
 

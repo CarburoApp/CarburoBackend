@@ -1,11 +1,11 @@
+<!-- templates/estaciones/estacionDeServicio.html -->
 <!DOCTYPE html>
-<html class="light" lang="es"><head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Carburo - Detalle Estación</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<html lang="es" class="light">
+<head>
+    <th:block th:replace="~{fragments/head :: head}"></th:block>
+    <title th:text="#{app.name} + ' - ' + #{eess.title}"></title>
+
+    <!-- Scripts -->
     <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
@@ -47,46 +47,31 @@
             background: #9ca3af;
         }
     </style>
+
 </head>
+
 <body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
-<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-border-color bg-background-light px-10 py-3 sticky top-0 z-50">
-    <div class="flex items-center gap-4 text-[#1c140d]">
-        <div class="size-8 text-primary flex items-center justify-center">
-            <span class="material-symbols-outlined text-4xl">local_gas_station</span>
-        </div>
-        <h2 class="text-[#1c140d] text-xl font-bold leading-tight tracking-[-0.015em]">Carburo</h2>
-    </div>
-    <div class="flex flex-1 justify-end gap-8 items-center">
-        <nav class="hidden md:flex items-center gap-9">
-            <a class="text-[#1c140d] text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Inicio</a>
-            <a class="text-[#1c140d] text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Mapa</a>
-            <a class="text-[#1c140d] text-sm font-medium leading-normal hover:text-primary transition-colors" href="#">Contacto</a>
-        </nav>
-        <div class="flex gap-2 items-center">
-            <div class="hidden lg:flex items-center gap-2 mr-4 text-sm font-medium text-text-secondary">
-                <span class="material-symbols-outlined text-[20px]">language</span>
-                <span>ES</span>
-            </div>
-            <button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary hover:bg-primary/90 transition-colors text-[#1c140d] text-sm font-bold leading-normal tracking-[0.015em]">
-                <span class="truncate">Registrarse</span>
-            </button>
-            <button class="flex min-w-[84px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-[#f4ede7] hover:bg-[#ebdccf] transition-colors text-[#1c140d] text-sm font-bold leading-normal tracking-[0.015em]">
-                <span class="truncate">Iniciar sesión</span>
-            </button>
-        </div>
-    </div>
-</header>
+
+<!-- Header -->
+<th:block th:replace="~{fragments/header :: header}"></th:block>
+
+<!-- Contenido principal -->
 <div class="flex flex-1 w-full max-w-[1400px] mx-auto px-4 py-6 md:px-8 gap-8">
     <main class="flex-1 flex flex-col min-w-0">
+        <!-- Breadcrumbs -->
         <div class="flex flex-wrap gap-2 py-2 mb-6 text-sm">
-            <a class="text-text-secondary font-medium hover:underline" href="#">Inicio</a>
+            <a class="text-text-secondary font-medium hover:underline" th:href="${'/home'}"
+               th:text="#{home.title}"></a>
             <span class="text-text-secondary font-medium">/</span>
-            <a class="text-text-secondary font-medium hover:underline" href="#">Estaciones de servicio</a>
+            <a class="text-text-secondary font-medium hover:underline" th:href="${'/estacionDeServicio/list'}"
+               th:text="#{eess.list.title}"></a>
             <span class="text-text-secondary font-medium">/</span>
-            <a class="text-text-secondary font-medium hover:underline" href="#">A Coruña</a>
+            <a class="text-text-secondary font-medium hover:underline"
+               th:text="${estacion.getProvincia().getDenominacion()}"></a>
             <span class="text-text-secondary font-medium">/</span>
-            <span class="text-text-main font-medium">CEPSA (ID: 15006)</span>
+            <span class="text-text-main font-medium" th:text="|${estacion.rotulo} (#{eess.id}${estacion.id})|"></span>
         </div>
+
         <div class="bg-surface rounded-xl border border-[#e8dbce] p-6 md:p-8 shadow-sm mb-8 relative overflow-hidden">
             <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-primary/5 to-transparent rounded-bl-full -mr-16 -mt-16 pointer-events-none"></div>
             <div class="flex flex-col md:flex-row justify-between items-start gap-6 relative z-10">
@@ -96,33 +81,41 @@
                     </div>
                     <div>
                         <div class="flex items-center gap-3 mb-1">
-                            <h1 class="text-text-main text-3xl font-bold leading-tight">CEPSA</h1>
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#f4ede7] text-text-secondary tracking-wide">
-                                ID: 15006
+                            <h1 class="text-text-main text-3xl font-bold leading-tight"
+                                th:text="${estacion.getRotulo()}"></h1>
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#f4ede7] text-text-secondary tracking-wide"
+                                  th:text="|${estacion.rotulo} #{eess.id}${estacion.id}|">>
                             </span>
                         </div>
                         <div class="flex items-center gap-1 text-text-secondary mb-3">
                             <span class="material-symbols-outlined text-[18px]">location_on</span>
-                            <span class="text-sm font-medium">Avda. del Pasaje, s/n, 15006, A Coruña</span>
+                            <span class="text-sm font-medium"
+                                  th:text="${estacion.getDireccion() + ', ' + estacion.getLocalidad()}"></span>
                         </div>
                         <div class="flex flex-wrap gap-3">
-                            <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-50 text-green-700 text-sm font-bold border border-green-100">
-                                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                                Abierto
+                            <div class="flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold"
+                                 th:classappend="${estacion.abierto} ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'">
+                                <span class="w-2 h-2 rounded-full animate-pulse"
+                                      th:classappend="${estacion.isAbierto()} ? 'bg-green-500' : 'bg-red-500'"></span>
+                                <span th:text="${estacion.isAbierto()} ? #{eess.estado.abierto} : #{eess.estado.cerrado}"></span>
                             </div>
+
                             <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fcfaf8] text-text-secondary text-sm font-medium border border-[#e8dbce]">
                                 <span class="material-symbols-outlined text-[16px]">schedule</span>
-                                06:00 - 23:00
+                                <span th:text="${estacion.getHorario()}"></span>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="flex flex-col items-end gap-3 w-full md:w-auto">
-                    <a class="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all rounded-lg font-bold text-sm shadow-sm group" href="https://maps.google.com" target="_blank">
+                    <a class="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all rounded-lg font-bold text-sm shadow-sm group"
+                       th:href="@{'https://www.google.com/maps/search/?api=1&query=' +${estacion.coordenada.latitud}+ ','+${estacion.coordenada.longitud}}"
+                       target="_blank">
                         <span class="material-symbols-outlined group-hover:animate-bounce">map</span>
-                        Ver en Google Maps
+                        <span th:text="#{eess.ubicacion.google.maps}"></span>
                     </a>
-                    <div class="text-xs text-text-secondary font-medium">Lat: 43.3444, Lon: -8.3912</div>
+                    <div class="text-xs text-text-secondary font-medium"
+                         th:text="|#{eess.ubicacion.latitud} ${estacion.coordenada.latitud}, #{eess.ubicacion.longitud} ${estacion.coordenada.longitud}|"></div>
                 </div>
             </div>
         </div>
@@ -131,36 +124,15 @@
                 <section>
                     <div class="flex items-center gap-2 mb-4">
                         <span class="material-symbols-outlined text-primary">price_check</span>
-                        <h2 class="text-xl font-bold text-text-main">Combustibles disponibles</h2>
+                        <h2 class="text-xl font-bold text-text-main" th:text="#{eess.combustible.disponible}"></h2>
                     </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                        <div class="bg-surface border border-[#e8dbce] rounded-xl p-4 shadow-sm hover:shadow-md hover:border-primary/50 transition-all flex flex-col items-center justify-center gap-1 group cursor-default">
-                            <span class="text-xs uppercase tracking-wider font-bold text-text-secondary">Diesel A</span>
-                            <span class="text-2xl font-bold text-primary font-mono group-hover:scale-110 transition-transform">1,399 €</span>
-                            <span class="text-[10px] text-green-600 font-medium flex items-center">
-<span class="material-symbols-outlined text-[12px] rotate-180">arrow_drop_down</span> -0.02
-                            </span>
-                        </div>
-                        <div class="bg-surface border border-[#e8dbce] rounded-xl p-4 shadow-sm hover:shadow-md hover:border-primary/50 transition-all flex flex-col items-center justify-center gap-1 group cursor-default">
-                            <span class="text-xs uppercase tracking-wider font-bold text-text-secondary">Gasolina 95</span>
-                            <span class="text-2xl font-bold text-primary font-mono group-hover:scale-110 transition-transform">1,529 €</span>
-                            <span class="text-[10px] text-red-500 font-medium flex items-center">
-<span class="material-symbols-outlined text-[12px]">arrow_drop_up</span> +0.01
-                            </span>
-                        </div>
-                        <div class="bg-surface border border-[#e8dbce] rounded-xl p-4 shadow-sm hover:shadow-md hover:border-primary/50 transition-all flex flex-col items-center justify-center gap-1 group cursor-default">
-                            <span class="text-xs uppercase tracking-wider font-bold text-text-secondary">Diesel +</span>
-                            <span class="text-2xl font-bold text-primary font-mono group-hover:scale-110 transition-transform">1,489 €</span>
-                            <span class="text-[10px] text-text-secondary font-medium flex items-center">
-                                = 0.00
-                            </span>
-                        </div>
-                        <div class="bg-surface border border-[#e8dbce] rounded-xl p-4 shadow-sm hover:shadow-md hover:border-primary/50 transition-all flex flex-col items-center justify-center gap-1 group cursor-default">
-                            <span class="text-xs uppercase tracking-wider font-bold text-text-secondary">GLP</span>
-                            <span class="text-2xl font-bold text-primary font-mono group-hover:scale-110 transition-transform">0,899 €</span>
-                            <span class="text-[10px] text-green-600 font-medium flex items-center">
-<span class="material-symbols-outlined text-[12px] rotate-180">arrow_drop_down</span> -0.01
-                            </span>
+                    <div class="grid gap-4 grid-cols-[repeat(auto-fit,minmax(150px,1fr))]">
+                        <div class="bg-surface border border-[#e8dbce] rounded-xl p-4 shadow-sm hover:shadow-md hover:border-primary/50 transition-all flex flex-col items-center justify-center gap-1 group cursor-default"
+                             th:each="entrySetPorCombustible : ${preciosCombMap.values().stream().findFirst().get()}">
+                            <span class="text-xs uppercase tracking-wider font-bold text-text-secondary"
+                                  th:text="${#messages.msg('combustible.' + entrySetPorCombustible.getKey().getCodigo().toLowerCase())}"></span>
+                            <span class="text-2xl font-bold text-primary font-mono group-hover:scale-110 transition-transform"
+                                  th:text="${#numbers.formatDecimal( entrySetPorCombustible.getValue(), 1, 'COMMA', 3, 'POINT')} + ' €'"></span>
                         </div>
                     </div>
                 </section>
@@ -168,60 +140,43 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-[#f4ede7] pb-4">
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary">history</span>
-                            <h2 class="text-lg font-bold text-text-main">Histórico de Precios</h2>
+                            <h2 class="text-lg font-bold text-text-main"
+                                th:text="#{eess.combustible.precios.historico}"></h2>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <label class="text-sm font-medium text-text-secondary">Desde:</label>
-                            <input class="form-input h-9 py-1 px-3 text-sm rounded-lg border-[#e8dbce] bg-[#fcfaf8] text-text-main focus:ring-primary focus:border-primary" type="date" value="2023-10-01"/>
-                        </div>
+                        <form class="flex items-center gap-2" method="get"
+                              th:action="@{/estacionDeServicio/{id}(id=${estacion.id})}">
+                            <label class="text-sm font-medium text-text-secondary"
+                                   th:text="#{eess.combustible.precios.historico.desde}" for="precios_calendario"></label>
+                            <input class="form-input h-9 py-1 px-3 text-sm rounded-lg border-[#e8dbce] bg-[#fcfaf8] text-text-main focus:ring-primary focus:border-primary"
+                                   id="precios_calendario"
+                                   name="fechaInicio"
+                                   type="date"
+                                   th:value="${fechaInicio}"
+                                   th:max="${T(java.time.LocalDate).now()}"
+                                   th:min="${T(java.time.LocalDate).now().minusDays(30)}"
+                                   onchange="this.form.submit()"/>
+                        </form>
                     </div>
                     <div class="overflow-x-auto custom-scrollbar">
                         <table class="w-full text-sm text-left">
+                            <!-- Cabecera dinámica de combustibles -->
                             <thead class="text-xs text-text-secondary uppercase bg-[#fcfaf8] border-b border-[#e8dbce]">
                             <tr>
-                                <th class="px-4 py-3 font-medium rounded-tl-lg">Fecha</th>
-                                <th class="px-4 py-3 font-medium">Diesel A</th>
-                                <th class="px-4 py-3 font-medium">Gasolina 95</th>
-                                <th class="px-4 py-3 font-medium">Diesel +</th>
-                                <th class="px-4 py-3 font-medium rounded-tr-lg">GLP</th>
+                                <th class="px-4 py-3 font-medium rounded-tl-lg" th:text="#{eess.combustible.precios.historico.fecha}"></th>
+                                <!-- Cabecera de combustibles dinámica sin streams -->
+                                <th th:each="combustible : ${preciosCombMap.values().stream().findFirst().get().keySet()}"
+                                    class="px-4 py-3 font-medium"
+                                    th:text="#{${'combustible.'+combustible.getCodigo().toLowerCase()}}"></th>
                             </tr>
                             </thead>
+
                             <tbody class="divide-y divide-[#f4ede7]">
-                            <tr class="hover:bg-[#fcfaf8]">
-                                <td class="px-4 py-3 font-medium text-text-main">Hoy</td>
-                                <td class="px-4 py-3 text-primary font-bold">1,399 €</td>
-                                <td class="px-4 py-3 text-primary font-bold">1,529 €</td>
-                                <td class="px-4 py-3 text-text-main">1,489 €</td>
-                                <td class="px-4 py-3 text-text-main">0,899 €</td>
-                            </tr>
-                            <tr class="hover:bg-[#fcfaf8]">
-                                <td class="px-4 py-3 text-text-secondary">24 Oct</td>
-                                <td class="px-4 py-3 text-text-secondary">1,401 €</td>
-                                <td class="px-4 py-3 text-text-secondary">1,528 €</td>
-                                <td class="px-4 py-3 text-text-secondary">1,489 €</td>
-                                <td class="px-4 py-3 text-text-secondary">0,900 €</td>
-                            </tr>
-                            <tr class="hover:bg-[#fcfaf8]">
-                                <td class="px-4 py-3 text-text-secondary">23 Oct</td>
-                                <td class="px-4 py-3 text-text-secondary">1,410 €</td>
-                                <td class="px-4 py-3 text-text-secondary">1,535 €</td>
-                                <td class="px-4 py-3 text-text-secondary">1,495 €</td>
-                                <td class="px-4 py-3 text-text-secondary">0,900 €</td>
-                            </tr>
-                            <tr class="hover:bg-[#fcfaf8]">
-                                <td class="px-4 py-3 text-text-secondary">22 Oct</td>
-                                <td class="px-4 py-3 text-text-secondary">1,415 €</td>
-                                <td class="px-4 py-3 text-text-secondary">1,540 €</td>
-                                <td class="px-4 py-3 text-text-secondary">1,495 €</td>
-                                <td class="px-4 py-3 text-text-secondary">0,900 €</td>
-                            </tr>
-                            <tr class="hover:bg-[#fcfaf8]">
-                                <td class="px-4 py-3 text-text-secondary">21 Oct</td>
-                                <td class="px-4 py-3 text-text-secondary">1,415 €</td>
-                                <td class="px-4 py-3 text-text-secondary">1,540 €</td>
-                                <td class="px-4 py-3 text-text-secondary">1,495 €</td>
-                                <td class="px-4 py-3 text-text-secondary">0,900 €</td>
-                            </tr>
+                            <tr class="hover:bg-[#fcfaf8]" th:each="entryXFecha : ${preciosCombMap}">
+                                <td class="px-4 py-3 font-medium text-text-main"
+                                    th:text="${#temporals.format(entryXFecha.getKey(), 'dd/MM/yy')}"></td>
+                                <td class="px-4 py-3 text-text-secondary"
+                                    th:each="precio : ${preciosCombMap.get(entryXFecha.getKey()).values()}"
+                                    th:text="${precio + ' €'}"></td>
                             </tbody>
                         </table>
                     </div>
@@ -231,35 +186,34 @@
                 <div class="bg-surface rounded-xl border border-[#e8dbce] p-5 shadow-sm">
                     <div class="flex items-center gap-2 mb-4 border-b border-[#f4ede7] pb-3">
                         <span class="material-symbols-outlined text-primary">info</span>
-                        <h3 class="text-lg font-bold text-text-main">Datos Técnicos</h3>
+                        <h3 class="text-lg font-bold text-text-main" th:text="#{eess.datos.tecnicos}"></h3>
                     </div>
                     <ul class="flex flex-col gap-4">
                         <li class="flex flex-col gap-1">
-                            <span class="text-xs font-bold text-text-secondary uppercase tracking-wider">Tipo de Venta</span>
+                            <span class="text-xs font-bold text-text-secondary uppercase tracking-wider"
+                                  th:text="#{eess.datos.venta}"></span>
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-[18px] text-primary">public</span>
-                                <span class="text-sm font-medium text-text-main">Venta al Público (P)</span>
+                                <span class="text-sm font-medium text-text-main"
+                                      th:text="#{${estacion.getVenta().getCodigoMensaje() + '.descripcion'}}"></span>
                             </div>
                         </li>
                         <li class="flex flex-col gap-1">
-                            <span class="text-xs font-bold text-text-secondary uppercase tracking-wider">Margen</span>
+                            <span class="text-xs font-bold text-text-secondary uppercase tracking-wider"
+                                  th:text="#{eess.datos.margen}"></span>
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-[18px] text-primary">add_road</span>
-                                <span class="text-sm font-medium text-text-main">Derecho (D)</span>
+                                <span class="text-sm font-medium text-text-main"
+                                      th:text="#{${estacion.getMargen().getCodigoMensaje()}}"></span>
                             </div>
                         </li>
                         <li class="flex flex-col gap-1">
-                            <span class="text-xs font-bold text-text-secondary uppercase tracking-wider">Tipo de Contrato</span>
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-[18px] text-primary">handshake</span>
-                                <span class="text-sm font-medium text-text-main">Comisión / Consignatario</span>
-                            </div>
-                        </li>
-                        <li class="flex flex-col gap-1">
-                            <span class="text-xs font-bold text-text-secondary uppercase tracking-wider">Remisión</span>
+                            <span class="text-xs font-bold text-text-secondary uppercase tracking-wider"
+                                  th:text="#{eess.datos.remision}"></span>
                             <div class="flex items-center gap-2">
                                 <span class="material-symbols-outlined text-[18px] text-primary">storefront</span>
-                                <span class="text-sm font-medium text-text-main">Mayorista</span>
+                                <span class="text-sm font-medium text-text-main"
+                                      th:text="#{${estacion.getRemision().getCodigoMensaje() + '.descripcion'}}"></span>
                             </div>
                         </li>
                     </ul>
@@ -267,41 +221,48 @@
                 <div class="bg-surface rounded-xl border border-[#e8dbce] p-5 shadow-sm">
                     <div class="flex items-center gap-2 mb-4 border-b border-[#f4ede7] pb-3">
                         <span class="material-symbols-outlined text-primary">science</span>
-                        <h3 class="text-lg font-bold text-text-main">Composición Bio</h3>
+                        <h3 class="text-lg font-bold text-text-main" th:text="#{eess.datos.composicion}"></h3>
                     </div>
                     <div class="space-y-4">
                         <div>
                             <div class="flex justify-between text-sm mb-1">
-                                <span class="text-text-main font-medium">Bioetanol</span>
-                                <span class="text-text-secondary font-mono">0.0%</span>
+                                <span class="text-text-main font-medium"
+                                      th:text="#{eess.datos.composicion.bioetanol}"></span>
+                                <span class="text-text-secondary font-mono"
+                                      th:text="${estacion.getX100BioEtanol() + '%'}"></span>
                             </div>
                             <div class="w-full bg-[#f4ede7] rounded-full h-2">
-                                <div class="bg-primary h-2 rounded-full" style="width: 0%"></div>
+                                <div class="bg-primary h-2 rounded-full"
+                                     th:style="|width: ${estacion.getX100BioEtanol()}%|"></div>
                             </div>
                         </div>
                         <div>
                             <div class="flex justify-between text-sm mb-1">
-                                <span class="text-text-main font-medium">Éster Metílico</span>
-                                <span class="text-text-secondary font-mono">4.5%</span>
+                                <span class="text-text-main font-medium"
+                                      th:text="#{eess.datos.composicion.ester}"></span>
+                                <span class="text-text-secondary font-mono"
+                                      th:text="${estacion.getX100EsterMetilico() + '%'}"></span>
                             </div>
                             <div class="w-full bg-[#f4ede7] rounded-full h-2">
-                                <div class="bg-primary h-2 rounded-full" style="width: 4.5%"></div>
+                                <div class="bg-primary h-2 rounded-full"
+                                     th:style="|width: ${estacion.getX100EsterMetilico()}%|"></div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="bg-primary/5 rounded-xl border border-primary/20 p-5 text-center">
-                    <p class="text-sm text-text-main mb-3">¿Información incorrecta?</p>
-                    <button class="text-primary text-sm font-bold hover:underline">Reportar incidencia</button>
+                    <p class="text-sm text-text-main mb-3" th:text="#{eess.info.incorrecta.pregunta}"></p>
+                    <button class="text-primary text-sm font-bold hover:underline"
+                            th:text="#{eess.info.incorrecta.reporta}"></button>
                 </div>
             </aside>
         </div>
+
     </main>
 </div>
-<footer class="border-t border-[#f4ede7] bg-surface py-6 mt-12">
-    <div class="px-40 flex justify-center">
-        <p class="text-text-secondary text-sm font-medium">Manuel García Baldó, Carburo © 2025</p>
-    </div>
-</footer>
 
-</body></html>
+<!-- Footer -->
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>

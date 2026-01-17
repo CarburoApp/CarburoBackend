@@ -1,24 +1,22 @@
 package com.inggarciabaldo.carburo.CarburoBackend.controllers;
 
 import com.inggarciabaldo.carburo.CarburoBackend.dto.CombustibleDto;
-import com.inggarciabaldo.carburo.CarburoBackend.entities.ComunidadAutonoma;
-import com.inggarciabaldo.carburo.CarburoBackend.entities.EstacionDeServicio;
-import com.inggarciabaldo.carburo.CarburoBackend.entities.Municipio;
-import com.inggarciabaldo.carburo.CarburoBackend.entities.Provincia;
+import com.inggarciabaldo.carburo.CarburoBackend.entities.*;
 import com.inggarciabaldo.carburo.CarburoBackend.services.*;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.security.Principal;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.util.*;
 
 @Controller
+@RequestMapping("/estacionDeServicio")
 public class EstacionDeServicioController {
 
 	private final EstacionDeServicioService estacionDeServicioService;
@@ -45,7 +43,6 @@ public class EstacionDeServicioController {
 	 *
 	 * @param model                 Modelo para la vista
 	 * @param pageable              Paginación automática
-	 * @param principal             Usuario autenticado (no usado directamente aquí)
 	 * @param comunidadSeleccionada ID de Comunidad Autónoma para filtrar
 	 * @param provinciaSeleccionada ID de Provincia para filtrar
 	 * @param municipioSeleccionado ID de Municipio para filtrar
@@ -56,23 +53,23 @@ public class EstacionDeServicioController {
 	 * @param ordenSeleccionado     Criterio de orden: name_asc, name_desc, price_asc, price_desc
 	 * @return Vista "eess/list" con la información filtrada
 	 */
-	@GetMapping("/estacionesDeServicio/list")
-	public String getEstacionesDeServicio(Model model, Pageable pageable,
-										  Principal principal,
-										  @RequestParam(required = false)
+	@GetMapping("/list")
+	public String doGetEstacionesDeServicio(Model model, Pageable pageable,
+											@RequestParam(required = false)
 										  String comunidadSeleccionada,
-										  @RequestParam(required = false)
+											@RequestParam(required = false)
 										  String provinciaSeleccionada,
-										  @RequestParam(required = false)
+											@RequestParam(required = false)
 										  String municipioSeleccionado,
-										  @RequestParam(required = false)
+											@RequestParam(required = false)
 										  String ordenSeleccionado,
-										  @RequestParam(required = false)
+											@RequestParam(required = false)
 										  String marcaSeleccionada,
-										  @RequestParam(required = false) String busqueda,
-										  @RequestParam(required = false)
+											@RequestParam(required = false)
+											String busqueda,
+											@RequestParam(required = false)
 										  String[] combustibles,
-										  @RequestParam(required = false)
+											@RequestParam(required = false)
 										  String estadoSeleccionado) {
 		model.addAttribute("pagina", "eess");
 
@@ -177,6 +174,38 @@ public class EstacionDeServicioController {
 		model.addAttribute("marcaSeleccionada", marcaFinal);
 
 		return "eess/list";
+	}
+
+	@GetMapping("/{id}")
+	public String doGet(@PathVariable Long id,
+						@RequestParam(name = "fechaInicio", required = false)
+						@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+						LocalDate fechaInicio, Model model) {
+		if (id <= 0) return "redirect:/home";
+		EstacionDeServicio estacion = estacionDeServicioService.getEstacionDeServicioById(
+				Math.toIntExact(id));
+		if (estacion == null) {
+			return "redirect:/home";
+		}
+
+		LocalDate hoy = LocalDate.now();
+		model.addAttribute("estacion", estacion);
+
+		// Si no viene fecha → últimos 5 días
+		if (fechaInicio == null || fechaInicio.isAfter(hoy)) fechaInicio = hoy.minusDays(
+				5);
+
+		LocalDate limiteInferior = hoy.minusDays(30);
+		if (fechaInicio.isBefore(limiteInferior)) fechaInicio = limiteInferior;
+
+		model.addAttribute("fechaInicio", fechaInicio);
+
+		Map<LocalDate, Map<Combustible, Double>> preciosCombMap = estacion.getAllPreciosCombustiblesMap(
+				fechaInicio);
+		model.addAttribute("preciosCombMap", preciosCombMap);
+
+
+		return "/eess/estacionDeServicio";
 	}
 }
 

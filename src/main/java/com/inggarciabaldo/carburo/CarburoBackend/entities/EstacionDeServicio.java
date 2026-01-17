@@ -15,9 +15,11 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.SignStyle;
 import java.time.temporal.ChronoField;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Entidad que representa una estación de servicio (EESS) en el sistema.
@@ -288,6 +290,42 @@ public class EstacionDeServicio {
 		return new HashSet<>(preciosCombustibles.stream().filter(p -> p.getId().getFecha()
 				.equals(LocalDate.now())).toList());
 	}
+
+	public Map<LocalDate, Map<Combustible, Double>> getAllPreciosCombustiblesMap(
+			LocalDate fechaInicio) {
+
+		Map<LocalDate, Map<Combustible, Double>> result = new HashMap<>();
+
+		// 1️⃣ Rellenar con los datos reales
+		for (PrecioCombustible pc : preciosCombustibles) {
+			LocalDate fecha = pc.getId().getFecha();
+
+			// Ignorar precios anteriores a la fecha inicio
+			if (fecha.isBefore(fechaInicio)) {
+				continue;
+			}
+
+			result.computeIfAbsent(fecha, k -> new HashMap<>())
+					.put(pc.getCombustible(), pc.getPrecio());
+		}
+
+		// 2️⃣ Asegurar que existen TODOS los días desde fechaInicio hasta hoy
+		LocalDate hoy = LocalDate.now();
+		LocalDate fecha = fechaInicio;
+
+		while (!fecha.isAfter(hoy)) {
+			result.computeIfAbsent(fecha, k -> new HashMap<>());
+			fecha = fecha.plusDays(1);
+		}
+
+		// 3️⃣ Ordenar por cercanía a hoy
+		return result.entrySet().stream().sorted(Comparator.comparing(
+				e -> Math.abs(ChronoUnit.DAYS.between(e.getKey(), hoy)))).collect(
+				Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a,
+								 LinkedHashMap::new));
+	}
+
+
 
 	// ==============================
 	// MÉTODOS DE GESTIÓN DE COLECCIONES

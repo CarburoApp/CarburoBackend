@@ -50,13 +50,13 @@ public class HomeController {
 		// Búsquedas populares: clave = texto visible, valor = URL de destino
 		Map<String, String> busquedasPopulares = new LinkedHashMap<>();
 		busquedasPopulares.put("Madrid",
-							   "/estacionesDeServicio/list?comunidadSeleccionada=13");
+							   "/estacionDeServicio/list?comunidadSeleccionada=13");
 		busquedasPopulares.put("Barcelona",
-							   "/estacionesDeServicio/list?comunidadSeleccionada=9&provinciaSeleccionada=8");
+							   "/estacionDeServicio/list?comunidadSeleccionada=9&provinciaSeleccionada=8");
 		busquedasPopulares.put("Asturias",
-							   "/estacionesDeServicio/list?comunidadSeleccionada=3");
+							   "/estacionDeServicio/list?comunidadSeleccionada=3");
 		busquedasPopulares.put("León",
-							   "/estacionesDeServicio/list?comunidadSeleccionada=8&provinciaSeleccionada=24");
+							   "/estacionDeServicio/list?comunidadSeleccionada=8&provinciaSeleccionada=24");
 
 		// Solo se añade al modelo si el mapa no es nulo ni está vacío
 		model.addAttribute("busquedasPopulares", busquedasPopulares);
