@@ -8,37 +8,47 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Controlador principal de la aplicación que maneja las rutas de inicio.
+ * Controlador principal de la aplicación que maneja las rutas de inicio y contacto.
  *
- * <p>Proporciona métodos para mostrar la página de inicio, y
- * redirigir la raíz del sitio web a la página de inicio.</p>
+ * <p>Este controlador se encarga de:
+ * <ul>
+ *     <li>Redirigir la raíz "/" a "/home".</li>
+ *     <li>Mostrar la página principal con búsquedas populares y la estación más cercana.</li>
+ *     <li>Obtener la estación de servicio más cercana a una ubicación proporcionada.</li>
+ *     <li>Mostrar la página de contacto con el correo configurado en application.properties.</li>
+ * </ul>
+ * </p>
  */
 @Controller
 public class HomeController {
 
+	// Servicio para manejar operaciones relacionadas con estaciones de servicio
 	private final EstacionDeServicioService estacionDeServicioService;
-	private final SpringTemplateEngine templateEngine;
 
-	public HomeController(EstacionDeServicioService estacionDeServicioService,
-						  SpringTemplateEngine templateEngine) {
+	/**
+	 * Constructor del controlador.
+	 *
+	 * @param estacionDeServicioService servicio para obtener información de estaciones de servicio
+	 */
+	public HomeController(EstacionDeServicioService estacionDeServicioService) {
 		this.estacionDeServicioService = estacionDeServicioService;
-		this.templateEngine            = templateEngine;
 	}
-
 
 	/**
 	 * Maneja las solicitudes GET a "/home".
 	 *
-	 * <p>Carga la página principal de la aplicación y añade al modelo
-	 * una lista de búsquedas populares para mostrarlas en la vista,
-	 * siempre que existan.</p>
+	 * <p>Carga la página principal de la aplicación y añade al modelo:
+	 * <ul>
+	 *     <li>El nombre de la página actual ("home").</li>
+	 *     <li>Un mapa de búsquedas populares con nombre y URL correspondiente.</li>
+	 *     <li>Un atributo "estacionCercana" inicializado en null si no existe.</li>
+	 * </ul>
+	 * </p>
 	 *
 	 * @param model modelo utilizado para pasar atributos a la vista
 	 * @return el nombre de la vista "home"
@@ -47,7 +57,28 @@ public class HomeController {
 	public String doGetHome(Model model) {
 		model.addAttribute("pagina", "home");
 
-		// Búsquedas populares: clave = texto visible, valor = URL de destino
+		// Obtenemos las búsquedas populares
+		Map<String, String> busquedasPopulares = getBusquedasPopulares();
+
+		// Se añade al modelo solo si el mapa contiene elementos
+		model.addAttribute("busquedasPopulares", busquedasPopulares);
+
+		// Inicializamos la estación cercana a null si no ha sido pasada
+		if (!model.containsAttribute("estacionCercana")) {
+			model.addAttribute("estacionCercana", null);
+		}
+
+		return "home";
+	}
+
+	/**
+	 * Obtiene un mapa con las búsquedas populares para mostrar en la página de inicio.
+	 *
+	 * <p>El mapa mantiene el orden de inserción usando LinkedHashMap.</p>
+	 *
+	 * @return un mapa clave=nombre visible, valor=URL de destino
+	 */
+	private static Map<String, String> getBusquedasPopulares() {
 		Map<String, String> busquedasPopulares = new LinkedHashMap<>();
 		busquedasPopulares.put("Madrid",
 							   "/estacionDeServicio/list?comunidadSeleccionada=13");
@@ -57,38 +88,29 @@ public class HomeController {
 							   "/estacionDeServicio/list?comunidadSeleccionada=3");
 		busquedasPopulares.put("León",
 							   "/estacionDeServicio/list?comunidadSeleccionada=8&provinciaSeleccionada=24");
-
-		// Solo se añade al modelo si el mapa no es nulo ni está vacío
-		model.addAttribute("busquedasPopulares", busquedasPopulares);
-
-		// Por defecto, no hay estación (null)
-		// Si no hay estación pasada por flash, por defecto null
-		if (!model.containsAttribute("estacionCercana")) {
-			model.addAttribute("estacionCercana", null);
-		}
-
-
-		return "home";
+		return busquedasPopulares;
 	}
 
 	/**
 	 * Recibe la ubicación del usuario y devuelve la estación de servicio más cercana.
 	 *
+	 * <p>Este método se invoca mediante AJAX desde la vista, devolviendo solo
+	 * el fragmento "estacionCercanaFragment".</p>
+	 *
 	 * @param lat latitud del usuario (WGS84)
 	 * @param lon longitud del usuario (WGS84)
-	 * @return estación de servicio más cercana
+	 * @param model modelo para pasar la estación encontrada a la vista
+	 * @return el fragmento "home :: estacionCercanaFragment" con la estación más cercana
 	 */
 	@PostMapping("/home/ubicacion")
 	public String obtenerEstacionMasCercanaFragment(@RequestParam double lat,
 													@RequestParam double lon,
 													Model model) {
-		EstacionDeServicio e = estacionDeServicioService.getEstacionDeServicioMasProxima(
-				lat, lon);
+		// Obtenemos la estación más cercana usando el servicio
+		EstacionDeServicio e = estacionDeServicioService.getEstacionDeServicioMasProxima(lat, lon);
 		model.addAttribute("estacion", e);
 		return "home :: estacionCercanaFragment";
 	}
-
-
 
 	/**
 	 * Maneja las solicitudes GET a la raíz del sitio web "/".
@@ -102,13 +124,24 @@ public class HomeController {
 		return "redirect:/home";
 	}
 
-	// Inyección del correo desde application.properties
+	// Inyección del correo de contacto desde application.properties
 	@Value("${contacto.email}")
 	private String emailContacto;
 
+	/**
+	 * Maneja las solicitudes GET a "/contacto".
+	 *
+	 * <p>Añade al modelo los atributos necesarios para mostrar la página de contacto:</p>
+	 * <ul>
+	 *     <li>"pagina": nombre de la página actual ("contacto")</li>
+	 *     <li>"email": correo de contacto</li>
+	 * </ul>
+	 *
+	 * @param model modelo para pasar atributos a la vista
+	 * @return el nombre de la vista "contacto"
+	 */
 	@GetMapping("/contacto")
 	public String quienesSomos(Model model) {
-		// Añadimos el correo al modelo para que la vista pueda mostrarlo
 		model.addAttribute("pagina", "contacto");
 		model.addAttribute("email", emailContacto);
 		return "contacto";

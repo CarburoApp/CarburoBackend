@@ -173,11 +173,14 @@
                         </style>
 
                         <!-- Inputs radio ocultos -->
-                        <input type="radio" name="estadoSeleccionado" value="ABIERTO" class="oculto"
+                        <label for="filtro_abierto" class="sr-only" th:text="#{eess.estado.abierto}"></label>
+                        <input type="radio" name="estadoSeleccionado" value="ABIERTO" class="oculto" id="filtro_abierto"
                                th:checked="${estadoSeleccionado=='ABIERTO'}" hidden>
-                        <input type="radio" name="estadoSeleccionado" value="CERRADO" class="oculto"
+                        <label for="filtro_cerrado" class="sr-only" th:text="#{eess.estado.cerrado}"></label>
+                        <input type="radio" name="estadoSeleccionado" value="CERRADO" class="oculto" id="filtro_cerrado"
                                th:checked="${estadoSeleccionado=='CERRADO'}" hidden>
-                        <input type="radio" name="estadoSeleccionado" value="INDEFERENTE" class="oculto"
+                        <label for="filtro_indiferente" class="sr-only" th:text="#{eess.list.estado.indiferente}"></label>
+                        <input type="radio" name="estadoSeleccionado" value="INDEFERENTE" class="oculto" id="filtro_indiferente"
                                th:checked="${estadoSeleccionado=='INDEFERENTE'}" hidden>
 
                         <!-- Botones visuales -->

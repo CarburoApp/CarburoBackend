@@ -10,7 +10,7 @@ $(document).ready(function () {
     $("#languageDropdownMenuButton a").click(function (e) {
         e.preventDefault(); // cancel link
         let languageSelectedText = $(this).text().trim();
-        let languageSelectedValue = $(this).attr("value");
+        let languageSelectedValue = $(this).data("value");
         $("#btnLanguage span").text(languageSelectedText);
         window.location.replace('?lang=' + languageSelectedValue);
     });

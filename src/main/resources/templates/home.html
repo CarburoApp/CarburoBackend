@@ -62,8 +62,11 @@
                           th:action="@{/estacionDeServicio/list}" method="get">
                         <div class="flex-auto flex items-center px-4">
                             <span class="material-symbols-outlined text-text-secondary mr-3">search</span>
+                            <!-- Label accesible, invisible -->
+                            <label for="busqueda" class="sr-only" th:text="#{home.buscar.boton}"></label>
                             <input class="w-full border-none focus:ring-0 text-text-main bg-transparent placeholder:text-text-secondary/50 py-3"
                                    type="text"
+                                   id="busqueda"
                                    name="busqueda"
                                    th:placeholder="#{home.buscar.placeholder}" />
                         </div>
