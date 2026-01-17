@@ -244,10 +244,10 @@
     <main class="flex-1 flex flex-col min-w-0">
         <!-- Breadcrumbs -->
         <div class="flex flex-wrap gap-2 py-2 mb-4 text-sm">
-            <a class="text-text-secondary font-medium hover:underline" th:href="${'/home'}"
+            <a class="text-text-secondary font-medium hover:underline" th:href="@{/}"
                th:text="#{home.title}"></a>
             <span class="text-text-secondary font-medium">/</span>
-            <a class="text-text-secondary font-medium hover:underline" th:href="${'/estacionDeServicio/list'}"
+            <a class="text-text-secondary font-medium hover:underline" th:href="@{/estacionDeServicio/list}"
                th:text="#{eess.list.title}"></a>
         </div>
         <!-- Page Header -->

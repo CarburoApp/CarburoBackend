@@ -1,9 +1,12 @@
-<!-- templates/home.html -->
+<!-- templates/inicio.html -->
 <!DOCTYPE html>
 <html lang="es" class="light">
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
     <title th:text="#{app.name} + ' - ' + #{home.title}"></title>
+
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
 
     <script id="tailwind-config">
         tailwind.config = {
@@ -161,6 +164,14 @@
     document.addEventListener("DOMContentLoaded", function () {
         if (!("geolocation" in navigator)) return;
 
+        const csrfToken = document
+            .querySelector('meta[name="_csrf"]')
+            .getAttribute('content');
+
+        const csrfHeader = document
+            .querySelector('meta[name="_csrf_header"]')
+            .getAttribute('content');
+
         const geoOptions = {
             enableHighAccuracy: true,
             timeout: 15000,    // 15 segundos
@@ -172,9 +183,12 @@
                 const lat = position.coords.latitude;
                 const lon = position.coords.longitude;
 
-                fetch("/home/ubicacion", {
+                fetch("/inicio/ubicacion", {
                     method: "POST",
-                    headers: {"Content-Type": "application/x-www-form-urlencoded"},
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        [csrfHeader]: csrfToken
+                    },
                     body: `lat=${lat}&lon=${lon}`
                 })
                     .then(res => res.text())

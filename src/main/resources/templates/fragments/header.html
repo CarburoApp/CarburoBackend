@@ -3,7 +3,7 @@
         class="flex items-center justify-between whitespace-nowrap border-b border-solid border-border-color bg-background-light px-10 py-3 sticky top-0 z-50">
 
     <!-- Logo -->
-    <a href="/home">
+    <a href="/">
         <div class="flex items-center gap-4 text-text-main">
             <div class="size-8 text-primary flex items-center justify-center">
                 <span class="material-symbols-outlined text-4xl">local_gas_station</span>
@@ -17,8 +17,8 @@
     <!-- Navegación -->
     <div class="flex flex-1 justify-end gap-8 items-center">
         <nav class="hidden md:flex items-center gap-9">
-            <a th:href="@{/home}"
-               th:class="${pagina == 'home'} ? 'text-primary text-sm font-bold leading-normal transition-colors' :
+            <a th:href="@{/}"
+               th:class="${pagina == 'inicio'} ? 'text-primary text-sm font-bold leading-normal transition-colors' :
                'text-main text-sm font-medium leading-normal hover:text-primary transition-colors'"
                th:text="#{header.nav.boton.inicio}"></a>
 

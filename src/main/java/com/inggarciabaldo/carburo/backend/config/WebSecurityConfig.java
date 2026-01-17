@@ -13,10 +13,21 @@ public class WebSecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(csrf -> csrf.disable()) // Desactiva CSRF solo para pruebas
-				.authorizeHttpRequests(auth -> auth.anyRequest().permitAll()
-									   // TODO el tráfico es público
-									  );
+		http.csrf(csrf -> {})
+
+				.authorizeHttpRequests(auth -> auth
+						// Recursos estáticos (públicos)
+						.requestMatchers("/css/**", "/js/**", "/images/**", "/fonts/**",
+										 "/webjars/**", "/favicon.ico").permitAll()
+						// Páginas públicas principales
+						.requestMatchers("/", "/inicio/ubicacion", "/contacto")
+						.permitAll()
+						// Estaciones de servicio
+						.requestMatchers("/estacionDeServicio", "/estacionDeServicio/*")
+						.permitAll()
+						// Cualquier otra petición (por ahora público)
+						.anyRequest().permitAll()).formLogin(form -> form.disable())
+				.logout(logout -> logout.disable());
 		return http.build();
 	}
 

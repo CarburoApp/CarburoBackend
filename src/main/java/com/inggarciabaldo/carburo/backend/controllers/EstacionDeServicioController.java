@@ -182,7 +182,7 @@ public class EstacionDeServicioController {
 	 * <p>Este método realiza las siguientes tareas:</p>
 	 * <ul>
 	 *     <li>Valida que el ID de la estación sea mayor que cero; en caso contrario redirige a la página principal.</li>
-	 *     <li>Obtiene la estación de servicio correspondiente al ID proporcionado; si no existe, redirige a "/home".</li>
+	 *     <li>Obtiene la estación de servicio correspondiente al ID proporcionado; si no existe, redirige a "/estacionDeServicio/list".</li>
 	 *     <li>Calcula la fecha de inicio para mostrar los precios históricos de combustible:
 	 *         <ul>
 	 *             <li>Si no se proporciona fecha o es futura, se toma como fecha inicio hace 5 días.</li>
@@ -201,7 +201,7 @@ public class EstacionDeServicioController {
 	 * @param id          ID de la estación de servicio (debe ser mayor que 0)
 	 * @param fechaInicio fecha de inicio opcional para filtrar los precios históricos (formato ISO, por ejemplo "2026-01-17")
 	 * @param model       modelo de Spring para pasar atributos a la vista
-	 * @return nombre de la vista "/eess/estacionDeServicio" o redirección a "/home" si el ID no es válido o la estación no existe
+	 * @return nombre de la vista "/eess/estacionDeServicio" o redirección a "/estacionDeServicio/list" si el ID no es válido o la estación no existe
 	 */
 	@GetMapping("/{id}")
 	public String doGet(@PathVariable Long id,
@@ -209,7 +209,7 @@ public class EstacionDeServicioController {
 						@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
 						LocalDate fechaInicio, Model model) {
 		// Validación rápida del ID
-		if (id <= 0) return "redirect:/home";
+		if (id <= 0) return "redirect:/estacionDeServicio/list";
 
 		// Se obtiene la estación de servicio por ID
 		EstacionDeServicio estacion = estacionDeServicioService.getEstacionDeServicioById(
@@ -217,7 +217,7 @@ public class EstacionDeServicioController {
 
 		// Si la estación no existe, se redirige a la página principal
 		if (estacion == null) {
-			return "redirect:/home";
+			return "redirect:/estacionDeServicio/list";
 		}
 
 		LocalDate hoy = LocalDate.now();

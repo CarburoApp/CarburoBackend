@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.LinkedHashMap;
@@ -17,7 +18,7 @@ import java.util.Map;
  *
  * <p>Este controlador se encarga de:
  * <ul>
- *     <li>Redirigir la raíz "/" a "/home".</li>
+ *     <li>Redirigir la raíz "/".</li>
  *     <li>Mostrar la página principal con búsquedas populares y la estación más cercana.</li>
  *     <li>Obtener la estación de servicio más cercana a una ubicación proporcionada.</li>
  *     <li>Mostrar la página de contacto con el correo configurado en application.properties.</li>
@@ -40,11 +41,11 @@ public class HomeController {
 	}
 
 	/**
-	 * Maneja las solicitudes GET a "/home".
+	 * Maneja las solicitudes GET a "/".
 	 *
 	 * <p>Carga la página principal de la aplicación y añade al modelo:
 	 * <ul>
-	 *     <li>El nombre de la página actual ("home").</li>
+	 *     <li>El nombre de la página actual ("inicio").</li>
 	 *     <li>Un mapa de búsquedas populares con nombre y URL correspondiente.</li>
 	 *     <li>Un atributo "estacionCercana" inicializado en null si no existe.</li>
 	 * </ul>
@@ -53,9 +54,9 @@ public class HomeController {
 	 * @param model modelo utilizado para pasar atributos a la vista
 	 * @return el nombre de la vista "home"
 	 */
-	@GetMapping("/home")
+	@GetMapping("/")
 	public String doGetHome(Model model) {
-		model.addAttribute("pagina", "home");
+		model.addAttribute("pagina", "inicio");
 
 		// Obtenemos las búsquedas populares
 		Map<String, String> busquedasPopulares = getBusquedasPopulares();
@@ -68,7 +69,7 @@ public class HomeController {
 			model.addAttribute("estacionCercana", null);
 		}
 
-		return "home";
+		return "inicio";
 	}
 
 	/**
@@ -94,34 +95,34 @@ public class HomeController {
 	/**
 	 * Recibe la ubicación del usuario y devuelve la estación de servicio más cercana.
 	 *
-	 * <p>Este método se invoca mediante AJAX desde la vista, devolviendo solo
+	 * <p>Se invoca mediante AJAX desde la vista, devolviendo solo
 	 * el fragmento "estacionCercanaFragment".</p>
 	 *
 	 * @param lat latitud del usuario (WGS84)
 	 * @param lon longitud del usuario (WGS84)
 	 * @param model modelo para pasar la estación encontrada a la vista
-	 * @return el fragmento "home :: estacionCercanaFragment" con la estación más cercana
+	 * @return el fragmento "inicio :: estacionCercanaFragment" con la estación más cercana
 	 */
-	@PostMapping("/home/ubicacion")
+	@PostMapping("/inicio/ubicacion")
 	public String obtenerEstacionMasCercanaFragment(@RequestParam double lat,
 													@RequestParam double lon,
 													Model model) {
 		// Obtenemos la estación más cercana usando el servicio
 		EstacionDeServicio e = estacionDeServicioService.getEstacionDeServicioMasProxima(lat, lon);
 		model.addAttribute("estacion", e);
-		return "home :: estacionCercanaFragment";
+		return "inicio :: estacionCercanaFragment";
 	}
 
 	/**
-	 * Maneja las solicitudes GET a la raíz del sitio web "/".
+	 * Maneja las solicitudes GET a todas las URLs no registradas.
 	 *
-	 * <p>Redirige automáticamente a "/home".</p>
+	 * <p>Redirige automáticamente toda url no controlada a '/' - Inicio.</p>
 	 *
-	 * @return un string de redirección a "/home".
+	 * @return un string de redirección a "/".
 	 */
-	@GetMapping("/")
+	@RequestMapping(value = {"/{path:[^.]*}", "/**/{path:[^.]*}"})
 	public String doGetBase() {
-		return "redirect:/home";
+		return "redirect:/";
 	}
 
 	// Inyección del correo de contacto desde application.properties
