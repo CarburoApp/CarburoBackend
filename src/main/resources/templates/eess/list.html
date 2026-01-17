@@ -33,16 +33,21 @@
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
+<div id="overlayFiltros"></div>
+
 
 <!-- Header -->
 <th:block th:replace="~{fragments/header :: header}"></th:block>
 
 <!-- Contenido principal -->
 <div class="flex flex-1 w-full max-w-[1400px] mx-auto px-4 py-6 md:px-8 gap-8">
-    <!-- Left Sidebar: Filters -->
-    <aside class="hidden lg:flex flex-col w-80 min-w-[320px] gap-6 shrink-0 h-fit sticky top-24">
+
+    <!-- Left Sidebar: Filters (desktop y móvil) -->
+    <aside id="asideFiltros" class="flex flex-col w-80 min-w-[320px] gap-6 shrink-0 h-fit sticky top-24">
         <div class="bg-surface rounded-xl border border-border-color p-5 shadow-sm">
-            <div class="flex items-center gap-2 mb-6 border-b border-border-color pb-4">
+
+            <!-- Cabecera visible siempre -->
+            <div class="flex items-center gap-2 mb-6 border-b border-border-color pb-4" id="cabeceraFiltros">
                 <span class="material-symbols-outlined text-primary">filter_list</span>
                 <h3 class="text-lg font-bold text-text-main" th:text="#{eess.list.filtros}"></h3>
             </div>
@@ -234,7 +239,8 @@
                    th:text="#{eess.list.introduccion(${page.numberOfElements},${page.totalElements})}"></p>
             </div>
             <!-- Mobile Filter Toggle (Visible only on small screens) -->
-            <button class="lg:hidden flex items-center gap-2 px-4 py-2 bg-white border border-[#e8dbce] rounded-lg shadow-sm text-sm font-medium"
+            <button id="btnMobileFiltros"
+                    class="lg:hidden flex items-center gap-2 px-4 py-2 bg-white border border-[#e8dbce] rounded-lg shadow-sm text-sm font-medium"
                     th:text="#{eess.list.filtros}">
                 <span class="material-symbols-outlined">filter_list</span>
             </button>
@@ -259,6 +265,49 @@
 <!-- Footer -->
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 <script src="/script/filtros_path_eess_list.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const btnMobile = document.getElementById('btnMobileFiltros');
+        const aside = document.getElementById('asideFiltros');
+        const overlay = document.getElementById('overlayFiltros');
+        const cabecera = document.getElementById('cabeceraFiltros');
+
+        function abrirFiltros() {
+            aside.classList.add('abierto');
+            overlay.classList.add('visible');
+            document.body.style.overflow = 'hidden'; // evitar scroll
+        }
+
+        function cerrarFiltros() {
+            aside.classList.remove('abierto');
+            overlay.classList.remove('visible');
+            document.body.style.overflow = ''; // restaurar scroll
+        }
+
+        // Botón móvil abre/cierra
+        btnMobile.addEventListener('click', function() {
+            if (aside.classList.contains('abierto')) {
+                cerrarFiltros();
+            } else {
+                abrirFiltros();
+            }
+        });
+
+        // Overlay cierra
+        overlay.addEventListener('click', cerrarFiltros);
+
+        // Cabecera dentro del aside también cierra
+        cabecera.addEventListener('click', cerrarFiltros);
+
+        // Esc también cierra
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && aside.classList.contains('abierto')) {
+                cerrarFiltros();
+            }
+        });
+    });
+</script>
 
 </body>
 </html>
