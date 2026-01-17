@@ -5,10 +5,7 @@ import com.inggarciabaldo.carburo.backend.services.EstacionDeServicioService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -121,7 +118,7 @@ public class HomeController {
 	 * @return un string de redirección a "/".
 	 */
 	@RequestMapping(value = {"/{path:[^.]*}", "/**/{path:[^.]*}"})
-	public String doGetBase() {
+	public String doGetBase(@PathVariable(required = false) String path ) {
 		return "redirect:/";
 	}
 

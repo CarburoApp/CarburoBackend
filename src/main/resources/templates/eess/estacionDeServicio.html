@@ -5,30 +5,7 @@
     <th:block th:replace="~{fragments/head :: head}"></th:block>
     <title th:text="#{app.name} + ' - ' + #{eess.title}"></title>
 
-    <!-- Scripts -->
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#f48c25",
-                        "background-light": "#fcfaf8",
-                        "background-dark": "#221910",
-                        "surface": "#ffffff",
-                        "border-color": "#f4ede7",
-                        "text-main": "#1c140d",
-                        "text-secondary": "#9c7349",
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"],
-                        "body": ["Inter", "sans-serif"],
-                    },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
-            },
-        }
-    </script>
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -82,7 +59,7 @@
                     <div>
                         <div class="flex items-center gap-3 mb-1">
                             <h1 class="text-text-main text-3xl font-bold leading-tight"
-                                th:text="${estacion.getRotulo()}"></h1>
+                                th:text="${estacion.getRotulo()}">Rotulo</h1>
                             <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#f4ede7] text-text-secondary tracking-wide"
                                   th:text="|${estacion.rotulo} #{eess.id}${estacion.id}|">>
                             </span>
@@ -124,7 +101,7 @@
                 <section>
                     <div class="flex items-center gap-2 mb-4">
                         <span class="material-symbols-outlined text-primary">price_check</span>
-                        <h2 class="text-xl font-bold text-text-main" th:text="#{eess.combustible.disponible}"></h2>
+                        <h2 class="text-xl font-bold text-text-main" th:text="#{eess.combustible.disponible}">Combustible Disponible</h2>
                     </div>
                     <div class="grid gap-4 grid-cols-[repeat(auto-fit,minmax(150px,1fr))]">
                         <div class="bg-surface border border-[#e8dbce] rounded-xl p-4 shadow-sm hover:shadow-md hover:border-primary/50 transition-all flex flex-col items-center justify-center gap-1 group cursor-default"

@@ -6,30 +6,6 @@
     <th:block th:replace="~{fragments/head :: head}"></th:block>
     <title th:text="#{app.name} + ' - ' + #{contacto.title}"></title>
 
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#f48c25",
-                        "background-light": "#fcfaf8",
-                        "background-dark": "#221910",
-                        "surface": "#ffffff",
-                        "border-color": "#f4ede7",
-                        "text-main": "#1c140d",
-                        "text-secondary": "#9c7349",
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"],
-                        "body": ["Inter", "sans-serif"],
-                    },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
-            },
-        }
-    </script>
     <style type="text/tailwindcss">
         body {
             font-family: 'Inter', sans-serif;
@@ -50,14 +26,14 @@
             <span class="text-text-secondary font-medium">/</span>
             <span class="text-text-main font-medium" th:href="${'/contacto'}" th:text="#{contacto.title}"></span>
         </div>
-        <h1 class="text-text-main text-4xl md:text-5xl font-bold leading-tight mb-8" th:text="#{contacto.title}"></h1>
+        <h1 class="text-text-main text-4xl md:text-5xl font-bold leading-tight mb-8" th:text="#{contacto.title}">Contacto</h1>
         <div class="bg-surface rounded-2xl border border-border-color p-8 md:p-12 shadow-sm mb-10 text-left">
             <div class="flex items-start gap-4 mb-8">
                 <div class="p-3 bg-primary/10 rounded-xl text-primary shrink-0">
                     <span class="material-symbols-outlined text-3xl">school</span>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold text-text-main mb-2" th:text="#{contacto.proyecto}"></h3>
+                    <h3 class="text-lg font-bold text-text-main mb-2" th:text="#{contacto.proyecto}">Proyecto</h3>
                     <p class="text-text-secondary leading-relaxed" th:text="#{contacto.proyecto.descripcion}"></p>
                 </div>
             </div>

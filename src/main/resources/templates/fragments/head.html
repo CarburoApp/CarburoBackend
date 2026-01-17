@@ -25,5 +25,30 @@
     <!-- Scripts -->
     <script src="/script/idioma.js"></script>
     <script th:src="@{/script/paginacion.js}"></script>
+
+    <!-- Scripts -->
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#f48c25",
+                        "background-light": "#fcfaf8",
+                        "background-dark": "#221910",
+                        "surface": "#ffffff",
+                        "border-color": "#f4ede7",
+                        "text-main": "#1c140d",
+                        "text-secondary": "#9c7349",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
 </th:block>
 <!--/head-->
