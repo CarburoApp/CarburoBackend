@@ -74,6 +74,7 @@ public class EstacionDeServicioController {
 										  String[] combustibles,
 										  @RequestParam(required = false)
 										  String estadoSeleccionado) {
+		model.addAttribute("pagina", "eess");
 
 		// -------------------------
 		// Valores por defecto al principio

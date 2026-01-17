@@ -17,19 +17,28 @@
     <!-- Navegación -->
     <div class="flex flex-1 justify-end gap-8 items-center">
         <nav class="hidden md:flex items-center gap-9">
-            <a class="text-primary text-sm font-bold leading-normal transition-colors" href="/home"
+            <a th:href="@{/home}"
+               th:class="${pagina == 'home'} ? 'text-primary text-sm font-bold leading-normal transition-colors' :
+               'text-main text-sm font-medium leading-normal hover:text-primary transition-colors'"
                th:text="#{header.nav.boton.inicio}"></a>
-            <a class="text-text-main text-sm font-medium leading-normal hover:text-primary transition-colors"
-               href="/estacionesDeServicio/list" th:text="#{header.nav.boton.estaciones}"></a>
-            <a class="text-text-main text-sm font-medium leading-normal hover:text-primary transition-colors"
-               href="/contacto" th:text="#{header.nav.contacto}"></a>
+
+            <a th:href="@{/estacionesDeServicio/list}"
+               th:class="${pagina == 'eess'} ? 'text-primary text-sm font-bold leading-normal transition-colors' :
+               'text-main text-sm font-medium leading-normal hover:text-primary transition-colors'"
+               th:text="#{header.nav.boton.estaciones}"></a>
+
+            <a th:href="@{/contacto}"
+               th:class="${pagina == 'contacto'} ? 'text-primary text-sm font-bold leading-normal transition-colors' :
+               'text-main text-sm font-medium leading-normal hover:text-primary transition-colors'"
+               th:text="#{header.nav.contacto}"></a>
+
         </nav>
 
         <!-- Botones -->
         <div class="flex gap-2 items-center">
             <!-- IDIOMA -->
             <div class="nav-item dropdown relative">
-                <a class="nav-link dropdown-toggle flex items-center gap-1 cursor-pointer"
+                <a class="nav-link dropdown-toggle flex items-center gap-1 cursor-pointer hover:text-primary"
                    href="#"
                    id="btnLanguage"
                    role="button"
