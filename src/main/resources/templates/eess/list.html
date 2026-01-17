@@ -249,7 +249,7 @@
         <div class="flex flex-col gap-4">
             <!-- Station Card -->
             <article th:each="estacion : ${page}"
-                     th:include="fragments/estacionDeServicio :: card(estacion=${estacion})"
+                     th:insert="~{fragments/estacionDeServicio :: card(estacion=${estacion})}"
                      class="bg-surface rounded-xl border border-[#e8dbce] shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden group"
                      th:classappend="${estacion.isAbierto()} ? '' : 'opacity-90'">
 

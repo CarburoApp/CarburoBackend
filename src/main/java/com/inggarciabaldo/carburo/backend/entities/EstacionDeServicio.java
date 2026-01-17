@@ -200,6 +200,14 @@ public class EstacionDeServicio {
 		setCombustiblesDisponibles(combustiblesDisponibles);
 	}
 
+	@PostLoad
+	public void transformacionCoordenada() {
+		if (coordenada != null) {
+			coordenada.transformacionACoordenadas();
+		}
+	}
+
+
 	/**
 	 * Determina si la estación de servicio está abierta en el momento actual
 	 * según el horario almacenado en el atributo 'horario'.

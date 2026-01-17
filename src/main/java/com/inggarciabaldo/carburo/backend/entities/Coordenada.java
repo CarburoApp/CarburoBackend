@@ -90,7 +90,6 @@ public class Coordenada implements Serializable {
 		transformacionACoordenadas();
 	}
 
-	@PostLoad
 	public void transformacionACoordenadas() {
 		if (codigo == null)
 			throw new IllegalArgumentException("Código de la coordenada nulo");

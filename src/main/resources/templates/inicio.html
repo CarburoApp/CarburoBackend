@@ -82,7 +82,7 @@
                         class="bg-surface rounded-xl border border-[#e8dbce] shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden group"
                         id="estacion-container">
 
-                    <div th:if="${estacionCercana != null}" th:replace="fragments/estacionDeServicio"></div>
+                    <div th:if="${estacionCercana != null}" th:replace="~{fragments/estacionDeServicio}"></div>
 
                     <!-- Si no hay estación, mostramos mensaje bonito -->
                     <div th:if="${estacionCercana == null}"
