@@ -1,32 +1,48 @@
-<!-- JS jQuery para dropdown y cambio de idioma -->
+// JS jQuery para dropdown y cambio de idioma
 $(document).ready(function () {
-    // Toggle dropdown
-    $("#btnLanguage").click(function (e) {
-        e.preventDefault();
-        $("#languageDropdownMenuButton").toggle();
-    });
 
-    // Selección de idioma
-    $("#languageDropdownMenuButton a").click(function (e) {
-        e.preventDefault(); // cancel link
-        let languageSelectedText = $(this).text().trim();
-        let languageSelectedValue = $(this).data("value");
-        $("#btnLanguage span").text(languageSelectedText);
-        globalThis.location.replace('?lang=' + languageSelectedValue);
-    });
-
-    // Cerrar dropdown al click fuera
-    $(document).click(function (event) {
-        if (!$(event.target).closest('#btnLanguage, #languageDropdownMenuButton').length) {
-            $("#languageDropdownMenuButton").hide();
+    // Toggle dropdown con click o teclado
+    $('#btnLanguage').on('click keydown', function(e) {
+        if (e.type === 'click' || e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            const menu = $('#languageDropdownMenuButton');
+            menu.toggle(); // mostrar/ocultar dropdown
+            $(this).attr('aria-expanded', menu.is(':visible'));
         }
     });
-});
-$('#btnLanguage').on('click keydown', function(e) {
-    if (e.type === 'click' || e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        const menu = $('#languageDropdownMenuButton');
-        menu.toggle();
-        $(this).attr('aria-expanded', !menu.hasClass('hidden'));
-    }
+
+    // Selección de idioma usando <a>
+    $('#languageDropdownMenuButton a').on('click keydown', function(e) {
+        if (e.type === 'click' || e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault(); // cancelar acción por defecto
+            let languageSelectedText = $(this).text().trim();
+            let languageSelectedValue = $(this).data("value");
+
+            // Actualizar texto del botón principal
+            $('#btnLanguage span').text(languageSelectedText);
+
+            // Redireccionar cambiando parámetro lang
+            globalThis.location.replace('?lang=' + languageSelectedValue);
+
+            // Cerrar dropdown
+            $('#languageDropdownMenuButton').hide();
+            $('#btnLanguage').attr('aria-expanded', 'false');
+        }
+    });
+
+    // Cerrar dropdown al hacer click fuera
+    $(document).click(function (event) {
+        if (!$(event.target).closest('#btnLanguage, #languageDropdownMenuButton').length) {
+            $('#languageDropdownMenuButton').hide();
+            $('#btnLanguage').attr('aria-expanded', 'false');
+        }
+    });
+
+    // Cerrar dropdown con Escape
+    $(document).keydown(function(e) {
+        if (e.key === 'Escape') {
+            $('#languageDropdownMenuButton').hide();
+            $('#btnLanguage').attr('aria-expanded', 'false');
+        }
+    });
 });
