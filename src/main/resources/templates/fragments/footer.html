@@ -1,7 +1,15 @@
 <!-- templates/fragments/footer.html -->
 <footer th:fragment="footer" class="border-t border-border-color bg-surface py-6 mt-12">
-  <div class="container mx-auto text-center">
-    <p class="text-text-secondary text-sm font-medium" th:text="#{app.copy} + ' ' + ${#dates.format(#dates.createNow(), 'yyyy')}">
-    </p>
+  <div class="max-w-[1400px] mx-auto px-10 flex flex-col md:flex-row justify-between items-center gap-6">
+    <div class="flex items-center gap-3">
+      <span class="material-symbols-outlined text-primary text-2xl">local_gas_station</span>
+      <span class="font-bold text-text-main" th:text="#{app.name}"></span>
+    </div>
+    <p class="text-text-secondary text-sm font-medium"
+       th:text="#{app.copy} + ' ' + ${#dates.format(#dates.createNow(), 'yyyy')}"></p>
+    <div class="flex gap-6">
+      <a class="text-text-secondary hover:text-primary text-sm font-medium transition-colors" th:href="${'/contacto'}"
+         th:text="#{contacto.title}"></a>
+    </div>
   </div>
 </footer>
