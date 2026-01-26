@@ -8,6 +8,8 @@ import org.springframework.validation.Validator;
 
 import java.util.regex.Pattern;
 
+import static com.inggarciabaldo.carburo.backend.validators.RegistroFormValidator.USUARIO_DTO_FIELD_CORREO;
+
 /**
  * Validador del formulario de recuperación de contraseña.
  * <p>
@@ -41,7 +43,7 @@ public class RecuperacionFormValidator implements Validator {
     public void validate(Object target, Errors errors) {
         UsuarioDto usuario = (UsuarioDto) target;
         // Validación de campos vacíos
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "correo",
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, USUARIO_DTO_FIELD_CORREO,
                 "Error.auth.login.correo.empty");
 
         // Errores de campos obligatorios, no seguimos
@@ -49,7 +51,8 @@ public class RecuperacionFormValidator implements Validator {
 
         //  Validación del correo
         if (!EMAIL_PATTERN.matcher(usuario.getCorreo()).matches()) {
-            errors.rejectValue("correo", "Error.auth.login.correo.formato");
+            errors.rejectValue(USUARIO_DTO_FIELD_CORREO,
+                               "Error.auth.login.correo.formato");
         }
     }
 }

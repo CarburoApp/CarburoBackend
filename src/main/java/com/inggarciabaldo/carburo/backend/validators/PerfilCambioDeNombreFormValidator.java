@@ -8,6 +8,8 @@ import org.springframework.validation.Validator;
 
 import java.io.IOException;
 
+import static com.inggarciabaldo.carburo.backend.validators.RegistroFormValidator.USUARIO_DTO_FIELD_NOMBRE;
+
 /**
  * Validador del formulario de inicio de sesión de usuarios.
  * <p>
@@ -36,7 +38,7 @@ public class PerfilCambioDeNombreFormValidator implements Validator {
         UsuarioDto usuario = (UsuarioDto) target;
         // Validación de campos vacíos
 
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "nombre",
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, USUARIO_DTO_FIELD_NOMBRE,
                 "Error.auth.login.nombre.empty");
 
         // Errores de campos obligatorios, no seguimos
@@ -48,7 +50,7 @@ public class PerfilCambioDeNombreFormValidator implements Validator {
 
         //  Validación del Nombre
         if (nombre == null || nombre.length() > RegistroFormValidator.LONGITUD_MAX_NOMBRE) {
-            errors.rejectValue("nombre", "Error.auth.login.nombre.empty");
+            errors.rejectValue(USUARIO_DTO_FIELD_NOMBRE, "Error.auth.login.nombre.empty");
         }
     }
 }

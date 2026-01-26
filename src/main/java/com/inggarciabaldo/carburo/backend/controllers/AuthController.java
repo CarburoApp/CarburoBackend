@@ -6,8 +6,8 @@ import com.inggarciabaldo.carburo.backend.entities.Usuario;
 import com.inggarciabaldo.carburo.backend.services.AuthService;
 import com.inggarciabaldo.carburo.backend.services.ProvinciaService;
 import com.inggarciabaldo.carburo.backend.services.UsuarioService;
-import com.inggarciabaldo.carburo.backend.validators.PerfilCambioContrasenaFormValidator;
 import com.inggarciabaldo.carburo.backend.validators.LoginFormValidator;
+import com.inggarciabaldo.carburo.backend.validators.PerfilCambioContrasenaFormValidator;
 import com.inggarciabaldo.carburo.backend.validators.RecuperacionFormValidator;
 import com.inggarciabaldo.carburo.backend.validators.RegistroFormValidator;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 import java.io.IOException;
 import java.util.Optional;
+
+import static com.inggarciabaldo.carburo.backend.validators.RegistroFormValidator.USUARIO_DTO_FIELD_CONTRASENA;
+import static com.inggarciabaldo.carburo.backend.validators.RegistroFormValidator.USUARIO_DTO_FIELD_CORREO;
 
 /**
  * Controlador de autenticación y gestión de acceso de usuarios.
@@ -98,13 +101,15 @@ public class AuthController {
         //Realizar el Login
         try {
             if (authService.login(request, usuarioDto.getCorreo(), usuarioDto.getContrasena()) == null) {
-                bindingResult.rejectValue("contrasena", "Error.auth.login.fallo.sesion");
+                bindingResult.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
+                                          "Error.auth.login.fallo.sesion");
                 return VISTA_LOGIN;
             }
             return "redirect:/perfil";
         } catch (IOException | IllegalStateException e) {
             e.printStackTrace(); // TODO Eliminar en producción
-            bindingResult.rejectValue("contrasena", "Error.auth.login.fallo.sesion");
+            bindingResult.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
+                                      "Error.auth.login.fallo.sesion");
             return VISTA_LOGIN;
         }
     }
@@ -216,12 +221,15 @@ public class AuthController {
 
         //  Registro del usuario
         try {
-            bindingResult.rejectValue("correo", (authService.recuperacionDeContrasena(usuarioDto.getCorreo())) ?
+            bindingResult.rejectValue(USUARIO_DTO_FIELD_CORREO,
+                                      (authService.recuperacionDeContrasena(
+                                              usuarioDto.getCorreo())) ?
                     "Error.auth.recuperacion.exito" : "Error.auth.recuperacion.fallo");
             return VISTA_RECUPERACION_CONTRASENA;
         } catch (IOException | IllegalStateException e) {
             e.printStackTrace(); // TODO Eliminar en producción
-            bindingResult.rejectValue("correo", "Error.auth.recuperacion.fallo");
+            bindingResult.rejectValue(USUARIO_DTO_FIELD_CORREO,
+                                      "Error.auth.recuperacion.fallo");
             return VISTA_RECUPERACION_CONTRASENA;
         }
     }
@@ -255,12 +263,12 @@ public class AuthController {
             token = authService.login(request, usuarioAutenticado.get().getEmail(),
                                       usuarioDto.getCorreo()); //dto.correo guarda la contraseña
             if (token == null) {
-                bindingResult.rejectValue("correo",
+                bindingResult.rejectValue(USUARIO_DTO_FIELD_CORREO,
                                           "Error.auth.change.password.contrasena.actual.incorrecta");
                 return VISTA_CAMBIAR_CONTRASENA;
             }
         } catch (IOException | IllegalStateException e) {
-            bindingResult.rejectValue("correo",
+            bindingResult.rejectValue(USUARIO_DTO_FIELD_CORREO,
                                       "Error.auth.change.password.validacion.usuario.fallo");
             return VISTA_CAMBIAR_CONTRASENA;
         }
@@ -268,13 +276,14 @@ public class AuthController {
         try {
             if (!authService.modificarContrasenaUsuario(token,
                                                         usuarioDto.getContrasena())) {
-                bindingResult.rejectValue("contrasena",
+                bindingResult.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
                                           "Error.auth.change.password.validacion.usuario.fallo");
                 return VISTA_CAMBIAR_CONTRASENA;
             }
         } catch (IOException | IllegalStateException e) {
             e.printStackTrace();
-            bindingResult.rejectValue("contrasena", "Error.auth.change.password.fallo");
+            bindingResult.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
+                                      "Error.auth.change.password.fallo");
             return returnRegistroConDatos(model);
         }
         return "redirect:/perfil?passwordChanged=true";

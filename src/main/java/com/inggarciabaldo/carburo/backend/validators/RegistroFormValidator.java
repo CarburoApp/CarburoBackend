@@ -26,6 +26,13 @@ import java.util.regex.Pattern;
 @Component
 public class RegistroFormValidator implements Validator {
 
+    // Constantes para literales del UsuarioDto
+    public static final String USUARIO_DTO_FIELD_NOMBRE = "nombre";
+    public static final String USUARIO_DTO_FIELD_CORREO = "correo";
+    public static final String USUARIO_DTO_FIELD_CONTRASENA = "contrasena";
+    public static final String USUARIO_DTO_FIELD_CONTRASENA_CONFIRMACION = "confirmacionContrasena";
+    public static final String USUARIO_DTO_FIELD_PROVINCIA = "provinciaFavorita";
+    
     /* ===========================
      *  Constantes de validación
      * =========================== */
@@ -86,13 +93,14 @@ public class RegistroFormValidator implements Validator {
          *  Validación de campos vacíos
          * =========================== */
 
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "nombre",
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, USUARIO_DTO_FIELD_NOMBRE,
                 "Error.auth.login.nombre.empty");
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "correo",
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, USUARIO_DTO_FIELD_CORREO,
                 "Error.auth.login.correo.empty");
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "contrasena",
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, USUARIO_DTO_FIELD_CONTRASENA,
                 "Error.auth.login.contrasena.empty");
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "confirmacionContrasena",
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors,
+                                                  USUARIO_DTO_FIELD_CONTRASENA_CONFIRMACION,
                                                   "Error.auth.login.confirmacion.contrasena.empty");
 
         // Si ya hay errores de campos obligatorios, no seguimos
@@ -111,7 +119,7 @@ public class RegistroFormValidator implements Validator {
          * =========================== */
 
         if (nombre.trim().isEmpty()) {
-            errors.rejectValue("nombre", "Error.auth.login.nombre.empty");
+            errors.rejectValue(USUARIO_DTO_FIELD_NOMBRE, "Error.auth.login.nombre.empty");
         }
 
         /* ===========================
@@ -120,17 +128,20 @@ public class RegistroFormValidator implements Validator {
 
         // Formato del correo
         if (!EMAIL_PATTERN.matcher(correo).matches()) {
-            errors.rejectValue("correo", "Error.auth.login.correo.formato");
+            errors.rejectValue(USUARIO_DTO_FIELD_CORREO,
+                               "Error.auth.login.correo.formato");
         }
         // Unicidad del correo
         else {
             try {
                 if (usuarioService.containsCorreo(correo) || authService.containsEmail(correo)) {
-                    errors.rejectValue("correo", "Error.auth.login.correo.existente");
+                    errors.rejectValue(USUARIO_DTO_FIELD_CORREO,
+                                       "Error.auth.login.correo.existente");
                 }
             } catch (IOException e) {
                 e.printStackTrace(); // TODO
-                errors.rejectValue("correo", "Error.auth.login.registro.fallo");
+                errors.rejectValue(USUARIO_DTO_FIELD_CORREO,
+                                   "Error.auth.login.registro.fallo");
             }
         }
 
@@ -140,7 +151,7 @@ public class RegistroFormValidator implements Validator {
 
         if (isValidPassword(contrasena, errors) &&
                 !contrasena.equals(confirmacionContrasena)) {
-            errors.rejectValue("confirmacionContrasena",
+            errors.rejectValue(USUARIO_DTO_FIELD_CONTRASENA_CONFIRMACION,
                     "Error.auth.login.contrasena.confirmacion");
         }
 
@@ -152,19 +163,19 @@ public class RegistroFormValidator implements Validator {
 
         // Provincia negativa o fuera de rango
         if (provinciaId < 0 || provinciaId > totalProvincias) {
-            errors.rejectValue("provinciaFavorita",
+            errors.rejectValue(USUARIO_DTO_FIELD_PROVINCIA,
                     "Error.auth.login.provincia.generico");
         }
         // No ha seleccionado provincia (opción por defecto)
         else if (provinciaId == 0) {
-            errors.rejectValue("provinciaFavorita",
+            errors.rejectValue(USUARIO_DTO_FIELD_PROVINCIA,
                     "Error.auth.login.provincia.noSeleccionada");
         }
 
 
         //  Validación del Nombre
         if (nombre.length() > LONGITUD_MAX_NOMBRE) {
-            errors.rejectValue("nombre", "Error.auth.login.nombre.empty");
+            errors.rejectValue(USUARIO_DTO_FIELD_NOMBRE, "Error.auth.login.nombre.empty");
         }
     }
 
@@ -177,15 +188,19 @@ public class RegistroFormValidator implements Validator {
      */
     public static boolean isValidPassword(String contrasena, Errors errors) {
         if (contrasena.length() < PASSWORD_MIN_LENGTH) {
-            errors.rejectValue("contrasena", "Error.auth.login.contrasena.length");
+            errors.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
+                               "Error.auth.login.contrasena.length");
         } else if (!PASSWORD_UPPERCASE.matcher(contrasena).matches()) {
-            errors.rejectValue("contrasena", "Error.auth.login.contrasena.mayuscula");
+            errors.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
+                               "Error.auth.login.contrasena.mayuscula");
         } else if (!PASSWORD_LOWERCASE.matcher(contrasena).matches()) {
-            errors.rejectValue("contrasena", "Error.auth.login.contrasena.minuscula");
+            errors.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
+                               "Error.auth.login.contrasena.minuscula");
         } else if (!PASSWORD_DIGIT.matcher(contrasena).matches()) {
-            errors.rejectValue("contrasena", "Error.auth.login.contrasena.numero");
+            errors.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
+                               "Error.auth.login.contrasena.numero");
         } else if (!PASSWORD_SPECIAL.matcher(contrasena).matches()) errors.rejectValue(
-                "contrasena", "Error.auth.login.contrasena.simbolo");
+                USUARIO_DTO_FIELD_CONTRASENA, "Error.auth.login.contrasena.simbolo");
         else return true;
         return false;
     }

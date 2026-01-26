@@ -11,6 +11,9 @@ import org.springframework.validation.Validator;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
+import static com.inggarciabaldo.carburo.backend.validators.RegistroFormValidator.USUARIO_DTO_FIELD_CONTRASENA;
+import static com.inggarciabaldo.carburo.backend.validators.RegistroFormValidator.USUARIO_DTO_FIELD_CORREO;
+
 /**
  * Validador del formulario de inicio de sesión de usuarios.
  * <p>
@@ -55,9 +58,9 @@ public class LoginFormValidator implements Validator {
         UsuarioDto usuario = (UsuarioDto) target;
         // Validación de campos vacíos
 
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "correo",
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, USUARIO_DTO_FIELD_CORREO,
                 "Error.auth.login.correo.empty");
-        ValidationUtils.rejectIfEmptyOrWhitespace(errors, "contrasena",
+        ValidationUtils.rejectIfEmptyOrWhitespace(errors, USUARIO_DTO_FIELD_CONTRASENA,
                 "Error.auth.login.contrasena.empty");
 
         // Errores de campos obligatorios, no seguimos
@@ -73,17 +76,19 @@ public class LoginFormValidator implements Validator {
 
         // Formato del correo
         if (!EMAIL_PATTERN.matcher(correo).matches()) {
-            errors.rejectValue("correo", "Error.auth.login.correo.formato");
+            errors.rejectValue(USUARIO_DTO_FIELD_CORREO,
+                               "Error.auth.login.correo.formato");
         }
         // Unicidad del correo
         else {
             try {
                 if (!usuarioService.containsCorreo(correo) || !authService.containsEmail(correo)) {
-                    errors.rejectValue("correo", "Error.auth.login.correo.no.existente");
+                    errors.rejectValue(USUARIO_DTO_FIELD_CORREO,
+                                       "Error.auth.login.correo.no.existente");
                 }
             } catch (IOException e) {
                 e.printStackTrace(); // TODO retirar en producción
-                errors.rejectValue("correo", "Error.auth.login.fallo");
+                errors.rejectValue(USUARIO_DTO_FIELD_CORREO, "Error.auth.login.fallo");
             }
         }
     }

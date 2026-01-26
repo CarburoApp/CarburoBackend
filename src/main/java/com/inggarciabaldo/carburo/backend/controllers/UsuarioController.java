@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.inggarciabaldo.carburo.backend.validators.RegistroFormValidator.USUARIO_DTO_FIELD_PROVINCIA;
+
 
 /**
  * Controlador de gestión del perfil del usuario autenticado.
@@ -159,7 +161,7 @@ public class UsuarioController {
         Optional<Provincia> provincia = provinciaService.getProvinciaById(usuarioDto.getProvinciaFavorita());
         // Error inesperado en el servicio de autenticación
         if (provincia.isEmpty()) {
-            bindingResult.rejectValue("provinciaFavorita", "Error.auth.login.registro.fallo");
+            bindingResult.rejectValue(USUARIO_DTO_FIELD_PROVINCIA, "Error.auth.login.registro.fallo");
             return "auth/perfil/editarProvinciaFavorita";
         }
         usuarioService.updateProvinciaFavoritaUsuario(usuario.get().getUuid(), provincia.get());

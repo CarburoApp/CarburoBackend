@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+import static com.inggarciabaldo.carburo.backend.validators.RegistroFormValidator.USUARIO_DTO_FIELD_PROVINCIA;
+
 /**
  * Validador del formulario del cambio de la provincia del usuario.
  * <p>
@@ -46,12 +48,12 @@ public class PerfilCambioDeProvinciaFavoritaFormValidator implements Validator {
 
         // Provincia negativa o fuera de rango
         if (provinciaId < 0 || provinciaId > totalProvincias) {
-            errors.rejectValue("provinciaFavorita",
+            errors.rejectValue(USUARIO_DTO_FIELD_PROVINCIA,
                     "Error.auth.login.provincia.generico");
         }
         // No ha seleccionado provincia (opción por defecto)
         else if (provinciaId == 0) {
-            errors.rejectValue("provinciaFavorita",
+            errors.rejectValue(USUARIO_DTO_FIELD_PROVINCIA,
                     "Error.auth.login.provincia.noSeleccionada");
         }
     }

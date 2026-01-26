@@ -6,6 +6,8 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
+import static com.inggarciabaldo.carburo.backend.validators.RegistroFormValidator.*;
+
 /**
  * Validador del formulario de cambio de contraseña para usuarios registrados
  * <p>
@@ -38,11 +40,12 @@ public class PerfilCambioContrasenaFormValidator implements Validator {
 		 * =========================== */
 
 		// PARA REUTILIZAR CÓDIGO, SE USA EL CORREO DEL DTO COMO CONTRASEÑA ACTUAL DEL USUARIO
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "correo",
+		ValidationUtils.rejectIfEmptyOrWhitespace(errors, USUARIO_DTO_FIELD_CORREO,
 												  "Error.auth.change.password.contrasena.vieja.empty");
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "contrasena",
+		ValidationUtils.rejectIfEmptyOrWhitespace(errors, USUARIO_DTO_FIELD_CONTRASENA,
 												  "Error.auth.change.password.contrasena.nueva.empty");
-		ValidationUtils.rejectIfEmptyOrWhitespace(errors, "confirmacionContrasena",
+		ValidationUtils.rejectIfEmptyOrWhitespace(errors,
+												  USUARIO_DTO_FIELD_CONTRASENA_CONFIRMACION,
 												  "Error.auth.change.password.contrasena.confirmacion.empty");
 
 		// Si ya hay errores de campos obligatorios, no seguimos
@@ -59,7 +62,8 @@ public class PerfilCambioContrasenaFormValidator implements Validator {
 
 		if (RegistroFormValidator.isValidPassword(contrasena, errors) &&
 				!contrasena.equals(confirmacionContrasena)) {
-			errors.rejectValue("confirmacionContrasena", "Error.auth.login.contrasena.confirmacion");
+			errors.rejectValue(USUARIO_DTO_FIELD_CONTRASENA_CONFIRMACION,
+							   "Error.auth.login.contrasena.confirmacion");
 		}
 	}
 }
