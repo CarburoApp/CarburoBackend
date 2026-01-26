@@ -61,17 +61,19 @@
     <main class="flex-1 flex flex-col min-w-0">
         <div class="flex flex-col gap-4">
             <div class="bg-primary/5 border-2 border-dashed border-primary/30 rounded-xl p-6 flex flex-col items-center justify-center text-center gap-2">
-                <div class="size-14 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-2">
+                <div class="size-14 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-2"
+                     th:if="${#lists.isEmpty(eess)}">
                     <span class="material-symbols-outlined text-4xl">favorite</span>
                 </div>
                 <div>
-                    <h3 class="text-xl font-bold text-text-main" th:text="#{eess.favoritas.titulo}"></h3>
-                    <p class="text-text-secondary mt-1 max-w-md" th:text="#{eess.favoritas.subtitulo}"></p>
+                    <h3 class="text-xl font-bold text-text-main" th:text="#{eess.favoritas.anadir.titulo}"></h3>
+                    <p class="text-text-secondary mt-1 max-w-md" th:text="#{eess.favoritas.anadir.subtitulo}"
+                       th:if="${#lists.isEmpty(eess)}"></p>
                 </div>
-                <button th:action="@{/estacionesDeServicio}"
+                <a th:href="@{/estacionesDeServicio}"
                         class="flex min-w-[240px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary hover:bg-primary/90 transition-colors text-white text-sm font-bold leading-normal tracking-[0.015em] shadow-sm">
                     <span class="truncate" th:text="#{eess.favotitas.boton.buscar}"></span>
-                </button>
+                </a>
             </div>
             <!-- Station Card -->
             <article th:each="estacion : ${eess}"

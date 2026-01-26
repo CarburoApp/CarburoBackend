@@ -33,7 +33,7 @@ public class RegistroFormValidator implements Validator {
     /**
      * Longitud mínima de la contraseña
      */
-    private static final int PASSWORD_MIN_LENGTH = 8;
+    public static final int PASSWORD_MIN_LENGTH = 8;
 
     /**
      * Longitud máxima del nombre
@@ -43,10 +43,10 @@ public class RegistroFormValidator implements Validator {
     /**
      * Expresiones regulares para la contraseña
      */
-    private static final Pattern PASSWORD_UPPERCASE = Pattern.compile(".*[A-Z].*");
-    private static final Pattern PASSWORD_LOWERCASE = Pattern.compile(".*[a-z].*");
-    private static final Pattern PASSWORD_DIGIT = Pattern.compile(".*\\d.*");
-    private static final Pattern PASSWORD_SPECIAL = Pattern.compile(".*[^a-zA-Z0-9].*");
+    public static final Pattern PASSWORD_UPPERCASE = Pattern.compile(".*[A-Z].*");
+    public static final Pattern PASSWORD_LOWERCASE = Pattern.compile(".*[a-z].*");
+    public static final Pattern PASSWORD_DIGIT = Pattern.compile(".*\\d.*");
+    public static final Pattern PASSWORD_SPECIAL = Pattern.compile(".*[^a-zA-Z0-9].*");
 
     /**
      * Expresión regular básica para correo electrónico
@@ -93,7 +93,7 @@ public class RegistroFormValidator implements Validator {
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "contrasena",
                 "Error.auth.login.contrasena.empty");
         ValidationUtils.rejectIfEmptyOrWhitespace(errors, "confirmacionContrasena",
-                "Error.auth.login.confirmacionContrasena.empty");
+                                                  "Error.auth.login.confirmacion.contrasena.empty");
 
         // Si ya hay errores de campos obligatorios, no seguimos
         if (errors.hasErrors()) {
@@ -138,18 +138,9 @@ public class RegistroFormValidator implements Validator {
          *  Validación de contraseña
          * =========================== */
 
-        if (contrasena.length() < PASSWORD_MIN_LENGTH) {
-            errors.rejectValue("contrasena", "Error.auth.login.contrasena.length");
-        } else if (!PASSWORD_UPPERCASE.matcher(contrasena).matches()) {
-            errors.rejectValue("contrasena", "Error.auth.login.contrasena.mayuscula");
-        } else if (!PASSWORD_LOWERCASE.matcher(contrasena).matches()) {
-            errors.rejectValue("contrasena", "Error.auth.login.contrasena.minuscula");
-        } else if (!PASSWORD_DIGIT.matcher(contrasena).matches()) {
-            errors.rejectValue("contrasena", "Error.auth.login.contrasena.numero");
-        } else if (!PASSWORD_SPECIAL.matcher(contrasena).matches()) {
-            errors.rejectValue("contrasena", "Error.auth.login.contrasena.simbolo");
-        } else if (!contrasena.equals(confirmacionContrasena)) {
-            errors.rejectValue("contrasena",
+        if (isValidPassword(contrasena, errors) &&
+                !contrasena.equals(confirmacionContrasena)) {
+            errors.rejectValue("confirmacionContrasena",
                     "Error.auth.login.contrasena.confirmacion");
         }
 
@@ -175,5 +166,27 @@ public class RegistroFormValidator implements Validator {
         if (nombre.length() > LONGITUD_MAX_NOMBRE) {
             errors.rejectValue("nombre", "Error.auth.login.nombre.empty");
         }
+    }
+
+    /**
+     * Se encarga de válidar la fortaleza de la contraseña.
+     *
+     * @param contrasena La contraseña a validar
+     * @param errors     El objeto de errores donde registrar los errores de validación
+     * @return true si la contraseña es válida, false en caso contrario
+     */
+    public static boolean isValidPassword(String contrasena, Errors errors) {
+        if (contrasena.length() < PASSWORD_MIN_LENGTH) {
+            errors.rejectValue("contrasena", "Error.auth.login.contrasena.length");
+        } else if (!PASSWORD_UPPERCASE.matcher(contrasena).matches()) {
+            errors.rejectValue("contrasena", "Error.auth.login.contrasena.mayuscula");
+        } else if (!PASSWORD_LOWERCASE.matcher(contrasena).matches()) {
+            errors.rejectValue("contrasena", "Error.auth.login.contrasena.minuscula");
+        } else if (!PASSWORD_DIGIT.matcher(contrasena).matches()) {
+            errors.rejectValue("contrasena", "Error.auth.login.contrasena.numero");
+        } else if (!PASSWORD_SPECIAL.matcher(contrasena).matches()) errors.rejectValue(
+                "contrasena", "Error.auth.login.contrasena.simbolo");
+        else return true;
+        return false;
     }
 }

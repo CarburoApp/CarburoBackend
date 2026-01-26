@@ -66,7 +66,6 @@ public class LoginFormValidator implements Validator {
         }
 
         String correo = usuario.getCorreo();
-        String contrasena = usuario.getContrasena();
 
         /* ===========================
          *  Validación del correo

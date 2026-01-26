@@ -1,8 +1,10 @@
 package com.inggarciabaldo.carburo.backend.services;
 
+import com.inggarciabaldo.carburo.backend.entities.EstacionDeServicio;
 import com.inggarciabaldo.carburo.backend.entities.Provincia;
 import com.inggarciabaldo.carburo.backend.entities.Usuario;
 import com.inggarciabaldo.carburo.backend.repositories.UsuarioRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -117,5 +119,57 @@ public class UsuarioService {
             throw new IllegalArgumentException("El UUID no puede ser nulo.");
         }
         return usuarioRepository.findById(uuid);
+    }
+
+    /**
+     * Comprueba si una estación de servicio está marcada como favorita por un usuario.
+     *
+     * @param usuario            Usuario a comprobar
+     * @param estacionDeServicio Estación de servicio
+     * @return true si la estación es favorita del usuario, false en caso contrario
+     * @throws IllegalArgumentException si alguno de los parámetros es null
+     */
+    public boolean isEstacionDeServicioFavorita(Usuario usuario,
+                                                EstacionDeServicio estacionDeServicio) {
+        if (usuario == null || estacionDeServicio == null)
+            throw new IllegalArgumentException(
+                    "Parámetros inválidos para la comprobación de estación de servicio favorita para el usuario.");
+        return usuario.getEessFavoritas().contains(estacionDeServicio);
+    }
+
+    /**
+     * Elimina una estación de servicio de la lista de favoritas del usuario.
+     *
+     * @param usuario            Usuario propietario de las favoritas
+     * @param estacionDeServicio Estación a eliminar
+     * @throws IllegalArgumentException si alguno de los parámetros es null
+     */
+    @Transactional
+    public void removeEstacionDeServicioFavorita(Usuario usuario,
+                                                 EstacionDeServicio estacionDeServicio) {
+        if (!isEstacionDeServicioFavorita(usuario, estacionDeServicio)) return;
+        if (usuario == null || estacionDeServicio == null)
+            throw new IllegalArgumentException(
+                    "Parámetros inválidos para la comprobación de estación de servicio favorita para el usuario.");
+        usuario.getEessFavoritas().remove(estacionDeServicio);
+        usuarioRepository.save(usuario);
+    }
+
+    /**
+     * Añade una estación de servicio a la lista de favoritas del usuario.
+     *
+     * @param usuario            Usuario propietario de las favoritas
+     * @param estacionDeServicio Estación a añadir
+     * @throws IllegalArgumentException si alguno de los parámetros es null
+     */
+    @Transactional
+    public void addEstacionDeServicioFavorita(Usuario usuario,
+                                              EstacionDeServicio estacionDeServicio) {
+        if (isEstacionDeServicioFavorita(usuario, estacionDeServicio)) return;
+        if (usuario == null || estacionDeServicio == null)
+            throw new IllegalArgumentException(
+                    "Parámetros inválidos para la comprobación de estación de servicio favorita para el usuario.");
+        usuario.getEessFavoritas().add(estacionDeServicio);
+        usuarioRepository.save(usuario);
     }
 }

@@ -81,3 +81,13 @@ body {
         display: block;
     }
 }
+
+.favorita-activa {
+    color: #ef4444; /* rojo */
+    font-variation-settings: "FILL" 1, "wght" 400;
+}
+
+.favorita-inactiva {
+    color: #fca5a5; /* rojo claro */
+    font-variation-settings: "FILL" 0, "wght" 400;
+}

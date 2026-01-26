@@ -42,7 +42,7 @@ public class AuthService {
     private final static String CONTENT_TYPE_JSON = "application/json";
 
     private final static String AUTHORIZATION = "Authorization";
-    private final static String AUTHORIZATION_ROLE_KEY = "Bearer %s";
+    private final static String AUTHORIZATION_BEARER = "Bearer %s";
 
     // Constantes para la autorización
     private final static String AUTH_USER_EMAIL = "email";
@@ -57,10 +57,13 @@ public class AuthService {
     // Constantes para los endpoints
     private final static String HTTP_METHOD_GET = "GET";
     private final static String HTTP_METHOD_POST = "POST";
+    private final static String HTTP_METHOD_PUT = "PUT";
+    private final static String HTTP_METHOD_DELETE = "DELETE";
     private final static String AUTH_ENDPOINT_SIGNUP = "/signup";
     private final static String AUTH_ENDPOINT_RECOVER = "/recover";
     private final static String AUTH_ENDPOINT_LOGIN = "/token?grant_type=password";
     private final static String AUTH_ENDPOINT_ADMIN_USERS = "/admin/users";
+    private final static String AUTH_ENDPOINT_USER = "/user";
 
     // Inyección de dependencias
     private final UsuarioService usuarioService;
@@ -92,7 +95,7 @@ public class AuthService {
      *
      * @return Optional con el usuario o vacío si no hay sesión
      */
-    public Optional<Usuario> getUsuarioAuthenticado() {
+    public Optional<Usuario> getUsuarioAutenticado() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (!isAuthenticated()) return Optional.empty();
         return usuarioService.findByUUID(UUID.fromString((String) auth.getPrincipal()));
@@ -153,7 +156,8 @@ public class AuthService {
      * @return token de sesión (JWT) si el login es exitoso, en caso contrarío null
      * @throws IOException si hay errores de conexión
      */
-    public String login(HttpServletRequest request, String email, String password) throws IOException {
+    public String login(HttpServletRequest request, String email, String password)
+            throws IOException, IllegalStateException {
         // Construir la URL completa del endpoint admin
         URL url = URI.create(SUPABASE_AUTH_URL + AUTH_ENDPOINT_LOGIN).toURL();
         // Conexión HTTP
@@ -186,7 +190,8 @@ public class AuthService {
 
             if (!root.has(AUTH_USER_TOKEN) || !root.has(AUTH_USER) || root.get(AUTH_USER) == null ||
                     !root.get(AUTH_USER).has(AUTH_USER_ID))
-                throw new RuntimeException("No se recibió información de usuario en la respuesta");
+                throw new IllegalStateException(
+                        "No se recibió información de usuario en la respuesta");
 
             String uuidStr = root.get(AUTH_USER).get(AUTH_USER_ID).asText();
             String accessToken = root.get(AUTH_USER_TOKEN).asText();
@@ -195,7 +200,8 @@ public class AuthService {
             login(request, accessToken, UUID.fromString(uuidStr));
             return accessToken;
         }
-        throw new RuntimeException("Error al registrar usuario: HTTP " + responseCode);
+        throw new IllegalStateException(
+                "Error al registrar usuario: HTTP " + responseCode);
     }
 
     /**
@@ -207,7 +213,8 @@ public class AuthService {
      * @throws IOException si hay errores de conexión
      */
     @Transactional
-    public UsuarioDto registro(UsuarioDto usuario) throws IOException {
+    public UsuarioDto registro(UsuarioDto usuario)
+            throws IOException, IllegalStateException {
         // Construir la URL completa del endpoint admin
         URL url = URI.create(SUPABASE_AUTH_URL + AUTH_ENDPOINT_SIGNUP).toURL();
         // Conexión HTTP
@@ -232,15 +239,16 @@ public class AuthService {
 
         int responseCode = conn.getResponseCode();
         if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_CREATED) {
-            throw new RuntimeException("Error al registrar usuario: HTTP " + responseCode);
+            throw new IllegalStateException(
+                    "Error al registrar usuario: HTTP " + responseCode);
         }
 
         // Parsear la respuesta JSON
         JsonNode root = OBJECT_MAPPER.readTree(conn.getInputStream());
 
         if (!root.has(AUTH_USER_TOKEN) || !root.has(AUTH_USER) || root.get(AUTH_USER) == null ||
-                !root.get(AUTH_USER).has(AUTH_USER_ID))
-            throw new RuntimeException("No se recibió información de usuario en la respuesta");
+                !root.get(AUTH_USER).has(AUTH_USER_ID)) throw new IllegalStateException(
+                "No se recibió información de usuario en la respuesta");
 
         // Extraer campos importantes
         String accessToken = root.get(AUTH_USER_TOKEN).asText();
@@ -271,7 +279,8 @@ public class AuthService {
         conn.setRequestMethod(HTTP_METHOD_GET);
         // Headers
         conn.setRequestProperty(CONTENT_TYPE, CONTENT_TYPE_JSON);
-        conn.setRequestProperty(AUTHORIZATION, String.format(AUTHORIZATION_ROLE_KEY, SERVICE_ROLE_KEY));
+        conn.setRequestProperty(AUTHORIZATION,
+                                String.format(AUTHORIZATION_BEARER, SERVICE_ROLE_KEY));
         conn.setDoOutput(false);
 
         int responseCode = conn.getResponseCode();
@@ -320,6 +329,36 @@ public class AuthService {
         // Enviar JSON
         conn.getOutputStream().write(jsonBody.getBytes(StandardCharsets.UTF_8));
 
+        return conn.getResponseCode() == HttpURLConnection.HTTP_OK;
+    }
+
+    /**
+     * Encargado de modificar la contraseña de un usuario a través de una petición HTTP
+     * PUT a la API REST de Supabase Auth.
+     *
+     * @param tokenDelUsuario Token de autenticación del usuario
+     * @param contrasenaNueva Nueva contraseña a establecer
+     * @throws IOException si hay errores de conexión
+     */
+    public boolean modificarContrasenaUsuario(String tokenDelUsuario,
+                                              String contrasenaNueva) throws IOException {
+        // Construir la URL completa del endpoint admin
+        URL url = URI.create(SUPABASE_AUTH_URL + AUTH_ENDPOINT_USER).toURL();
+        // Conexión HTTP
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(HTTP_METHOD_PUT);
+        // Headers
+        conn.setRequestProperty(CONTENT_TYPE, CONTENT_TYPE_JSON);
+        conn.setRequestProperty(AUTHORIZATION,
+                                String.format(AUTHORIZATION_BEARER, tokenDelUsuario));
+        conn.setDoOutput(true);
+        // Enviar JSON
+        conn.getOutputStream().write(String.format("""
+                                                   {
+                                                       "password": "%s"
+                                                   }
+                                                   """, contrasenaNueva)
+                                             .getBytes(StandardCharsets.UTF_8));
         return conn.getResponseCode() == HttpURLConnection.HTTP_OK;
     }
 

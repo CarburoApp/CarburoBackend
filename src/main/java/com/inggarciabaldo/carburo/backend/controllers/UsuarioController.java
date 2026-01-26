@@ -5,6 +5,7 @@ import com.inggarciabaldo.carburo.backend.entities.EstacionDeServicio;
 import com.inggarciabaldo.carburo.backend.entities.Provincia;
 import com.inggarciabaldo.carburo.backend.entities.Usuario;
 import com.inggarciabaldo.carburo.backend.services.AuthService;
+import com.inggarciabaldo.carburo.backend.services.EstacionDeServicioService;
 import com.inggarciabaldo.carburo.backend.services.ProvinciaService;
 import com.inggarciabaldo.carburo.backend.services.UsuarioService;
 import com.inggarciabaldo.carburo.backend.validators.PerfilCambioDeNombreFormValidator;
@@ -13,12 +14,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -39,6 +36,7 @@ public class UsuarioController {
     private final ProvinciaService provinciaService;
     private final AuthService authService;
     private final UsuarioService usuarioService;
+    private final EstacionDeServicioService estacionDeServicioService;
     private final PerfilCambioDeProvinciaFavoritaFormValidator perfilCambioDeProvinciaFavoritaFormValidator;
     private final PerfilCambioDeNombreFormValidator perfilCambioDeNombreFormValidator;
 
@@ -48,11 +46,13 @@ public class UsuarioController {
     public UsuarioController(AuthService authService,
                              UsuarioService usuarioService,
                              ProvinciaService provinciaService,
+                             EstacionDeServicioService estacionDeServicioService,
                              PerfilCambioDeProvinciaFavoritaFormValidator perfilCambioDeProvinciaFavoritaFormValidator,
                              PerfilCambioDeNombreFormValidator perfilCambioDeNombreFormValidator) {
         this.authService = authService;
         this.usuarioService = usuarioService;
         this.provinciaService = provinciaService;
+        this.estacionDeServicioService = estacionDeServicioService;
         this.perfilCambioDeProvinciaFavoritaFormValidator = perfilCambioDeProvinciaFavoritaFormValidator;
         this.perfilCambioDeNombreFormValidator = perfilCambioDeNombreFormValidator;
     }
@@ -68,7 +68,7 @@ public class UsuarioController {
      */
     @GetMapping("")
     public String doGetPerfil(Model model) {
-        Optional<Usuario> usuario = authService.getUsuarioAuthenticado();
+        Optional<Usuario> usuario = authService.getUsuarioAutenticado();
         if (usuario.isEmpty()) return "redirect:/login";
         model.addAttribute("nombre", usuario.get().getNombre());
         model.addAttribute("correo", usuario.get().getEmail());
@@ -85,7 +85,7 @@ public class UsuarioController {
      */
     @GetMapping("/editarNombre")
     public String doGetCambioDeNombrePerfil(Model model) {
-        Optional<Usuario> usuario = authService.getUsuarioAuthenticado();
+        Optional<Usuario> usuario = authService.getUsuarioAutenticado();
         if (usuario.isEmpty()) return "redirect:/login";
         UsuarioDto usuarioDto = new UsuarioDto();
         usuarioDto.setUuid(usuario.get().getUuid());
@@ -105,7 +105,7 @@ public class UsuarioController {
     @PostMapping("/editarNombre")
     public String doPostCambioDeNombrePerfil(@ModelAttribute("usuario") @Validated UsuarioDto usuarioDto,
                                              BindingResult bindingResult) {
-        Optional<Usuario> usuario = authService.getUsuarioAuthenticado();
+        Optional<Usuario> usuario = authService.getUsuarioAutenticado();
         if (usuario.isEmpty()) return "redirect:/login";
         // Validación del formulario
         perfilCambioDeNombreFormValidator.validate(usuarioDto, bindingResult);
@@ -126,7 +126,7 @@ public class UsuarioController {
      */
     @GetMapping("/editarProvincia")
     public String doGetCambioDeProvinciaFavoritaPerfil(Model model) {
-        Optional<Usuario> usuario = authService.getUsuarioAuthenticado();
+        Optional<Usuario> usuario = authService.getUsuarioAutenticado();
         if (usuario.isEmpty()) return "redirect:/login";
         // Creo el DTO con los datos necesarios del usuario
         UsuarioDto usuarioDto = new UsuarioDto();
@@ -149,7 +149,7 @@ public class UsuarioController {
     @PostMapping("/editarProvincia")
     public String doPostCambioDeProvinciaFavoritaPerfil(@ModelAttribute("usuario") @Validated UsuarioDto usuarioDto,
                                                         BindingResult bindingResult) {
-        Optional<Usuario> usuario = authService.getUsuarioAuthenticado();
+        Optional<Usuario> usuario = authService.getUsuarioAutenticado();
         if (usuario.isEmpty()) return "redirect:/login";
         // Validación del formulario
         perfilCambioDeProvinciaFavoritaFormValidator.validate(usuarioDto, bindingResult);
@@ -174,12 +174,10 @@ public class UsuarioController {
      * </p>
      */
     @GetMapping("/change-password")
-    public String doGetCambioDeContrasenaPerfil(Model model) {
-        Optional<Usuario> usuario = authService.getUsuarioAuthenticado();
-        if (usuario.isEmpty()) return "redirect:/login";
-        // Paso los datos necesarios
-        // TODO
-        return "auth/perfil/cambiarContraseña";
+    public String doGetCambioDeContrasena(Model model) {
+        if (!authService.isAuthenticated()) return "redirect:/login";
+        model.addAttribute("usuario", new UsuarioDto());
+        return "auth/perfil/editarContrasena";
     }
 
     /**
@@ -188,7 +186,7 @@ public class UsuarioController {
     @GetMapping("/estacionesDeServicioFavoritas")
     public String doGetEstacionesDeServicioFavoritas(Model model) {
         model.addAttribute("pagina", "eessFav");
-        Optional<Usuario> usuario = authService.getUsuarioAuthenticado();
+        Optional<Usuario> usuario = authService.getUsuarioAutenticado();
         if (usuario.isEmpty()) return "redirect:/EstacionesDeServicio";
         Set<EstacionDeServicio> eess = usuario.get().getEessFavoritas();
         model.addAttribute("eess", eess);
@@ -196,16 +194,35 @@ public class UsuarioController {
     }
 
     /**
-     * Redirige al listado de estaciones de servicio filtrado
-     * por la provincia favorita del usuario.
+     * Se encarga de la gestión de la estación de servicio favorita del usuario.
+     * Añade o retira a las estaciones de servicio favoritas del usuario la estación
+     * de servicio cuyo id se recibe como parámetro.
      */
-    @GetMapping("/estacionesDeServicio")
-    public String doGetEstacionesDeServicioProvinciaFavorita() {
-        Optional<Usuario> usuario = authService.getUsuarioAuthenticado();
-        if (usuario.isEmpty()) return "redirect:/EstacionesDeServicio";
-        String redireccion = "redirect:/EstacionesDeServicio?comunidadSeleccionada=%d&provinciaSeleccionada=%d";
-        return String.format(redireccion,
-                usuario.get().getProvinciaFavorita().getComunidadAutonoma().getId(),
-                usuario.get().getProvinciaFavorita().getId());
+    @PostMapping("/estacionesDeServicio/favorita/{id}")
+    public String doPostAddRemoveEstacionDeServicioFavorita(@PathVariable Long id) {
+        // Usuario autenticado
+        Optional<Usuario> usuario = authService.getUsuarioAutenticado();
+        if (usuario.isEmpty()) return "redirect:/login";
+
+        // Validación rápida del ID
+        if (id <= 0) return "redirect:/estacionesDeServicioFavoritas";
+
+        // Se obtiene la estación de servicio por ID
+        EstacionDeServicio estacion = estacionDeServicioService.getEstacionDeServicioById(
+                Math.toIntExact(id));
+
+        // Si la estación no existe, se redirige a la página principal
+        if (estacion == null) {
+            return "redirect:/estacionesDeServicioFavoritas";
+        }
+
+        if (usuarioService.isEstacionDeServicioFavorita(usuario.get(), estacion)) {
+            // La estación ya es favorita, se elimina
+            usuarioService.removeEstacionDeServicioFavorita(usuario.get(), estacion);
+        } else {
+            // La estación no es favorita, se añade
+            usuarioService.addEstacionDeServicioFavorita(usuario.get(), estacion);
+        }
+        return "redirect:/estacionesDeServicio/" + id;
     }
 }

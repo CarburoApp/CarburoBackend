@@ -87,20 +87,20 @@
             <!-- Contraseña -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="flex flex-col gap-2">
-                    <label class="text-[#1c140d] dark:text-white text-sm font-semibold" for="contrasenia_input"
-                           th:text="#{auth.contrasenia.titulo}"></label>
+                    <label class="text-[#1c140d] dark:text-white text-sm font-semibold" for="contrasena_input"
+                           th:text="#{auth.contrasena.titulo}"></label>
                     <input class="w-full rounded-lg border border-[#e8dbce] dark:border-[#4d3a29] bg-white dark:bg-[#221910] text-[#1c140d] dark:text-white p-3.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                           id="contrasenia_input" th:field="*{contrasena}"
-                           th:placeholder="#{auth.contrasenia.placeholder}"
+                           id="contrasena_input" th:field="*{contrasena}"
+                           th:placeholder="#{auth.contrasena.placeholder}"
                            type="password"/>
                 </div>
                 <div class="flex flex-col gap-2">
                     <label class="text-[#1c140d] dark:text-white text-sm font-semibold"
-                           for="contrasenia_confirmacion_input"
-                           th:text="#{auth.registro.contrasenia.nueva.titulo}"></label>
+                           for="contrasena_confirmacion_input"
+                           th:text="#{auth.registro.contrasena.nueva.titulo}"></label>
                     <input class="w-full rounded-lg border border-[#e8dbce] dark:border-[#4d3a29] bg-white dark:bg-[#221910] text-[#1c140d] dark:text-white p-3.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                           id="contrasenia_confirmacion_input" th:field="*{confirmacionContrasena}"
-                           th:placeholder="#{auth.contrasenia.placeholder}"
+                           id="contrasena_confirmacion_input" th:field="*{confirmacionContrasena}"
+                           th:placeholder="#{auth.contrasena.placeholder}"
                     type="password"/>
                 </div>
             </div>
@@ -109,19 +109,19 @@
             <!-- Password Requirements -->
             <div class="bg-background-light dark:bg-[#221910] p-3 rounded-lg border border-[#e8dbce] dark:border-[#4d3a29]">
                 <p class="text-[#9c7349] dark:text-[#b59b7c] text-xs font-medium mb-1"
-                   th:text="#{auth.registro.contrasenia.info}"></p>
+                   th:text="#{auth.contrasena.info}"></p>
                 <ul class="text-[#9c7349] dark:text-[#b59b7c] text-xs grid grid-cols-2 gap-x-2">
                     <li class="flex items-center gap-1">
                         <span class="material-symbols-outlined text-[10px] text-green-500">check_circle</span>
-                        <span th:text="#{auth.registro.contrasenia.info.caracteres}"></span>
+                        <span th:text="#{auth.contrasena.info}"></span>
                     </li>
                     <li class="flex items-center gap-1">
                         <span class="material-symbols-outlined text-[10px] text-green-500">check_circle</span>
-                        <span th:text="#{auth.registro.contrasenia.info.letra.numero}"></span>
+                        <span th:text="#{auth.contrasena.info}"></span>
                     </li>
                     <li class="flex items-center gap-1">
                         <span class="material-symbols-outlined text-[10px] text-green-500">check_circle</span>
-                        <span th:text="#{auth.registro.contrasenia.info.simbolo}"></span>
+                        <span th:text="#{auth.contrasena.info}"></span>
                     </li>
                 </ul>
             </div>

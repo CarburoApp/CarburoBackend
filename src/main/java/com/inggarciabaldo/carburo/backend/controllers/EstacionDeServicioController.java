@@ -24,6 +24,7 @@ public class EstacionDeServicioController {
 	private final ProvinciaService provinciaService;
 	private final MunicipioService municipioService;
 	private final CombustibleService combustibleService;
+	private final AuthService authService;
 
 	/**
 	 * Constructor con inyección de dependencias de servicios y validadores.
@@ -32,12 +33,13 @@ public class EstacionDeServicioController {
 			EstacionDeServicioService estacionDeServicioService,
 			ComunidadAutonomaService comunidadAutonomaService,
 			ProvinciaService provinciaService, MunicipioService municipioService,
-			CombustibleService combustibleService) {
+			CombustibleService combustibleService, AuthService authService) {
 		this.estacionDeServicioService = estacionDeServicioService;
 		this.comunidadAutonomaService  = comunidadAutonomaService;
 		this.provinciaService          = provinciaService;
 		this.municipioService          = municipioService;
 		this.combustibleService        = combustibleService;
+		this.authService = authService;
 	}
 
 
@@ -228,6 +230,13 @@ public class EstacionDeServicioController {
 		// Añadimos la estación al modelo para la vista
 		model.addAttribute("estacion", estacion);
 
+		// Defino si tiene posibilidad de estar en favoritas
+		// Usuario autenticado
+		Optional<Usuario> usuario = authService.getUsuarioAutenticado();
+		if (usuario.isPresent()) {
+			model.addAttribute("favorita",
+							   usuario.get().getEessFavoritas().contains(estacion));
+		}
 		// Si no se proporciona fechaInicio o es futura, se toman los últimos 5 días
 		if (fechaInicio == null || fechaInicio.isAfter(hoy)) {
 			fechaInicio = hoy.minusDays(5);

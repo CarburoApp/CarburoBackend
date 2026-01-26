@@ -6,6 +6,7 @@ import com.inggarciabaldo.carburo.backend.entities.Usuario;
 import com.inggarciabaldo.carburo.backend.services.AuthService;
 import com.inggarciabaldo.carburo.backend.services.ProvinciaService;
 import com.inggarciabaldo.carburo.backend.services.UsuarioService;
+import com.inggarciabaldo.carburo.backend.validators.PerfilCambioContrasenaFormValidator;
 import com.inggarciabaldo.carburo.backend.validators.LoginFormValidator;
 import com.inggarciabaldo.carburo.backend.validators.RecuperacionFormValidator;
 import com.inggarciabaldo.carburo.backend.validators.RegistroFormValidator;
@@ -32,12 +33,19 @@ import java.util.Optional;
 @Controller
 public class AuthController {
 
+    // Constantes de vistas
+    public static final String VISTA_LOGIN = "auth/login";
+    public static final String VISTA_REGISTRO = "auth/registro";
+    public static final String VISTA_RECUPERACION_CONTRASENA = "auth/recuperacion";
+    public static final String VISTA_CAMBIAR_CONTRASENA = "auth/perfil/editarContrasena";
+
     private final ProvinciaService provinciaService;
     private final AuthService authService;
     private final UsuarioService usuarioService;
     private final RegistroFormValidator registroFormValidator;
     private final LoginFormValidator loginFormValidator;
     private final RecuperacionFormValidator recuperacionFormValidator;
+    private final PerfilCambioContrasenaFormValidator perfilCambioContrasenaFormValidator;
 
     /**
      * Constructor con inyección de dependencias de servicios y validadores.
@@ -47,13 +55,15 @@ public class AuthController {
                           ProvinciaService provinciaService,
                           RegistroFormValidator registroFormValidator,
                           LoginFormValidator loginFormValidator,
-                          RecuperacionFormValidator recuperacionFormValidator) {
-        this.authService = authService;
-        this.usuarioService = usuarioService;
-        this.provinciaService = provinciaService;
-        this.registroFormValidator = registroFormValidator;
-        this.loginFormValidator = loginFormValidator;
-        this.recuperacionFormValidator = recuperacionFormValidator;
+                          RecuperacionFormValidator recuperacionFormValidator,
+                          PerfilCambioContrasenaFormValidator perfilCambioContrasenaFormValidator) {
+        this.authService                         = authService;
+        this.usuarioService                      = usuarioService;
+        this.provinciaService                    = provinciaService;
+        this.registroFormValidator               = registroFormValidator;
+        this.loginFormValidator                  = loginFormValidator;
+        this.recuperacionFormValidator           = recuperacionFormValidator;
+        this.perfilCambioContrasenaFormValidator = perfilCambioContrasenaFormValidator;
     }
 
     /**
@@ -64,7 +74,7 @@ public class AuthController {
     public String doGetLogin(Model model) {
         if (authService.isAuthenticated()) return "redirect:/perfil";
         model.addAttribute("usuario", new UsuarioDto());
-        return "auth/login";
+        return VISTA_LOGIN;
     }
 
     /**
@@ -84,19 +94,18 @@ public class AuthController {
         // Validación del formulario
         loginFormValidator.validate(usuarioDto, bindingResult);
         // hay errores -> vista de login
-        if (bindingResult.hasErrors())
-            return "auth/login";
+        if (bindingResult.hasErrors()) return VISTA_LOGIN;
         //Realizar el Login
         try {
             if (authService.login(request, usuarioDto.getCorreo(), usuarioDto.getContrasena()) == null) {
                 bindingResult.rejectValue("contrasena", "Error.auth.login.fallo.sesion");
-                return "auth/login";
+                return VISTA_LOGIN;
             }
             return "redirect:/perfil";
-        } catch (IOException e) {
+        } catch (IOException | IllegalStateException e) {
             e.printStackTrace(); // TODO Eliminar en producción
             bindingResult.rejectValue("contrasena", "Error.auth.login.fallo.sesion");
-            return "auth/login";
+            return VISTA_LOGIN;
         }
     }
 
@@ -122,7 +131,7 @@ public class AuthController {
     private String returnRegistroConDatos(Model model) {
         model.addAttribute("pagina", "registro");
         model.addAttribute("provincias", provinciaService.getProvinciasOrderByDenominacion());
-        return "auth/registro";
+        return VISTA_REGISTRO;
     }
 
     /**
@@ -151,7 +160,7 @@ public class AuthController {
         //  Registro del usuario
         try {
             usuarioDto = authService.registro(usuarioDto);
-        } catch (IOException e) {
+        } catch (IOException | IllegalStateException e) {
             e.printStackTrace(); // TODO Eliminar en producción
             bindingResult.rejectValue("contraseña", "Error.auth.login.registro.fallo");
             return returnRegistroConDatos(model);
@@ -185,7 +194,7 @@ public class AuthController {
     public String doGetRepuceracion(Model model) {
         if (authService.isAuthenticated()) return "redirect:/perfil";
         model.addAttribute("usuario", new UsuarioDto());
-        return "auth/recuperacion";
+        return VISTA_RECUPERACION_CONTRASENA;
     }
 
     /**
@@ -203,18 +212,71 @@ public class AuthController {
         // Validación del formulario
         recuperacionFormValidator.validate(usuarioDto, bindingResult);
         // Si hay errores, volvemos a la vista de la recuperación de contraseña
-        if (bindingResult.hasErrors())
-            return "auth/recuperacion";
+        if (bindingResult.hasErrors()) return VISTA_RECUPERACION_CONTRASENA;
 
         //  Registro del usuario
         try {
             bindingResult.rejectValue("correo", (authService.recuperacionDeContrasena(usuarioDto.getCorreo())) ?
                     "Error.auth.recuperacion.exito" : "Error.auth.recuperacion.fallo");
-            return "auth/recuperacion";
-        } catch (IOException e) {
+            return VISTA_RECUPERACION_CONTRASENA;
+        } catch (IOException | IllegalStateException e) {
             e.printStackTrace(); // TODO Eliminar en producción
             bindingResult.rejectValue("correo", "Error.auth.recuperacion.fallo");
-            return "auth/recuperacion";
+            return VISTA_RECUPERACION_CONTRASENA;
         }
+    }
+
+    /**
+     * Procesa el formulario de cambio de contraseña
+     *
+     * <p>
+     * Válida los datos, registra el usuario en el sistema de autenticación,
+     * persiste el usuario en la base de datos local y realiza el login
+     * automático tras un registro exitoso.
+     * </p>
+     */
+    @PostMapping("/change-password")
+    public String doPostCambioDeContrasena(
+            @ModelAttribute("usuario") @Validated UsuarioDto usuarioDto,
+            BindingResult bindingResult, HttpServletRequest request, Model model) {
+        // Comprobamos que el usuario está autenticado
+        Optional<Usuario> usuarioAutenticado = authService.getUsuarioAutenticado();
+        if (usuarioAutenticado.isEmpty()) return "redirect:/login";
+        // Validación del formulario
+        perfilCambioContrasenaFormValidator.validate(usuarioDto, bindingResult);
+        // Si hay errores, volvemos a la vista de registro
+
+        if (bindingResult.hasErrors()) return VISTA_CAMBIAR_CONTRASENA;
+
+        // Validaciones manuales
+        // Se comprueba que el usuario existe en el sistema de autenticación con esa contraseña
+        String token = null;
+        try {
+            token = authService.login(request, usuarioAutenticado.get().getEmail(),
+                                      usuarioDto.getCorreo()); //dto.correo guarda la contraseña
+            if (token == null) {
+                bindingResult.rejectValue("correo",
+                                          "Error.auth.change.password.contrasena.actual.incorrecta");
+                return VISTA_CAMBIAR_CONTRASENA;
+            }
+        } catch (IOException | IllegalStateException e) {
+            bindingResult.rejectValue("correo",
+                                      "Error.auth.change.password.validacion.usuario.fallo");
+            return VISTA_CAMBIAR_CONTRASENA;
+        }
+        //  Realizamos el cambio de contraseña del usuario
+        try {
+            if (!authService.modificarContrasenaUsuario(token,
+                                                        usuarioDto.getContrasena())) {
+                bindingResult.rejectValue("contrasena",
+                                          "Error.auth.change.password.validacion.usuario.fallo");
+                return VISTA_CAMBIAR_CONTRASENA;
+            }
+        } catch (IOException | IllegalStateException e) {
+            e.printStackTrace();
+            bindingResult.rejectValue("contrasena", "Error.auth.change.password.fallo");
+            return returnRegistroConDatos(model);
+        }
+        return "redirect:/perfil?passwordChanged=true";
     }
 }
