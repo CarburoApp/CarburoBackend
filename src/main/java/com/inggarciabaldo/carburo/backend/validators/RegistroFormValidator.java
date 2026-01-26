@@ -139,7 +139,6 @@ public class RegistroFormValidator implements Validator {
                                        "Error.auth.login.correo.existente");
                 }
             } catch (IOException e) {
-                e.printStackTrace(); // TODO
                 errors.rejectValue(USUARIO_DTO_FIELD_CORREO,
                                    "Error.auth.login.registro.fallo");
             }

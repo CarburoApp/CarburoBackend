@@ -107,7 +107,6 @@ public class AuthController {
             }
             return "redirect:/perfil";
         } catch (IOException | IllegalStateException e) {
-            e.printStackTrace(); // TODO Eliminar en producción
             bindingResult.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
                                       "Error.auth.login.fallo.sesion");
             return VISTA_LOGIN;
@@ -166,7 +165,6 @@ public class AuthController {
         try {
             usuarioDto = authService.registro(usuarioDto);
         } catch (IOException | IllegalStateException e) {
-            e.printStackTrace(); // TODO Eliminar en producción
             bindingResult.rejectValue("contraseña", "Error.auth.login.registro.fallo");
             return returnRegistroConDatos(model);
         }
@@ -227,7 +225,6 @@ public class AuthController {
                     "Error.auth.recuperacion.exito" : "Error.auth.recuperacion.fallo");
             return VISTA_RECUPERACION_CONTRASENA;
         } catch (IOException | IllegalStateException e) {
-            e.printStackTrace(); // TODO Eliminar en producción
             bindingResult.rejectValue(USUARIO_DTO_FIELD_CORREO,
                                       "Error.auth.recuperacion.fallo");
             return VISTA_RECUPERACION_CONTRASENA;
@@ -281,7 +278,6 @@ public class AuthController {
                 return VISTA_CAMBIAR_CONTRASENA;
             }
         } catch (IOException | IllegalStateException e) {
-            e.printStackTrace();
             bindingResult.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
                                       "Error.auth.change.password.fallo");
             return returnRegistroConDatos(model);

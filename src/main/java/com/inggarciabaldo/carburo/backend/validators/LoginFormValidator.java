@@ -87,7 +87,6 @@ public class LoginFormValidator implements Validator {
                                        "Error.auth.login.correo.no.existente");
                 }
             } catch (IOException e) {
-                e.printStackTrace(); // TODO retirar en producción
                 errors.rejectValue(USUARIO_DTO_FIELD_CORREO, "Error.auth.login.fallo");
             }
         }
