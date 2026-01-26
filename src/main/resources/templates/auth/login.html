@@ -1,0 +1,131 @@
+<!-- auth/login.html -->
+<!DOCTYPE html>
+<html lang="es" class="light">
+<!-- head -->
+<head>
+    <th:block th:replace="~{fragments/head :: head}"></th:block>
+    <title th:text="#{app.name} + ' - ' + #{auth.login.title}"></title>
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
+    <script src="https://apis.google.com/js/api:client.js"></script>
+    <link rel="stylesheet" th:href="@{/style/auth/google.css}">
+    <script src="/script/auth/google.js"></script>
+    <script src="/script/auth/password.js"></script>
+    <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
+
+<!-- Header -->
+<th:block th:replace="~{fragments/header :: header}"></th:block>
+
+<!-- Contenido principal -->
+<main class="flex-grow flex items-center justify-center py-2 px-4">
+    <div class="w-full max-w-md">
+        <div class="bg-surface p-6 rounded-2xl border border-border-color shadow-xl">
+            <div class="text-center mb-6">
+                <h1 class="text-2xl font-bold text-text-main mb-2" th:text="#{auth.login.titulo}">Bienvenido</h1>
+                <p class="text-text-secondary text-sm" th:text="#{auth.login.subtitulo}"></p>
+            </div>
+            <!--Mensaje de cierre de sesión exitoso-->
+            <div class="mb-6 flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-100 rounded-xl text-red-800 animate-in fade-in duration-500"
+                 th:if="${param.logout}">
+                <span class="material-symbols-outlined text-red-500 text-xl">info</span>
+                <p class="text-sm font-medium" th:text="#{auth.logout.exitoso}">Se ha cerrado sesión adecuadamente. ¡Hasta pronto!</p>
+            </div>
+
+            <form class="space-y-5" method="post" th:action="@{/login}" th:object="${usuario}">
+                <div>
+                    <label class="block text-sm font-bold text-text-main mb-2" for="email"
+                           th:text="#{auth.correo.titulo}"></label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-[20px]">mail</span>
+                        <input class="w-full pl-10 pr-4 py-2.5 bg-background-light border-border-color rounded-xl text-text-main placeholder:text-text-secondary/50 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none"
+                               id="email" th:placeholder="#{auth.correo.placeholder}"
+                               type="email" th:field="*{correo}"/>
+                    </div>
+                </div>
+                <p th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}" class="text-red-600 text-xs mt-1"></p>
+                <div>
+                    <label class="block text-sm font-bold text-text-main mb-2" for="password-input"
+                           th:text="#{auth.contrasenia.titulo}"> </label>
+
+                    <div class="relative flex items-center">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-[20px] z-10">lock</span>
+                        <input id="password-input" type="password"
+                               class="w-full pl-10 pr-12 py-3 bg-background-light border-border-color rounded-xl
+                               text-text-main placeholder:text-text-secondary/50 focus:border-primary focus:ring-1
+                               focus:ring-primary transition-all outline-none"
+                               th:placeholder="#{auth.contrasenia.placeholder}" th:field="*{contrasena}"
+                               th:attr="data-show-label=#{auth.contrasenia.mostrar},
+                               data-hide-label=#{auth.contrasenia.ocultar},
+                               data-placeholder-hidden=#{auth.contrasenia.placeholder},
+                               data-placeholder-visible=#{auth.contrasenia.placeholder.ejemplo}"/>
+
+
+                        <button type="button" id="password-toggle-btn"
+                                class="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-text-secondary hover:text-primary transition-colors select-none z-10"
+                                th:attr="aria-label=#{auth.contrasenia.mostrar}">
+                            <span class="material-symbols-outlined" data-eye-open>visibility</span>
+                            <span class="material-symbols-outlined hidden" data-eye-closed>visibility_off</span>
+                        </button>
+                    </div>
+                    <p th:if="${#fields.hasErrors('contrasena')}" th:errors="*{contrasena}"
+                       class="text-red-600 text-xs mt-1"></p>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                </div>
+
+
+                <div class="flex justify-end text-sm">
+                    <a class="text-primary font-bold hover:underline" th:href="@{/recuperacion}"
+                       th:text="#{auth.login.contrasenia.olvidada}"></a>
+                </div>
+                <button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-primary/20"
+                        type="submit" th:text="#{auth.login.boton}">
+                </button>
+            </form>
+            <div class="relative my-4">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-border-color"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-4 bg-surface text-text-secondary uppercase tracking-wider text-xs font-bold"
+                          th:text="#{auth.login.sesion.google}"></span>
+                </div>
+            </div>
+
+            <!-- Auth de google para inicio de sesión-->
+            <!-- In the callback, you would hide the gSignInWrapper element on a successful sign in -->
+            <div class="w-full flex items-center justify-center gap-3 bg-white border border-border-color hover:bg-background-light text-text-main font-bold py-3 rounded-xl transition-all"
+                 id="gSignInWrapper">
+                <div id="customBtn" class="customGPlusSignIn">
+                    <span class="icon"></span>
+                    <span class="buttonText">Google</span>
+                </div>
+            </div>
+            <div id="name"></div>
+            <script>startApp();</script>
+
+            <p class="mt-4 text-center text-sm text-text-secondary">
+                <span th:text="#{auth.login.registro.alternativa}"></span>
+                <a class="text-primary font-bold hover:underline" th:href="@{/registro}"
+                   th:text="#{auth.login.registro.boton}"></a>
+            </p>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>

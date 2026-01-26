@@ -52,7 +52,7 @@
                 <h3 class="text-lg font-bold text-text-main" th:text="#{eess.list.filtros}"></h3>
             </div>
 
-            <form id="formFiltros" method="get" th:action="@{/estacionDeServicio/list}">
+            <form id="formFiltros" method="get" th:action="@{/estacionesDeServicio}">
 
                 <div class="flex flex-col gap-5">
                     <!-- Search Text -->
@@ -216,7 +216,7 @@
             <a class="text-text-secondary font-medium hover:underline" th:href="@{/}"
                th:text="#{home.title}"></a>
             <span class="text-text-secondary font-medium">/</span>
-            <a class="text-text-secondary font-medium hover:underline" th:href="@{/estacionDeServicio/list}"
+            <a class="text-text-secondary font-medium hover:underline" th:href="@{/estacionesDeServicio}"
                th:text="#{eess.list.title}"></a>
         </div>
         <!-- Page Header -->
@@ -252,50 +252,8 @@
 
 <!-- Footer -->
 <footer th:replace="~{fragments/footer :: footer}"></footer>
-<script src="/script/filtros_path_eess_list.js"></script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const btnMobile = document.getElementById('btnMobileFiltros');
-        const aside = document.getElementById('asideFiltros');
-        const overlay = document.getElementById('overlayFiltros');
-        const cabecera = document.getElementById('cabeceraFiltros');
-
-        function abrirFiltros() {
-            aside.classList.add('abierto');
-            overlay.classList.add('visible');
-            document.body.style.overflow = 'hidden'; // evitar scroll
-        }
-
-        function cerrarFiltros() {
-            aside.classList.remove('abierto');
-            overlay.classList.remove('visible');
-            document.body.style.overflow = ''; // restaurar scroll
-        }
-
-        // Botón móvil abre/cierra
-        btnMobile.addEventListener('click', function() {
-            if (aside.classList.contains('abierto')) {
-                cerrarFiltros();
-            } else {
-                abrirFiltros();
-            }
-        });
-
-        // Overlay cierra
-        overlay.addEventListener('click', cerrarFiltros);
-
-        // Cabecera dentro del aside también cierra
-        cabecera.addEventListener('click', cerrarFiltros);
-
-        // Esc también cierra
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && aside.classList.contains('abierto')) {
-                cerrarFiltros();
-            }
-        });
-    });
-</script>
+<script src="/script/filtrosPathListadoEstacionesDeServicio.js"></script>
+<script src="/script/filtrosListadoEstacionesDeServicio.js"></script>
 
 </body>
 </html>

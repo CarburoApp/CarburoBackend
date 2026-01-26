@@ -1,0 +1,181 @@
+<!-- auth/login.html -->
+<!DOCTYPE html>
+<html lang="es" class="light">
+<!-- head -->
+<head>
+    <th:block th:replace="~{fragments/head :: head}"></th:block>
+    <title th:text="#{app.name} + ' - ' + #{auth.registro.title}"></title>
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
+    <script src="https://apis.google.com/js/api:client.js"></script>
+    <link rel="stylesheet" th:href="@{/style/auth/google.css}">
+    <script src="/script/auth/google.js"></script>
+    <script src="/script/auth/password.js"></script>
+    <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
+
+<!-- Header -->
+<th:block th:replace="~{fragments/header :: header}"></th:block>
+
+<!-- Contenido principal -->
+<main class="flex-grow flex items-center justify-center py-2 px-4">
+    <div class="w-full max-w-[600px] bg-white dark:bg-[#2d2216] rounded-xl shadow-lg border border-[#e8dbce] dark:border-[#3d2e1f] overflow-hidden">
+        <!-- Headline & MetaText -->
+        <div class="pt-10 pb-6 text-center">
+            <h1 class="text-[#1c140d] dark:text-white tracking-tight text-3xl font-bold leading-tight px-4"
+                th:text="#{auth.registro.titulo}">Únete a Carburo</h1>
+            <p class="text-[#9c7349] dark:text-[#b59b7c] text-sm font-normal leading-normal pt-2 px-8"
+               th:text="#{auth.registro.subtitulo}"></p>
+        </div>
+
+        <!-- Actions -->
+        <div class="px-6 md:px-12 pb-10 space-y-1 pt-6">
+            <!-- Auth de google para inicio de sesión-->
+            <!-- In the callback, you would hide the gSignInWrapper element on a successful sign in -->
+            <div class="w-full flex items-center justify-center gap-3 bg-white border border-border-color hover:bg-background-light text-text-main font-bold py-3 rounded-xl transition-all"
+                 id="gSignInWrapper">
+                <div id="customBtn" class="customGPlusSignIn">
+                    <span class="icon"></span>
+                    <span class="buttonText">Google</span>
+                </div>
+            </div>
+            <div id="name"></div>
+            <script>startApp();</script>
+            <div class="relative flex items-center py-2">
+                <div class="flex-grow border-t border-[#e8dbce] dark:border-[#3d2e1f]"></div>
+                <span class="flex-shrink mx-4 text-[#9c7349] text-xs uppercase font-medium"
+                      th:text="#{auth.registro.alternativa.titulo}"></span>
+                <div class="flex-grow border-t border-[#e8dbce] dark:border-[#3d2e1f]"></div>
+            </div>
+        </div>
+
+        <!-- Registration Form -->
+        <form class="px-6 md:px-12 pb-10 space-y-3" th:action="@{/registro}" method="post" th:object="${usuario}">
+            <!-- Nombre Completo -->
+            <div class="flex flex-col gap-2">
+                <label class="text-[#1c140d] dark:text-white text-sm font-semibold" for="name_input"
+                       th:text="#{auth.registro.nombre.titulo}"></label>
+                <input class="w-full rounded-lg border border-[#e8dbce] dark:border-[#4d3a29] bg-white dark:bg-[#221910] text-[#1c140d] dark:text-white p-3.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                       id="name_input" th:field="*{nombre}" th:placeholder="#{auth.registro.nombre.placeholder}"
+                       type="text"/>
+                <p th:if="${#fields.hasErrors('nombre')}" th:errors="*{nombre}" class="text-red-600 text-xs mt-1"></p>
+            </div>
+            <!-- Correo Electrónico -->
+            <div class="flex flex-col gap-2">
+                <label class="text-[#1c140d] dark:text-white text-sm font-semibold" for="email_input"
+                       th:text="#{auth.correo.titulo}"></label>
+                <input class="w-full rounded-lg border border-[#e8dbce] dark:border-[#4d3a29] bg-white dark:bg-[#221910] text-[#1c140d] dark:text-white p-3.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                       th:field="*{correo}" th:placeholder="#{auth.correo.placeholder}"
+                       type="email" id="email_input"/>
+                <p class="text-[#9c7349] text-xs flex items-center gap-1">
+                    <span class="material-symbols-outlined text-xs">info</span>
+                    <span th:text="#{auth.registro.correo.informacion}"></span>
+                </p>
+                <p th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}" class="text-red-600 text-xs mt-1"></p>
+            </div>
+            <!-- Contraseña -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex flex-col gap-2">
+                    <label class="text-[#1c140d] dark:text-white text-sm font-semibold" for="contrasenia_input"
+                           th:text="#{auth.contrasenia.titulo}"></label>
+                    <input class="w-full rounded-lg border border-[#e8dbce] dark:border-[#4d3a29] bg-white dark:bg-[#221910] text-[#1c140d] dark:text-white p-3.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                           id="contrasenia_input" th:field="*{contrasena}"
+                           th:placeholder="#{auth.contrasenia.placeholder}"
+                           type="password"/>
+                </div>
+                <div class="flex flex-col gap-2">
+                    <label class="text-[#1c140d] dark:text-white text-sm font-semibold"
+                           for="contrasenia_confirmacion_input"
+                           th:text="#{auth.registro.contrasenia.nueva.titulo}"></label>
+                    <input class="w-full rounded-lg border border-[#e8dbce] dark:border-[#4d3a29] bg-white dark:bg-[#221910] text-[#1c140d] dark:text-white p-3.5 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                           id="contrasenia_confirmacion_input" th:field="*{confirmacionContrasena}"
+                           th:placeholder="#{auth.contrasenia.placeholder}"
+                    type="password"/>
+                </div>
+            </div>
+            <p th:if="${#fields.hasErrors('contrasena')}" th:errors="*{contrasena}" class="text-red-600 text-xs mt-1"></p>
+            <p th:if="${#fields.hasErrors('confirmacionContrasena')}" th:errors="*{confirmacionContrasena}" class="text-red-600 text-xs mt-1"></p>
+            <!-- Password Requirements -->
+            <div class="bg-background-light dark:bg-[#221910] p-3 rounded-lg border border-[#e8dbce] dark:border-[#4d3a29]">
+                <p class="text-[#9c7349] dark:text-[#b59b7c] text-xs font-medium mb-1"
+                   th:text="#{auth.registro.contrasenia.info}"></p>
+                <ul class="text-[#9c7349] dark:text-[#b59b7c] text-xs grid grid-cols-2 gap-x-2">
+                    <li class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[10px] text-green-500">check_circle</span>
+                        <span th:text="#{auth.registro.contrasenia.info.caracteres}"></span>
+                    </li>
+                    <li class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[10px] text-green-500">check_circle</span>
+                        <span th:text="#{auth.registro.contrasenia.info.letra.numero}"></span>
+                    </li>
+                    <li class="flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[10px] text-green-500">check_circle</span>
+                        <span th:text="#{auth.registro.contrasenia.info.simbolo}"></span>
+                    </li>
+                </ul>
+            </div>
+            <!-- Divider Personalization -->
+            <div class="relative flex py-4 items-center">
+                <div class="flex-grow border-t border-[#e8dbce] dark:border-[#3d2e1f]"></div>
+                <span class="flex-shrink mx-4 text-[#9c7349] text-xs font-bold uppercase tracking-wider"
+                      th:text="#{auth.registro.personalizacion.titulo}"></span>
+                <div class="flex-grow border-t border-[#e8dbce] dark:border-[#3d2e1f]"></div>
+            </div>
+            <!-- Infotip Personalización -->
+            <div class="flex gap-3 bg-primary/10 border border-primary/20 p-4 rounded-lg">
+                <span class="material-symbols-outlined text-primary">tips_and_updates</span>
+                <p class="text-[#6d4f32] dark:text-[#e8dbce] text-xs leading-relaxed">
+                    <span th:text="#{auth.registro.personalizacion.informacion1}"></span>
+                    <strong th:text="#{auth.registro.personalizacion.informacion2}"></strong>
+                    <span th:text="#{auth.registro.personalizacion.informacion3}"></span>
+                </p>
+            </div>
+            <!-- Provincia Selector -->
+            <div class="flex flex-col gap-2">
+                <label class="text-[#1c140d] dark:text-white text-sm font-semibold"
+                       th:text="#{auth.registro.provincia.favorita.titulo}" for="filtro_provincia"></label>
+                <div class="relative group">
+                    <span class="absolute left-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#9c7349]">search</span>
+                    <select class="appearance-none w-full rounded-lg border border-[#e8dbce] dark:border-[#4d3a29] bg-white dark:bg-[#221910] text-[#1c140d] dark:text-white py-3.5 pl-11 pr-10 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                            id="filtro_provincia" th:field="*{provinciaFavorita}">
+                        <option th:value="0" th:text="#{auth.registro.provincia.favorita.defecto}"></option>
+                        <option th:each="provincia : ${provincias}" th:value="${provincia.getId()}"
+                                th:text="${provincia.getDenominacion()}"
+                                th:selected="${provincia.getId() == usuario.getProvinciaFavorita()}"></option>
+                    </select>
+                    <span class="absolute right-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#9c7349] pointer-events-none">expand_more</span>
+                </div>
+                <p th:if="${#fields.hasErrors('provinciaFavorita')}" th:errors="*{provinciaFavorita}" class="text-red-600 text-xs mt-1"></p>
+            </div>
+
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+            <button class="w-full flex items-center justify-center h-14 bg-primary text-white font-bold rounded-lg hover:bg-opacity-95 shadow-md shadow-primary/20 transition-all text-lg"
+                    type="submit" th:text="#{auth.registro.boton}"></button>
+        </form>
+        <div class="bg-background-light dark:bg-[#3d2e1f]/30 py-6 text-center border-t border-[#e8dbce] dark:border-[#3d2e1f]">
+            <p class="text-[#1c140d] dark:text-[#e8dbce] text-sm">
+                <span th:text="#{auth.registro.inicio.sesion}"></span>
+                <a class="text-primary font-bold hover:underline" th:href="@{/login}"
+                   th:text="#{auth.registro.inicio.sesion.boton}"></a>
+            </p>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>

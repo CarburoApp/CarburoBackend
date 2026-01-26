@@ -1,0 +1,68 @@
+<!-- auth/login.html -->
+<!DOCTYPE html>
+<html lang="es" class="light">
+<!-- head -->
+<head>
+    <th:block th:replace="~{fragments/head :: head}"></th:block>
+    <title th:text="#{app.name} + ' - ' + #{auth.recuperacion.title}"></title>
+
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
+
+<!-- Header -->
+<th:block th:replace="~{fragments/header :: header}"></th:block>
+
+<!-- Contenido principal -->
+<main class="flex-grow flex items-center justify-center py-2 px-4">
+    <div class="w-full max-w-md">
+        <div class="bg-surface p-8 rounded-2xl border border-border-color shadow-xl">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-bold text-text-main mb-3" th:text="#{auth.recuperacion.titulo}">¿Olvidada?</h1>
+                <p class="text-text-secondary text-sm leading-relaxed px-4"
+                   th:text="#{auth.recuperacion.subtitulo}"></p>
+            </div>
+            <form class="space-y-6" method="post" th:action="@{/recuperacion}" th:object="${usuario}">
+                <div>
+                    <label class="block text-sm font-bold text-text-main mb-2" for="email"
+                           th:text="#{auth.correo.titulo}"></label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-[20px]">mail</span>
+                        <input class="w-full pl-10 pr-4 py-3 bg-background-light border-border-color rounded-xl text-text-main placeholder:text-text-secondary/50 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none"
+                               id="email" th:placeholder="#{auth.correo.placeholder}"
+                               type="email" th:field="*{correo}"/>
+                    </div>
+                </div>
+
+                <p th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}" class="text-red-600 text-xs mt-1"></p>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                <button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3.5 rounded-xl transition-colors shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
+                        type="submit">
+                    <span th:text="#{auth.recuperacion.boton}"></span>
+                </button>
+            </form>
+            <div class="mt-8 text-center">
+                <a class="text-primary font-bold hover:underline inline-flex items-center gap-2 text-sm"
+                   th:href="@{/login}">
+                    <span class="material-symbols-outlined text-sm">arrow_back</span>
+                    <span th:text="#{auth.recuperacion.volver.inicio.sesion}"></span>
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+</body>
+</html>

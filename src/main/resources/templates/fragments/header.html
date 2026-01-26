@@ -1,6 +1,7 @@
 <!-- templates/fragments/header.html -->
 <header th:fragment="header"
-        class="flex flex-wrap items-center justify-between whitespace-nowrap border-b border-solid border-border-color bg-background-light px-10 py-3 sticky top-0 z-50">
+        class="flex flex-wrap items-center justify-between whitespace-nowrap border-b border-solid border-border-color bg-surface px-10 py-3 sticky top-0 z-50"
+        xmlns:sec="http://www.w3.org/1999/xhtml">
 
     <!-- Logo -->
     <a th:href="@{/}">
@@ -23,7 +24,7 @@
     </button>
 
     <!-- Navegación y botones (desktop) -->
-    <div class="hidden md:flex flex-1 justify-end gap-8 items-center">
+    <div class="hidden md:flex flex-1 justify-end gap-6 items-center">
         <!-- Menú principal -->
         <nav class="hidden md:flex items-center gap-9">
             <a th:href="@{/}"
@@ -31,10 +32,26 @@
                'text-main text-sm font-medium leading-normal hover:text-primary transition-colors'"
                th:text="#{header.nav.boton.inicio}"></a>
 
-            <a th:href="@{/estacionDeServicio/list}"
+            <a th:href="@{/estacionesDeServicio}"
                th:class="${pagina == 'eess'} ? 'text-primary text-sm font-bold leading-normal transition-colors' :
-               'text-main text-sm font-medium leading-normal hover:text-primary transition-colors'"
+              'text-main text-sm font-medium leading-normal hover:text-primary transition-colors'"
                th:text="#{header.nav.boton.estaciones}"></a>
+
+
+            <a sec:authorize="isAuthenticated()" th:href="@{/perfil/estacionesDeServicioFavoritas}"
+               th:class="${pagina == 'eessFav'} ? 'text-primary text-sm font-bold leading-normal transition-colors' :
+               'text-main text-sm font-medium leading-normal hover:text-primary transition-colors'"
+               th:text="#{header.nav.boton.favoritos}"></a>
+
+            <a sec:authorize="isAuthenticated()" th:href="@{/vehiculos}"
+               th:class="${pagina == 'vehiculos'} ? 'text-primary text-sm font-bold leading-normal transition-colors' :
+               'text-main text-sm font-medium leading-normal hover:text-primary transition-colors'"
+               th:text="#{header.nav.boton.vehiculos}"></a>
+
+            <a sec:authorize="isAuthenticated()" th:href="@{/repostajes}"
+               th:class="${pagina == 'repostajes'} ? 'text-primary text-sm font-bold leading-normal transition-colors' :
+               'text-main text-sm font-medium leading-normal hover:text-primary transition-colors'"
+               th:text="#{header.nav.boton.repostajes}"></a>
 
             <a th:href="@{/contacto}"
                th:class="${pagina == 'contacto'} ? 'text-primary text-sm font-bold leading-normal transition-colors' :
@@ -49,11 +66,7 @@
                 <button class="nav-link dropdown-toggle flex items-center gap-1 cursor-pointer hover:text-primary"
                         id="btnLanguage" tabindex="0" aria-haspopup="true" aria-expanded="false"
                         onclick="toggleDropdown()">
-                    <svg class="w-3 h-3 ml-1 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd"
-                              d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.08 1.04l-4.25 4.25a.75.75 0 01-1.06 0L5.21 8.27a.75.75 0 01.02-1.06z"
-                              clip-rule="evenodd"/>
-                    </svg>
+                    <span class="material-symbols-outlined">language</span>
                     <span th:text="#{header.nav.boton.idioma}"></span>
                 </button>
 
@@ -87,16 +100,37 @@
             </div>
 
             <!-- Botón registrarse -->
-            <button onclick="location.href='/register'"
-                    class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary hover:bg-primary/90 transition-colors text-text-main text-sm font-bold">
-                <span class="truncate" th:text="#{header.nav.boton.registrarse}"></span>
-            </button>
+            <a th:href="@{/registro}" sec:authorize="!isAuthenticated()" th:text="#{header.nav.boton.registrarse}"
+               th:class="${pagina == 'registro'} ? 'flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary hover:bg-primary/90 transition-colors text-white text-sm font-bold' :
+               'flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-border-color hover:bg-[#ebdccf] transition-colors text-text-main text-sm font-bold'"></a>
 
             <!-- Botón iniciar sesión -->
-            <button onclick="location.href='/login'"
-                    class="flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-border-color hover:bg-[#ebdccf] transition-colors text-text-main text-sm font-bold">
-                <span class="truncate" th:text="#{header.nav.boton.iniciar}"></span>
-            </button>
+            <a th:href="@{/login}" sec:authorize="!isAuthenticated()" th:text="#{header.nav.boton.iniciar}"
+               th:class="${pagina != 'registro'} ? 'flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-primary hover:bg-primary/90 transition-colors text-white text-sm font-bold' :
+               'flex min-w-[84px] cursor-pointer items-center justify-center rounded-lg h-10 px-4 bg-border-color hover:bg-[#ebdccf] transition-colors text-text-main text-sm font-bold'"></a>
+
+
+            <div class="flex gap-2 items-center" sec:authorize="isAuthenticated()">
+                <form th:action="@{/perfil}" method="get">
+                    <button class="flex items-center gap-2 bg-primary/10 text-primary border border-primary/20 rounded-full py-1.5 pl-1.5 pr-4 hover:bg-primary/20 transition-colors"
+                            type="submit">
+                        <span class="size-7 bg-primary rounded-full flex items-center justify-center text-white">
+                            <span class="material-symbols-outlined text-sm">person</span>
+                        </span>
+                        <span class="text-sm font-bold" th:text="#{header.nav.boton.perfil}"></span>
+                    </button>
+                </form>
+                <form th:action="@{/logout}" method="post">
+                    <button class="flex items-center gap-2 bg-red-500/10 text-red-600 border border-red-500/20 rounded-full py-1.5 pl-1.5 pr-4 hover:bg-red-500/20 transition-colors"
+                            type="submit">
+
+                        <span class="size-7 bg-red-600 rounded-full flex items-center justify-center text-white">
+                            <span class="material-symbols-outlined text-sm">logout</span>
+                        </span>
+                        <span class="text-sm font-bold" th:text="#{auth.perfil.cerrar.sesion}"></span>
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -107,7 +141,7 @@
             <a th:href="@{/}"
                class="text-main text-sm font-medium hover:text-primary transition-colors"
                th:text="#{header.nav.boton.inicio}"></a>
-            <a th:href="@{/estacionDeServicio/list}"
+            <a th:href="@{/estacionesDeServicio}"
                class="text-main text-sm font-medium hover:text-primary transition-colors"
                th:text="#{header.nav.boton.estaciones}"></a>
             <a th:href="@{/contacto}"
@@ -118,12 +152,12 @@
         <!-- Botones móvil -->
         <div class="flex flex-col gap-2 mt-2">
             <!-- Registrarse -->
-            <button onclick="location.href='/register'"
+            <button th:href="@{/registro}"
                     class="flex w-full justify-center rounded-lg h-10 px-4 bg-primary hover:bg-primary/90 transition-colors text-text-main text-sm font-bold"
                     th:text="#{header.nav.boton.registrarse}"></button>
 
             <!-- Iniciar sesión -->
-            <button onclick="location.href='/login'"
+            <button th:href="@{/login}"
                     class="flex w-full justify-center rounded-lg h-10 px-4 bg-border-color hover:bg-[#ebdccf] transition-colors text-text-main text-sm font-bold"
                     th:text="#{header.nav.boton.iniciar}"></button>
 

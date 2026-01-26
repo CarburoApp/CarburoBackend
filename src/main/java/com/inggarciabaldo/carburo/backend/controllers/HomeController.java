@@ -79,13 +79,13 @@ public class HomeController {
 	private static Map<String, String> getBusquedasPopulares() {
 		Map<String, String> busquedasPopulares = new LinkedHashMap<>();
 		busquedasPopulares.put("Madrid",
-							   "/estacionDeServicio/list?comunidadSeleccionada=13");
+							   "/estacionesDeServicio?comunidadSeleccionada=13");
 		busquedasPopulares.put("Barcelona",
-							   "/estacionDeServicio/list?comunidadSeleccionada=9&provinciaSeleccionada=8");
+							   "/estacionesDeServicio?comunidadSeleccionada=9&provinciaSeleccionada=8");
 		busquedasPopulares.put("Asturias",
-							   "/estacionDeServicio/list?comunidadSeleccionada=3");
+							   "/estacionesDeServicio?comunidadSeleccionada=3");
 		busquedasPopulares.put("León",
-							   "/estacionDeServicio/list?comunidadSeleccionada=8&provinciaSeleccionada=24");
+							   "/estacionesDeServicio?comunidadSeleccionada=8&provinciaSeleccionada=24");
 		return busquedasPopulares;
 	}
 

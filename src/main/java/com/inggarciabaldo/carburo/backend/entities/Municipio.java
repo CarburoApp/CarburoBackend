@@ -102,8 +102,8 @@ public class Municipio {
 	// SETTERS CON VALIDACIÓN
 	// ==============================
 
-	public void setId(Short id) {
-		if (id != null && id < 0)
+	public void setId(short id) {
+		if (id < 0)
 			throw new IllegalArgumentException("El ID de municipio no puede ser negativo");
 		this.id = id;
 	}

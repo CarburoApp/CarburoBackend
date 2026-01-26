@@ -16,7 +16,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Controller
-@RequestMapping("/estacionDeServicio")
+@RequestMapping("/estacionesDeServicio")
 public class EstacionDeServicioController {
 
 	private final EstacionDeServicioService estacionDeServicioService;
@@ -25,6 +25,9 @@ public class EstacionDeServicioController {
 	private final MunicipioService municipioService;
 	private final CombustibleService combustibleService;
 
+	/**
+	 * Constructor con inyección de dependencias de servicios y validadores.
+	 */
 	public EstacionDeServicioController(
 			EstacionDeServicioService estacionDeServicioService,
 			ComunidadAutonomaService comunidadAutonomaService,
@@ -53,7 +56,7 @@ public class EstacionDeServicioController {
 	 * @param ordenSeleccionado     Criterio de orden: name_asc, name_desc, price_asc, price_desc
 	 * @return Vista "eess/list" con la información filtrada
 	 */
-	@GetMapping("/list")
+	@GetMapping("")
 	public String doGetEstacionesDeServicio(Model model, Pageable pageable,
 											@RequestParam(required = false)
 										  String comunidadSeleccionada,
@@ -179,7 +182,7 @@ public class EstacionDeServicioController {
 	/**
 	 * Maneja las solicitudes GET a "/{id}" para mostrar los detalles de una estación de servicio.
 	 *
-	 * <p>Este método realiza las siguientes tareas:</p>
+	 * <p>Realiza las siguientes tareas:</p>
 	 * <ul>
 	 *     <li>Valida que el ID de la estación sea mayor que cero; en caso contrario redirige a la página principal.</li>
 	 *     <li>Obtiene la estación de servicio correspondiente al ID proporcionado; si no existe, redirige a "/estacionDeServicio/list".</li>

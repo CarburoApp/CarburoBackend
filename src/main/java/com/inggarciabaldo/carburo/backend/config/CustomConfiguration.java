@@ -14,33 +14,99 @@ import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Configuración personalizada de Spring MVC para la aplicación.
+ *
+ * <p>
+ * Esta clase centraliza configuraciones globales relacionadas con:
+ * </p>
+ * <ul>
+ *     <li>Paginación por defecto en controladores</li>
+ *     <li>Gestión de internacionalización (i18n)</li>
+ *     <li>Resolución y cambio dinámico del idioma</li>
+ * </ul>
+ * <p>
+ * Implementa {@link WebMvcConfigurer} para extender el comportamiento
+ * por defecto de Spring MVC.
+ */
 @Configuration
 public class CustomConfiguration implements WebMvcConfigurer {
 
+	// Página inicial por defecto para la paginación.
+	public static final int PAGINATION_INITIAL_PAGE = 0;
+	// Tamaño de página por defecto para la paginación.
+	public static final int PAGINATION_SIZE = 10;
+	// Idioma por defecto de la aplicación.
+	public static final Locale IDIOMA_POR_DEFECTO = Locale.of("es", "ES");
+	// Nombre del parámetro utilizado para cambiar el idioma en las peticiones.
+	public static final String IDIOMA_PARAMETRO_PATH = "lang";
+
+	/**
+	 * Configura resolutores de argumentos personalizados para los métodos
+	 * de los controladores.
+	 *
+	 * <p>
+	 * En este caso, se define un resolutor de paginación con valores
+	 * por defecto cuando no se proporcionan parámetros en la petición.
+	 * </p>
+	 *
+	 * @param argumentResolvers lista de resolutores de argumentos de Spring MVC
+	 */
 	@Override
 	public void addArgumentResolvers(
 			List<HandlerMethodArgumentResolver> argumentResolvers) {
-		int page = 0;
-		int size = 10;
 		PageableHandlerMethodArgumentResolver resolver = new PageableHandlerMethodArgumentResolver();
-		resolver.setFallbackPageable(PageRequest.of(page, size));
+		resolver.setFallbackPageable(PageRequest.of(PAGINATION_INITIAL_PAGE, PAGINATION_SIZE));
 		argumentResolvers.add(resolver);
 	}
 
+	/**
+	 * Define el {@link LocaleResolver} encargado de determinar el idioma
+	 * actual del usuario.
+	 *
+	 * <p>
+	 * Se utiliza una implementación basada en sesión, estableciendo
+	 * un idioma por defecto para toda la aplicación.
+	 * </p>
+	 *
+	 * @return resolvedor de idioma basado en sesión
+	 */
 	@Bean
 	public LocaleResolver localeResolver() {
 		SessionLocaleResolver localeResolver = new SessionLocaleResolver();
-		localeResolver.setDefaultLocale(Locale.of("es", "ES"));
+		localeResolver.setDefaultLocale(IDIOMA_POR_DEFECTO);
 		return localeResolver;
 	}
 
+	/**
+	 * Define un interceptor que permite cambiar el idioma de la aplicación
+	 * a través de un parámetro en la petición HTTP.
+	 *
+	 * <p>
+	 * El nombre del parámetro se configura mediante una constante
+	 * de la propia clase.
+	 * </p>
+	 *
+	 * @return interceptor para el cambio de idioma
+	 */
 	@Bean
 	public LocaleChangeInterceptor localeChangeInterceptor() {
 		LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
-		localeChangeInterceptor.setParamName("lang");
+		localeChangeInterceptor.setParamName(IDIOMA_PARAMETRO_PATH);
 		return localeChangeInterceptor;
 	}
 
+	/**
+	 * Registra interceptores personalizados dentro del ciclo de vida
+	 * de las peticiones web.
+	 *
+	 * <p>
+	 * En este caso, se añade el interceptor encargado de gestionar
+	 * el cambio de idioma.
+	 * </p>
+	 *
+	 * @param registry registro de interceptores de Spring MVC
+	 */
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(localeChangeInterceptor());

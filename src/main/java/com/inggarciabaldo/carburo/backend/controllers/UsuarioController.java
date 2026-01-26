@@ -1,0 +1,211 @@
+package com.inggarciabaldo.carburo.backend.controllers;
+
+import com.inggarciabaldo.carburo.backend.dto.UsuarioDto;
+import com.inggarciabaldo.carburo.backend.entities.EstacionDeServicio;
+import com.inggarciabaldo.carburo.backend.entities.Provincia;
+import com.inggarciabaldo.carburo.backend.entities.Usuario;
+import com.inggarciabaldo.carburo.backend.services.AuthService;
+import com.inggarciabaldo.carburo.backend.services.ProvinciaService;
+import com.inggarciabaldo.carburo.backend.services.UsuarioService;
+import com.inggarciabaldo.carburo.backend.validators.PerfilCambioDeNombreFormValidator;
+import com.inggarciabaldo.carburo.backend.validators.PerfilCambioDeProvinciaFavoritaFormValidator;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+
+/**
+ * Controlador de gestión del perfil del usuario autenticado.
+ *
+ * <p>
+ * Permite consultar y modificar los datos personales del usuario,
+ * como el nombre o la provincia favorita, así como acceder a
+ * funcionalidades relacionadas con su perfil.
+ * </p>
+ */
+@Controller
+@RequestMapping("/perfil")
+public class UsuarioController {
+
+    private final ProvinciaService provinciaService;
+    private final AuthService authService;
+    private final UsuarioService usuarioService;
+    private final PerfilCambioDeProvinciaFavoritaFormValidator perfilCambioDeProvinciaFavoritaFormValidator;
+    private final PerfilCambioDeNombreFormValidator perfilCambioDeNombreFormValidator;
+
+    /**
+     * Constructor con inyección de dependencias de servicios y validadores.
+     */
+    public UsuarioController(AuthService authService,
+                             UsuarioService usuarioService,
+                             ProvinciaService provinciaService,
+                             PerfilCambioDeProvinciaFavoritaFormValidator perfilCambioDeProvinciaFavoritaFormValidator,
+                             PerfilCambioDeNombreFormValidator perfilCambioDeNombreFormValidator) {
+        this.authService = authService;
+        this.usuarioService = usuarioService;
+        this.provinciaService = provinciaService;
+        this.perfilCambioDeProvinciaFavoritaFormValidator = perfilCambioDeProvinciaFavoritaFormValidator;
+        this.perfilCambioDeNombreFormValidator = perfilCambioDeNombreFormValidator;
+    }
+
+    /**
+     * Muestra la página de perfil del usuario autenticado.
+     * <p>
+     * Recupera el usuario autenticado y expone sus datos básicos
+     * a la vista. Si no hay sesión válida, redirige al login.
+     *
+     * @param model Modelo MVC para la vista
+     * @return Vista del perfil o redirección a login
+     */
+    @GetMapping("")
+    public String doGetPerfil(Model model) {
+        Optional<Usuario> usuario = authService.getUsuarioAuthenticado();
+        if (usuario.isEmpty()) return "redirect:/login";
+        model.addAttribute("nombre", usuario.get().getNombre());
+        model.addAttribute("correo", usuario.get().getEmail());
+        model.addAttribute("provincia", usuario.get().getProvinciaFavorita().getDenominacion());
+        return "auth/perfil/perfil";
+    }
+
+    /**
+     * Muestra el formulario de cambio de nombre del perfil.
+     *
+     * <p>
+     * Inicializa el DTO con los datos actuales del usuario.
+     * </p>
+     */
+    @GetMapping("/editarNombre")
+    public String doGetCambioDeNombrePerfil(Model model) {
+        Optional<Usuario> usuario = authService.getUsuarioAuthenticado();
+        if (usuario.isEmpty()) return "redirect:/login";
+        UsuarioDto usuarioDto = new UsuarioDto();
+        usuarioDto.setUuid(usuario.get().getUuid());
+        usuarioDto.setNombre(usuario.get().getNombre());
+        model.addAttribute("usuario", usuarioDto);
+        return "auth/perfil/editarNombre";
+    }
+
+    /**
+     * Procesa el cambio de nombre del usuario.
+     *
+     * <p>
+     * Valida el nuevo nombre y actualiza el registro del usuario
+     * si los datos son correctos.
+     * </p>
+     */
+    @PostMapping("/editarNombre")
+    public String doPostCambioDeNombrePerfil(@ModelAttribute("usuario") @Validated UsuarioDto usuarioDto,
+                                             BindingResult bindingResult) {
+        Optional<Usuario> usuario = authService.getUsuarioAuthenticado();
+        if (usuario.isEmpty()) return "redirect:/login";
+        // Validación del formulario
+        perfilCambioDeNombreFormValidator.validate(usuarioDto, bindingResult);
+        // Si hay errores, volvemos a la vista de la recuperación de contraseña
+        if (bindingResult.hasErrors()) return "auth/perfil/editarNombre";
+        //  Registro del usuario
+        usuarioService.updateNombreDeUsuario(usuario.get().getUuid(), usuarioDto.getNombre());
+        return "redirect:/perfil";
+    }
+
+    /**
+     * Muestra el formulario de cambio de provincia favorita.
+     *
+     * <p>
+     * Carga el listado de provincias y establece la provincia
+     * actual del usuario como valor inicial.
+     * </p>
+     */
+    @GetMapping("/editarProvincia")
+    public String doGetCambioDeProvinciaFavoritaPerfil(Model model) {
+        Optional<Usuario> usuario = authService.getUsuarioAuthenticado();
+        if (usuario.isEmpty()) return "redirect:/login";
+        // Creo el DTO con los datos necesarios del usuario
+        UsuarioDto usuarioDto = new UsuarioDto();
+        usuarioDto.setUuid(usuario.get().getUuid());
+        usuarioDto.setProvinciaFavorita(usuario.get().getProvinciaFavorita().getId());
+        // Paso los datos necesarios
+        model.addAttribute("provincias", provinciaService.getProvinciasOrderByDenominacion());
+        model.addAttribute("usuario", usuarioDto);
+        return "auth/perfil/editarProvinciaFavorita";
+    }
+
+    /**
+     * Procesa el cambio de provincia favorita del usuario.
+     *
+     * <p>
+     * Valida la selección y actualiza la provincia asociada
+     * al usuario en la base de datos.
+     * </p>
+     */
+    @PostMapping("/editarProvincia")
+    public String doPostCambioDeProvinciaFavoritaPerfil(@ModelAttribute("usuario") @Validated UsuarioDto usuarioDto,
+                                                        BindingResult bindingResult) {
+        Optional<Usuario> usuario = authService.getUsuarioAuthenticado();
+        if (usuario.isEmpty()) return "redirect:/login";
+        // Validación del formulario
+        perfilCambioDeProvinciaFavoritaFormValidator.validate(usuarioDto, bindingResult);
+        // Si hay errores, volvemos a la vista de la recuperación de contraseña
+        if (bindingResult.hasErrors()) return "auth/perfil/editarProvinciaFavorita";
+
+        Optional<Provincia> provincia = provinciaService.getProvinciaById(usuarioDto.getProvinciaFavorita());
+        // Error inesperado en el servicio de autenticación
+        if (provincia.isEmpty()) {
+            bindingResult.rejectValue("provinciaFavorita", "Error.auth.login.registro.fallo");
+            return "auth/perfil/editarProvinciaFavorita";
+        }
+        usuarioService.updateProvinciaFavoritaUsuario(usuario.get().getUuid(), provincia.get());
+        return "redirect:/perfil";
+    }
+
+    /**
+     * Muestra la vista de cambio de contraseña del perfil.
+     *
+     * <p>
+     * Actualmente pendiente de implementación.
+     * </p>
+     */
+    @GetMapping("/change-password")
+    public String doGetCambioDeContrasenaPerfil(Model model) {
+        Optional<Usuario> usuario = authService.getUsuarioAuthenticado();
+        if (usuario.isEmpty()) return "redirect:/login";
+        // Paso los datos necesarios
+        // TODO
+        return "auth/perfil/cambiarContraseña";
+    }
+
+    /**
+     * Redirige al listado de estaciones de servicio favoritas por usuario
+     */
+    @GetMapping("/estacionesDeServicioFavoritas")
+    public String doGetEstacionesDeServicioFavoritas(Model model) {
+        model.addAttribute("pagina", "eessFav");
+        Optional<Usuario> usuario = authService.getUsuarioAuthenticado();
+        if (usuario.isEmpty()) return "redirect:/EstacionesDeServicio";
+        Set<EstacionDeServicio> eess = usuario.get().getEessFavoritas();
+        model.addAttribute("eess", eess);
+        return "eess/favoritas";
+    }
+
+    /**
+     * Redirige al listado de estaciones de servicio filtrado
+     * por la provincia favorita del usuario.
+     */
+    @GetMapping("/estacionesDeServicio")
+    public String doGetEstacionesDeServicioProvinciaFavorita() {
+        Optional<Usuario> usuario = authService.getUsuarioAuthenticado();
+        if (usuario.isEmpty()) return "redirect:/EstacionesDeServicio";
+        String redireccion = "redirect:/EstacionesDeServicio?comunidadSeleccionada=%d&provinciaSeleccionada=%d";
+        return String.format(redireccion,
+                usuario.get().getProvinciaFavorita().getComunidadAutonoma().getId(),
+                usuario.get().getProvinciaFavorita().getId());
+    }
+}
