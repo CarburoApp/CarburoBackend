@@ -38,32 +38,32 @@ import java.util.UUID;
 public class AuthService {
 
     // Constantes para los headers
-    private final static String CONTENT_TYPE = "Content-Type";
-    private final static String CONTENT_TYPE_JSON = "application/json";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_TYPE_JSON = "application/json";
 
-    private final static String AUTHORIZATION = "Authorization";
-    private final static String AUTHORIZATION_BEARER = "Bearer %s";
+    private static final String AUTHORIZATION = "Authorization";
+    private static final String AUTHORIZATION_BEARER = "Bearer %s";
 
     // Constantes para la autorización
-    private final static String AUTH_USER_EMAIL = "email";
-    private final static String AUTH_USER_PASSWORD = "password";
-    private final static String AUTH_USER_TOKEN = "access_token";
-    private final static String AUTH_USER = "user";
-    private final static String AUTH_USERS = "users";
-    private final static String AUTH_USER_ID = "id";
-    private final static String AUTH_USER_CREATED = "created_at";
-    private final static String AUTH_USER_UPDATED = "updated_at";
+    private static final String AUTH_USER_EMAIL = "email";
+    private static final String AUTH_USER_PASSWORD = "password";
+    private static final String AUTH_USER_TOKEN = "access_token";
+    private static final String AUTH_USER = "user";
+    private static final String AUTH_USERS = "users";
+    private static final String AUTH_USER_ID = "id";
+    private static final String AUTH_USER_CREATED = "created_at";
+    private static final String AUTH_USER_UPDATED = "updated_at";
 
     // Constantes para los endpoints
-    private final static String HTTP_METHOD_GET = "GET";
-    private final static String HTTP_METHOD_POST = "POST";
-    private final static String HTTP_METHOD_PUT = "PUT";
-    private final static String HTTP_METHOD_DELETE = "DELETE";
-    private final static String AUTH_ENDPOINT_SIGNUP = "/signup";
-    private final static String AUTH_ENDPOINT_RECOVER = "/recover";
-    private final static String AUTH_ENDPOINT_LOGIN = "/token?grant_type=password";
-    private final static String AUTH_ENDPOINT_ADMIN_USERS = "/admin/users";
-    private final static String AUTH_ENDPOINT_USER = "/user";
+    private static final String HTTP_METHOD_GET = "GET";
+    private static final String HTTP_METHOD_POST = "POST";
+    private static final String HTTP_METHOD_PUT = "PUT";
+    private static final String HTTP_METHOD_DELETE = "DELETE";
+    private static final String AUTH_ENDPOINT_SIGNUP = "/signup";
+    private static final String AUTH_ENDPOINT_RECOVER = "/recover";
+    private static final String AUTH_ENDPOINT_LOGIN = "/token?grant_type=password";
+    private static final String AUTH_ENDPOINT_ADMIN_USERS = "/admin/users";
+    private static final String AUTH_ENDPOINT_USER = "/user";
 
     // Inyección de dependencias
     private final UsuarioService usuarioService;
