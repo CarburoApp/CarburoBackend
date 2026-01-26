@@ -5,10 +5,15 @@ import com.inggarciabaldo.carburo.backend.services.EstacionDeServicioService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import static com.inggarciabaldo.carburo.backend.controllers.EstacionDeServicioController.RUTA_ESTACIONES_DE_SERVICIO;
 
 /**
  * Controlador principal de la aplicación que maneja las rutas de inicio y contacto.
@@ -25,13 +30,20 @@ import java.util.Map;
 @Controller
 public class HomeController {
 
-	// Servicio para manejar operaciones relacionadas con estaciones de servicio
+	// Constantes de vistas
+	public static final String VISTA_INICIO = "inicio";
+	public static final String VISTA_CONTACTO = "contacto";
+
+	// Rutas
+	public static final String RUTA_CONTACTO = "/contacto";
+	public static final String RUTA_INICIO_UBICACION = "/inicio/ubicacion";
+
+	// Dependencias
 	private final EstacionDeServicioService estacionDeServicioService;
 
 	/**
-	 * Constructor del controlador.
+	 * Constructor del controlador para la inyección de dependencias.
 	 *
-	 * @param estacionDeServicioService servicio para obtener información de estaciones de servicio
 	 */
 	public HomeController(EstacionDeServicioService estacionDeServicioService) {
 		this.estacionDeServicioService = estacionDeServicioService;
@@ -66,7 +78,7 @@ public class HomeController {
 			model.addAttribute("estacionCercana", null);
 		}
 
-		return "inicio";
+		return VISTA_INICIO;
 	}
 
 	/**
@@ -79,13 +91,13 @@ public class HomeController {
 	private static Map<String, String> getBusquedasPopulares() {
 		Map<String, String> busquedasPopulares = new LinkedHashMap<>();
 		busquedasPopulares.put("Madrid",
-							   "/estacionesDeServicio?comunidadSeleccionada=13");
-		busquedasPopulares.put("Barcelona",
-							   "/estacionesDeServicio?comunidadSeleccionada=9&provinciaSeleccionada=8");
+							   RUTA_ESTACIONES_DE_SERVICIO + "?comunidadSeleccionada=13");
+		busquedasPopulares.put("Barcelona", RUTA_ESTACIONES_DE_SERVICIO +
+				"?comunidadSeleccionada=9&provinciaSeleccionada=8");
 		busquedasPopulares.put("Asturias",
-							   "/estacionesDeServicio?comunidadSeleccionada=3");
-		busquedasPopulares.put("León",
-							   "/estacionesDeServicio?comunidadSeleccionada=8&provinciaSeleccionada=24");
+							   RUTA_ESTACIONES_DE_SERVICIO + "?comunidadSeleccionada=3");
+		busquedasPopulares.put("León", RUTA_ESTACIONES_DE_SERVICIO +
+				"?comunidadSeleccionada=8&provinciaSeleccionada=24");
 		return busquedasPopulares;
 	}
 
@@ -100,14 +112,14 @@ public class HomeController {
 	 * @param model modelo para pasar la estación encontrada a la vista
 	 * @return el fragmento "inicio :: estacionCercanaFragment" con la estación más cercana
 	 */
-	@PostMapping("/inicio/ubicacion")
+	@PostMapping(RUTA_INICIO_UBICACION)
 	public String obtenerEstacionMasCercanaFragment(@RequestParam double lat,
 													@RequestParam double lon,
 													Model model) {
 		// Obtenemos la estación más cercana usando el servicio
 		EstacionDeServicio e = estacionDeServicioService.getEstacionDeServicioMasProxima(lat, lon);
 		model.addAttribute("estacion", e);
-		return "inicio :: estacionCercanaFragment";
+		return VISTA_INICIO + " :: estacionCercanaFragment";
 	}
 
 	/**
@@ -138,10 +150,10 @@ public class HomeController {
 	 * @param model modelo para pasar atributos a la vista
 	 * @return el nombre de la vista "contacto"
 	 */
-	@GetMapping("/contacto")
+	@GetMapping(RUTA_CONTACTO)
 	public String quienesSomos(Model model) {
 		model.addAttribute("pagina", "contacto");
 		model.addAttribute("email", emailContacto);
-		return "contacto";
+		return VISTA_CONTACTO;
 	}
 }

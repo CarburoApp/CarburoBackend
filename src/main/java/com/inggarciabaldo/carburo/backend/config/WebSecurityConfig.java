@@ -60,7 +60,7 @@ public class WebSecurityConfig {
 						.requestMatchers("/estacionesDeServicio", "/estacionesDeServicio/*").permitAll()
 						// Rutas que requieren autenticación
 						.requestMatchers("/perfil", "/perfil/**").hasRole("USER")
-						.requestMatchers("/vehiculos/**", "/repostajes/**", "/perfil/estacionesDeServicioFavoritas").hasRole("USER")
+						.requestMatchers("/vehiculos/**", "/repostajes/**", "/perfil/estacionesDeServicio/favoritas/*").hasRole("USER")
 						// Cualquier otra petición (por ahora público)
 						.anyRequest().permitAll())
 				// Formulario de login personalizado deshabilitado

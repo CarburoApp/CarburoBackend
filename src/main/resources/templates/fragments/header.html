@@ -38,7 +38,7 @@
                th:text="#{header.nav.boton.estaciones}"></a>
 
 
-            <a sec:authorize="isAuthenticated()" th:href="@{/perfil/estacionesDeServicioFavoritas}"
+            <a sec:authorize="isAuthenticated()" th:href="@{/perfil/estacionesDeServicio/favoritas}"
                th:class="${pagina == 'eessFav'} ? 'text-primary text-sm font-bold leading-normal transition-colors' :
                'text-main text-sm font-medium leading-normal hover:text-primary transition-colors'"
                th:text="#{header.nav.boton.favoritos}"></a>
@@ -149,7 +149,7 @@
            'text-main text-sm font-medium hover:text-primary transition-colors'"
                th:text="#{header.nav.boton.estaciones}"></a>
 
-            <a sec:authorize="isAuthenticated()" th:href="@{/perfil/estacionesDeServicioFavoritas}"
+            <a sec:authorize="isAuthenticated()" th:href="@{/perfil/estacionesDeServicio/favoritas}"
                th:class="${pagina == 'eessFav'} ? 'text-primary text-sm font-bold' :
            'text-main text-sm font-medium hover:text-primary transition-colors'"
                th:text="#{header.nav.boton.favoritos}"></a>

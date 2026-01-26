@@ -52,7 +52,7 @@
         <div class="bg-surface rounded-xl border border-[#e8dbce] p-6 md:p-8 shadow-sm mb-8 relative overflow-visible">
             <!-- Botón de me gusta-->
             <form th:fragment="botonFavorita(estacion, favorita)" method="post" sec:authorize="isAuthenticated()"
-                  th:action="@{/perfil/estacionesDeServicio/favorita/{id}(id=${estacion.id})}">
+                  th:action="@{/perfil/estacionesDeServicio/favoritas/{id}(id=${estacion.id})}">
                 <button type="submit"
                         class="absolute -top-6 -right-1 md:right-8 w-12 h-12 md:w-14 md:h-14
                    rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all group z-20

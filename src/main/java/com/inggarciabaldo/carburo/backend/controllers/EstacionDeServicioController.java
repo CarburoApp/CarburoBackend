@@ -16,8 +16,20 @@ import java.time.LocalDate;
 import java.util.*;
 
 @Controller
-@RequestMapping("/estacionesDeServicio")
+@RequestMapping(EstacionDeServicioController.RUTA_ESTACIONES_DE_SERVICIO)
 public class EstacionDeServicioController {
+
+	// Constantes de vistas
+	public static final String VISTA_EESS_DESCRIPTION = "eess/estacionDeServicio";
+	public static final String VISTA_EESS_LIST = "eess/list";
+
+	// Rutas
+	public static final String RUTA_REDIRECT = "redirect:";
+	public static final String RUTA_ESTACIONES_DE_SERVICIO = "/estacionesDeServicio";
+	public static final String RUTA_ESTACION_DE_SERVICIO = "/estacionesDeServicio/";
+	// A las siguientes rutas les hace falta al comienzo /perfil/....
+	public static final String RUTA_ESTACIONES_DE_SERVICIO_FAVORITAS_SIN_PERFIL = "/estacionesDeServicio/favoritas";
+	public static final String RUTA_ESTACION_DE_SERVICIO_FAVORITA_SIN_PERFIL = "/estacionesDeServicio/favoritas/";
 
 	private final EstacionDeServicioService estacionDeServicioService;
 	private final ComunidadAutonomaService comunidadAutonomaService;
@@ -178,7 +190,7 @@ public class EstacionDeServicioController {
 				marcaSeleccionada)) ? marcaSeleccionada : "0NOTSELECTED"; // Si no hay selección o la selección no es válida
 		model.addAttribute("marcaSeleccionada", marcaFinal);
 
-		return "eess/list";
+		return VISTA_EESS_LIST;
 	}
 
 	/**
@@ -206,7 +218,7 @@ public class EstacionDeServicioController {
 	 * @param id          ID de la estación de servicio (debe ser mayor que 0)
 	 * @param fechaInicio fecha de inicio opcional para filtrar los precios históricos (formato ISO, por ejemplo "2026-01-17")
 	 * @param model       modelo de Spring para pasar atributos a la vista
-	 * @return nombre de la vista "/eess/estacionDeServicio" o redirección a "/estacionDeServicio/list" si el ID no es válido o la estación no existe
+	 * @return nombre de la vista "/eess/estacionDeServicio" o redirección a "/estacionesDeServicio" si el ID no es válido o la estación no existe
 	 */
 	@GetMapping("/{id}")
 	public String doGet(@PathVariable Long id,
@@ -214,7 +226,7 @@ public class EstacionDeServicioController {
 						@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
 						LocalDate fechaInicio, Model model) {
 		// Validación rápida del ID
-		if (id <= 0) return "redirect:/estacionDeServicio/list";
+		if (id <= 0) return RUTA_REDIRECT + RUTA_ESTACIONES_DE_SERVICIO;
 
 		// Se obtiene la estación de servicio por ID
 		EstacionDeServicio estacion = estacionDeServicioService.getEstacionDeServicioById(
@@ -222,7 +234,7 @@ public class EstacionDeServicioController {
 
 		// Si la estación no existe, se redirige a la página principal
 		if (estacion == null) {
-			return "redirect:/estacionDeServicio/list";
+			return RUTA_REDIRECT + RUTA_ESTACIONES_DE_SERVICIO;
 		}
 
 		LocalDate hoy = LocalDate.now();
@@ -258,7 +270,7 @@ public class EstacionDeServicioController {
 		model.addAttribute("preciosCombMap", preciosCombMap);
 
 		// Retornamos la vista correspondiente a la estación de servicio
-		return "/eess/estacionDeServicio";
+		return VISTA_EESS_DESCRIPTION;
 	}
 }
 

@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.inggarciabaldo.carburo.backend.controllers.AuthController.RUTA_CAMBIAR_CONTRASENA;
+import static com.inggarciabaldo.carburo.backend.controllers.AuthController.RUTA_LOGIN;
+import static com.inggarciabaldo.carburo.backend.controllers.EstacionDeServicioController.*;
 import static com.inggarciabaldo.carburo.backend.validators.RegistroFormValidator.USUARIO_DTO_FIELD_PROVINCIA;
 
 
@@ -32,8 +35,22 @@ import static com.inggarciabaldo.carburo.backend.validators.RegistroFormValidato
  * </p>
  */
 @Controller
-@RequestMapping("/perfil")
+@RequestMapping(UsuarioController.RUTA_PERFIL)
 public class UsuarioController {
+
+    // Constantes de vistas
+    public static final String VISTA_PERFIL = "auth/perfil/perfil";
+    public static final String VISTA_EDITAR_NOMBRE = "auth/perfil/editarNombre";
+    public static final String VISTA_EDITAR_CONTRASENA = "auth/perfil/editarContrasena";
+    public static final String VISTA_EDITAR_PROVINCIA = "auth/perfil/editarProvinciaFavorita";
+    public static final String VISTA_ESTACIONES_DE_SERVICIO_FAVORITAS = "eess/favoritas";
+
+    // Ruta
+    public static final String RUTA_REDIRECT = "redirect:";
+    public static final String RUTA_PERFIL = "/perfil";
+    // A las siguientes rutas les hace falta al comienzo /perfil/....
+    public static final String RUTA_PERFIL_EDITAR_NOMBRE_SIN_PERFIL = "/editarNombre";
+    public static final String RUTA_PERFIL_EDITAR_PROVINCIA_SIN_PERFIL = "/editarProvincia";
 
     private final ProvinciaService provinciaService;
     private final AuthService authService;
@@ -71,11 +88,11 @@ public class UsuarioController {
     @GetMapping("")
     public String doGetPerfil(Model model) {
         Optional<Usuario> usuario = authService.getUsuarioAutenticado();
-        if (usuario.isEmpty()) return "redirect:/login";
+        if (usuario.isEmpty()) return RUTA_REDIRECT + RUTA_LOGIN;
         model.addAttribute("nombre", usuario.get().getNombre());
         model.addAttribute("correo", usuario.get().getEmail());
         model.addAttribute("provincia", usuario.get().getProvinciaFavorita().getDenominacion());
-        return "auth/perfil/perfil";
+        return VISTA_PERFIL;
     }
 
     /**
@@ -85,15 +102,15 @@ public class UsuarioController {
      * Inicializa el DTO con los datos actuales del usuario.
      * </p>
      */
-    @GetMapping("/editarNombre")
+    @GetMapping(RUTA_PERFIL_EDITAR_NOMBRE_SIN_PERFIL)
     public String doGetCambioDeNombrePerfil(Model model) {
         Optional<Usuario> usuario = authService.getUsuarioAutenticado();
-        if (usuario.isEmpty()) return "redirect:/login";
+        if (usuario.isEmpty()) return RUTA_REDIRECT + RUTA_LOGIN;
         UsuarioDto usuarioDto = new UsuarioDto();
         usuarioDto.setUuid(usuario.get().getUuid());
         usuarioDto.setNombre(usuario.get().getNombre());
         model.addAttribute("usuario", usuarioDto);
-        return "auth/perfil/editarNombre";
+        return VISTA_EDITAR_NOMBRE;
     }
 
     /**
@@ -104,18 +121,18 @@ public class UsuarioController {
      * si los datos son correctos.
      * </p>
      */
-    @PostMapping("/editarNombre")
+    @PostMapping(RUTA_PERFIL_EDITAR_NOMBRE_SIN_PERFIL)
     public String doPostCambioDeNombrePerfil(@ModelAttribute("usuario") @Validated UsuarioDto usuarioDto,
                                              BindingResult bindingResult) {
         Optional<Usuario> usuario = authService.getUsuarioAutenticado();
-        if (usuario.isEmpty()) return "redirect:/login";
+        if (usuario.isEmpty()) return RUTA_REDIRECT + RUTA_LOGIN;
         // Validación del formulario
         perfilCambioDeNombreFormValidator.validate(usuarioDto, bindingResult);
         // Si hay errores, volvemos a la vista de la recuperación de contraseña
-        if (bindingResult.hasErrors()) return "auth/perfil/editarNombre";
+        if (bindingResult.hasErrors()) return VISTA_EDITAR_NOMBRE;
         //  Registro del usuario
         usuarioService.updateNombreDeUsuario(usuario.get().getUuid(), usuarioDto.getNombre());
-        return "redirect:/perfil";
+        return RUTA_REDIRECT + RUTA_PERFIL;
     }
 
     /**
@@ -126,10 +143,10 @@ public class UsuarioController {
      * actual del usuario como valor inicial.
      * </p>
      */
-    @GetMapping("/editarProvincia")
+    @GetMapping(RUTA_PERFIL_EDITAR_PROVINCIA_SIN_PERFIL)
     public String doGetCambioDeProvinciaFavoritaPerfil(Model model) {
         Optional<Usuario> usuario = authService.getUsuarioAutenticado();
-        if (usuario.isEmpty()) return "redirect:/login";
+        if (usuario.isEmpty()) return RUTA_REDIRECT + RUTA_LOGIN;
         // Creo el DTO con los datos necesarios del usuario
         UsuarioDto usuarioDto = new UsuarioDto();
         usuarioDto.setUuid(usuario.get().getUuid());
@@ -137,7 +154,7 @@ public class UsuarioController {
         // Paso los datos necesarios
         model.addAttribute("provincias", provinciaService.getProvinciasOrderByDenominacion());
         model.addAttribute("usuario", usuarioDto);
-        return "auth/perfil/editarProvinciaFavorita";
+        return VISTA_EDITAR_PROVINCIA;
     }
 
     /**
@@ -148,24 +165,24 @@ public class UsuarioController {
      * al usuario en la base de datos.
      * </p>
      */
-    @PostMapping("/editarProvincia")
+    @PostMapping(RUTA_PERFIL_EDITAR_PROVINCIA_SIN_PERFIL)
     public String doPostCambioDeProvinciaFavoritaPerfil(@ModelAttribute("usuario") @Validated UsuarioDto usuarioDto,
                                                         BindingResult bindingResult) {
         Optional<Usuario> usuario = authService.getUsuarioAutenticado();
-        if (usuario.isEmpty()) return "redirect:/login";
+        if (usuario.isEmpty()) return RUTA_REDIRECT + RUTA_LOGIN;
         // Validación del formulario
         perfilCambioDeProvinciaFavoritaFormValidator.validate(usuarioDto, bindingResult);
         // Si hay errores, volvemos a la vista de la recuperación de contraseña
-        if (bindingResult.hasErrors()) return "auth/perfil/editarProvinciaFavorita";
+        if (bindingResult.hasErrors()) return VISTA_EDITAR_PROVINCIA;
 
         Optional<Provincia> provincia = provinciaService.getProvinciaById(usuarioDto.getProvinciaFavorita());
         // Error inesperado en el servicio de autenticación
         if (provincia.isEmpty()) {
             bindingResult.rejectValue(USUARIO_DTO_FIELD_PROVINCIA, "Error.auth.login.registro.fallo");
-            return "auth/perfil/editarProvinciaFavorita";
+            return VISTA_EDITAR_PROVINCIA;
         }
         usuarioService.updateProvinciaFavoritaUsuario(usuario.get().getUuid(), provincia.get());
-        return "redirect:/perfil";
+        return RUTA_REDIRECT + RUTA_PERFIL;
     }
 
     /**
@@ -175,24 +192,24 @@ public class UsuarioController {
      * Actualmente pendiente de implementación.
      * </p>
      */
-    @GetMapping("/change-password")
+    @GetMapping(RUTA_CAMBIAR_CONTRASENA)
     public String doGetCambioDeContrasena(Model model) {
-        if (!authService.isAuthenticated()) return "redirect:/login";
+        if (!authService.isAuthenticated()) return RUTA_REDIRECT + RUTA_LOGIN;
         model.addAttribute("usuario", new UsuarioDto());
-        return "auth/perfil/editarContrasena";
+        return VISTA_EDITAR_CONTRASENA;
     }
 
     /**
      * Redirige al listado de estaciones de servicio favoritas por usuario
      */
-    @GetMapping("/estacionesDeServicioFavoritas")
+    @GetMapping(RUTA_ESTACIONES_DE_SERVICIO_FAVORITAS_SIN_PERFIL)
     public String doGetEstacionesDeServicioFavoritas(Model model) {
         model.addAttribute("pagina", "eessFav");
         Optional<Usuario> usuario = authService.getUsuarioAutenticado();
-        if (usuario.isEmpty()) return "redirect:/EstacionesDeServicio";
+        if (usuario.isEmpty()) return RUTA_REDIRECT + RUTA_ESTACIONES_DE_SERVICIO;
         Set<EstacionDeServicio> eess = usuario.get().getEessFavoritas();
         model.addAttribute("eess", eess);
-        return "eess/favoritas";
+        return VISTA_ESTACIONES_DE_SERVICIO_FAVORITAS;
     }
 
     /**
@@ -200,14 +217,15 @@ public class UsuarioController {
      * Añade o retira a las estaciones de servicio favoritas del usuario la estación
      * de servicio cuyo id se recibe como parámetro.
      */
-    @PostMapping("/estacionesDeServicio/favorita/{id}")
+    @PostMapping(RUTA_ESTACION_DE_SERVICIO_FAVORITA_SIN_PERFIL + "{id}")
     public String doPostAddRemoveEstacionDeServicioFavorita(@PathVariable Long id) {
         // Usuario autenticado
         Optional<Usuario> usuario = authService.getUsuarioAutenticado();
-        if (usuario.isEmpty()) return "redirect:/login";
+        if (usuario.isEmpty()) return RUTA_REDIRECT + RUTA_LOGIN;
 
         // Validación rápida del ID
-        if (id <= 0) return "redirect:/estacionesDeServicioFavoritas";
+        if (id <= 0)
+            return RUTA_REDIRECT + RUTA_ESTACIONES_DE_SERVICIO_FAVORITAS_SIN_PERFIL;
 
         // Se obtiene la estación de servicio por ID
         EstacionDeServicio estacion = estacionDeServicioService.getEstacionDeServicioById(
@@ -215,7 +233,7 @@ public class UsuarioController {
 
         // Si la estación no existe, se redirige a la página principal
         if (estacion == null) {
-            return "redirect:/estacionesDeServicioFavoritas";
+            return RUTA_REDIRECT + RUTA_ESTACIONES_DE_SERVICIO_FAVORITAS_SIN_PERFIL;
         }
 
         if (usuarioService.isEstacionDeServicioFavorita(usuario.get(), estacion)) {
@@ -225,6 +243,6 @@ public class UsuarioController {
             // La estación no es favorita, se añade
             usuarioService.addEstacionDeServicioFavorita(usuario.get(), estacion);
         }
-        return "redirect:/estacionesDeServicio/" + id;
+        return RUTA_REDIRECT + RUTA_ESTACION_DE_SERVICIO + id;
     }
 }

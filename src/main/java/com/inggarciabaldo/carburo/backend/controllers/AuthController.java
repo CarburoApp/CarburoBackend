@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import java.io.IOException;
 import java.util.Optional;
 
+import static com.inggarciabaldo.carburo.backend.controllers.UsuarioController.RUTA_PERFIL;
 import static com.inggarciabaldo.carburo.backend.validators.RegistroFormValidator.USUARIO_DTO_FIELD_CONTRASENA;
 import static com.inggarciabaldo.carburo.backend.validators.RegistroFormValidator.USUARIO_DTO_FIELD_CORREO;
 
@@ -41,6 +42,13 @@ public class AuthController {
     public static final String VISTA_REGISTRO = "auth/registro";
     public static final String VISTA_RECUPERACION_CONTRASENA = "auth/recuperacion";
     public static final String VISTA_CAMBIAR_CONTRASENA = "auth/perfil/editarContrasena";
+
+    // Rutas
+    public static final String RUTA_REDIRECT = "redirect:";
+    public static final String RUTA_LOGIN = "/login";
+    public static final String RUTA_REGISTRO = "/registro";
+    public static final String RUTA_RECUPERACION = "/recuperacion";
+    public static final String RUTA_CAMBIAR_CONTRASENA = "/change-password";
 
     private final ProvinciaService provinciaService;
     private final AuthService authService;
@@ -73,9 +81,9 @@ public class AuthController {
      * Muestra la vista de login si el usuario no está autenticado.
      * Si ya existe sesión activa, redirige directamente al perfil.
      */
-    @GetMapping("/login")
+    @GetMapping(RUTA_LOGIN)
     public String doGetLogin(Model model) {
-        if (authService.isAuthenticated()) return "redirect:/perfil";
+        if (authService.isAuthenticated()) return RUTA_REDIRECT + RUTA_PERFIL;
         model.addAttribute("usuario", new UsuarioDto());
         return VISTA_LOGIN;
     }
@@ -89,11 +97,11 @@ public class AuthController {
      * la sesión y se redirige al perfil.
      * </p>
      */
-    @PostMapping("/login")
+    @PostMapping(RUTA_LOGIN)
     public String doPostLogin(@ModelAttribute("usuario") @Validated UsuarioDto usuarioDto,
                               BindingResult bindingResult,
                               HttpServletRequest request) {
-        if (authService.isAuthenticated()) return "redirect:/perfil";
+        if (authService.isAuthenticated()) return RUTA_REDIRECT + RUTA_PERFIL;
         // Validación del formulario
         loginFormValidator.validate(usuarioDto, bindingResult);
         // hay errores -> vista de login
@@ -105,7 +113,7 @@ public class AuthController {
                                           "Error.auth.login.fallo.sesion");
                 return VISTA_LOGIN;
             }
-            return "redirect:/perfil";
+            return RUTA_REDIRECT + RUTA_PERFIL;
         } catch (IOException | IllegalStateException e) {
             bindingResult.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
                                       "Error.auth.login.fallo.sesion");
@@ -117,9 +125,9 @@ public class AuthController {
      * Muestra el formulario de registro junto con los datos necesarios
      * para su cumplimentación (provincias).
      */
-    @GetMapping("/registro")
+    @GetMapping(RUTA_REGISTRO)
     public String doGetRegistro(Model model) {
-        if (authService.isAuthenticated()) return "redirect:/perfil";
+        if (authService.isAuthenticated()) return RUTA_REDIRECT + RUTA_PERFIL;
         model.addAttribute("usuario", new UsuarioDto());
         model.addAttribute("pagina", "registro");
         model.addAttribute("provincias", provinciaService.getProvinciasOrderByDenominacion());
@@ -147,14 +155,14 @@ public class AuthController {
      * automático tras un registro exitoso.
      * </p>
      */
-    @PostMapping("/registro")
+    @PostMapping(RUTA_REGISTRO)
     public String doPostRegistro(
             @ModelAttribute("usuario") @Validated UsuarioDto usuarioDto,
             BindingResult bindingResult,
             HttpServletRequest request,
             Model model
     ) {
-        if (authService.isAuthenticated()) return "redirect:/perfil";
+        if (authService.isAuthenticated()) return RUTA_REDIRECT + RUTA_PERFIL;
         // Validación del formulario
         registroFormValidator.validate(usuarioDto, bindingResult);
         // Si hay errores, volvemos a la vista de registro
@@ -187,15 +195,15 @@ public class AuthController {
         //Realizar el Login
         authService.login(request, usuarioDto.getToken(), usuario.getUuid());
 
-        return "redirect:/perfil";
+        return RUTA_REDIRECT + RUTA_PERFIL;
     }
 
     /**
      * Muestra el formulario de recuperación de contraseña.
      */
-    @GetMapping("/recuperacion")
+    @GetMapping(RUTA_RECUPERACION)
     public String doGetRepuceracion(Model model) {
-        if (authService.isAuthenticated()) return "redirect:/perfil";
+        if (authService.isAuthenticated()) return RUTA_REDIRECT + RUTA_PERFIL;
         model.addAttribute("usuario", new UsuarioDto());
         return VISTA_RECUPERACION_CONTRASENA;
     }
@@ -208,10 +216,10 @@ public class AuthController {
      * el envío del proceso de recuperación.
      * </p>
      */
-    @PostMapping("/recuperacion")
+    @PostMapping(RUTA_RECUPERACION)
     public String doGetRepuceracion(@ModelAttribute("usuario") @Validated UsuarioDto usuarioDto,
                                     BindingResult bindingResult) {
-        if (authService.isAuthenticated()) return "redirect:/perfil";
+        if (authService.isAuthenticated()) return RUTA_REDIRECT + RUTA_PERFIL;
         // Validación del formulario
         recuperacionFormValidator.validate(usuarioDto, bindingResult);
         // Si hay errores, volvemos a la vista de la recuperación de contraseña
@@ -240,13 +248,13 @@ public class AuthController {
      * automático tras un registro exitoso.
      * </p>
      */
-    @PostMapping("/change-password")
+    @PostMapping(RUTA_CAMBIAR_CONTRASENA)
     public String doPostCambioDeContrasena(
             @ModelAttribute("usuario") @Validated UsuarioDto usuarioDto,
             BindingResult bindingResult, HttpServletRequest request, Model model) {
         // Comprobamos que el usuario está autenticado
         Optional<Usuario> usuarioAutenticado = authService.getUsuarioAutenticado();
-        if (usuarioAutenticado.isEmpty()) return "redirect:/login";
+        if (usuarioAutenticado.isEmpty()) return RUTA_REDIRECT + RUTA_LOGIN;
         // Validación del formulario
         perfilCambioContrasenaFormValidator.validate(usuarioDto, bindingResult);
         // Si hay errores, volvemos a la vista de registro
@@ -282,6 +290,6 @@ public class AuthController {
                                       "Error.auth.change.password.fallo");
             return returnRegistroConDatos(model);
         }
-        return "redirect:/perfil?passwordChanged=true";
+        return RUTA_REDIRECT + RUTA_PERFIL + "?passwordChanged=true";
     }
 }
