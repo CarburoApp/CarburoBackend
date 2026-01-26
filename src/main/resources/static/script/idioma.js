@@ -1,63 +1,50 @@
 $(document).ready(function () {
-    // Dropdown desktop
-    $('#btnLanguage').on('click keydown', function(e) {
-        if (e.type === 'click' || e.key === 'Enter' || e.key === ' ') {
+
+    // Función genérica para manejar dropdowns
+    function setupDropdown(buttonId, menuId) {
+        const $button = $(buttonId);
+        const $menu = $(menuId);
+
+        // Abrir/cerrar dropdown al click o Enter/Space
+        $button.on('click keydown', function(e) {
+            if (e.type === 'click' || e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                $menu.toggle();
+                $button.attr('aria-expanded', $menu.is(':visible'));
+            }
+        });
+
+        // Seleccionar idioma
+        $menu.find('button').on('click', function(e) {
             e.preventDefault();
-            const menu = $('#languageDropdownMenuButton');
-            menu.toggle();
-            $(this).attr('aria-expanded', menu.is(':visible'));
-        }
-    });
+            const selectedText = $(this).text().trim();
+            const selectedValue = $(this).data("value");
 
-    $('#languageDropdownMenuButton button').on('click', function(e) {
-        e.preventDefault();
-        let languageSelectedText = $(this).text().trim();
-        let languageSelectedValue = $(this).data("value");
-        $('#btnLanguage span').text(languageSelectedText);
-        globalThis.location.replace('?lang=' + languageSelectedValue);
-        $('#languageDropdownMenuButton').hide();
-        $('#btnLanguage').attr('aria-expanded', 'false');
-    });
+            $button.find('span').text(selectedText);
+            globalThis.location.replace('?lang=' + selectedValue);
 
-    // Dropdown móvil
-    $('#btnLanguageMobile').on('click keydown', function(e) {
-        if (e.type === 'click' || e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            const menu = $('#languageDropdownMobile');
-            menu.toggle();
-            $(this).attr('aria-expanded', menu.is(':visible'));
-        }
-    });
+            $menu.hide();
+            $button.attr('aria-expanded', 'false');
+        });
 
-    $('#languageDropdownMobile button').on('click', function(e) {
-        e.preventDefault();
-        let languageSelectedText = $(this).text().trim();
-        let languageSelectedValue = $(this).data("value");
-        $('#btnLanguageMobile span').text(languageSelectedText);
-        globalThis.location.replace('?lang=' + languageSelectedValue);
-        $('#languageDropdownMobile').hide();
-        $('#btnLanguageMobile').attr('aria-expanded', 'false');
-    });
+        // Cerrar dropdown al hacer click fuera
+        $(document).click(function(event) {
+            if (!$(event.target).closest(buttonId + ', ' + menuId).length) {
+                $menu.hide();
+                $button.attr('aria-expanded', 'false');
+            }
+        });
+    }
 
-    // Cerrar dropdowns al hacer click fuera
-    $(document).click(function (event) {
-        if (!$(event.target).closest('#btnLanguage, #languageDropdownMenuButton').length) {
-            $('#languageDropdownMenuButton').hide();
-            $('#btnLanguage').attr('aria-expanded', 'false');
-        }
-        if (!$(event.target).closest('#btnLanguageMobile, #languageDropdownMobile').length) {
-            $('#languageDropdownMobile').hide();
-            $('#btnLanguageMobile').attr('aria-expanded', 'false');
-        }
-    });
+    // Inicializamos ambos dropdowns
+    setupDropdown('#btnLanguage', '#languageDropdownMenuButton');
+    setupDropdown('#btnLanguageMobile', '#languageDropdownMobile');
 
-    // Escape cierra ambos dropdowns
+    // Escape cierra todos los dropdowns
     $(document).keydown(function(e) {
         if (e.key === 'Escape') {
-            $('#languageDropdownMenuButton').hide();
-            $('#btnLanguage').attr('aria-expanded', 'false');
-            $('#languageDropdownMobile').hide();
-            $('#btnLanguageMobile').attr('aria-expanded', 'false');
+            $('#languageDropdownMenuButton, #languageDropdownMobile').hide();
+            $('#btnLanguage, #btnLanguageMobile').attr('aria-expanded', 'false');
         }
     });
 
