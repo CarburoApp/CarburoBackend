@@ -58,6 +58,8 @@ public class WebSecurityConfig {
 						.requestMatchers("/", "/login", "/registro", "/logout", "/recuperacion", "/contacto").permitAll()
 						// Estaciones de servicio
 						.requestMatchers("/estacionesDeServicio", "/estacionesDeServicio/*").permitAll()
+						// Sistema de Auth de Supabase
+						.requestMatchers("/recoverPassword/*").permitAll()
 						// Rutas que requieren autenticación
 						.requestMatchers("/perfil", "/perfil/**").hasRole("USER")
 						.requestMatchers("/vehiculos/**", "/repostajes/**", "/perfil/estacionesDeServicio/favoritas/*").hasRole("USER")

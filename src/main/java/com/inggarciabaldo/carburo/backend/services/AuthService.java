@@ -61,6 +61,7 @@ public class AuthService {
     private static final String HTTP_METHOD_DELETE = "DELETE";
     private static final String AUTH_ENDPOINT_SIGNUP = "/signup";
     private static final String AUTH_ENDPOINT_RECOVER = "/recover";
+    private static final String AUTH_ENDPOINT_RESET = "/user/reset";
     private static final String AUTH_ENDPOINT_LOGIN = "/token?grant_type=password";
     private static final String AUTH_ENDPOINT_ADMIN_USERS = "/admin/users";
     private static final String AUTH_ENDPOINT_USER = "/user";
@@ -328,7 +329,43 @@ public class AuthService {
                 """, correo);
         // Enviar JSON
         conn.getOutputStream().write(jsonBody.getBytes(StandardCharsets.UTF_8));
+        return conn.getResponseCode() == HttpURLConnection.HTTP_OK;
+    }
 
+    /**
+     * Envía un email de recuperación de contraseña al correo indicado.
+     *
+     * @param nuevaContrasena Nueva contraseña del usuario a resablecer.
+     * @param tokenDeRecover  Token de recuperación recibido por email.
+     * @return true si la solicitud fue exitosa, false en caso contrario.
+     * @throws IOException si hay errores de conexión
+     */
+    @Transactional
+    public boolean restablecerContrasena(String tokenDeRecover, String nuevaContrasena)
+            throws IOException {
+        if (nuevaContrasena == null || tokenDeRecover == null ||
+                tokenDeRecover.isBlank() || nuevaContrasena.isBlank())
+            throw new IllegalArgumentException("Correo inválida para la recuperación.");
+        // Construir la URL completa del endpoint admin
+        URL url = URI.create(SUPABASE_AUTH_URL + AUTH_ENDPOINT_RESET).toURL();
+        // Conexión HTTP
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(HTTP_METHOD_POST);
+        // Headers
+        conn.setRequestProperty(CONTENT_TYPE, CONTENT_TYPE_JSON);
+        conn.setRequestProperty(AUTHORIZATION,
+                                String.format(AUTHORIZATION_BEARER, SERVICE_ROLE_KEY));
+        conn.setDoOutput(true);
+        // TODO ACABAR DE IMPLEMENTAR
+        // Crear JSON de registro
+        String jsonBody = String.format("""
+                                        {
+                                           "password": "%s",
+                                           "token": "%s"
+                                         }
+                                        """, nuevaContrasena, tokenDeRecover);
+        // Enviar JSON
+        conn.getOutputStream().write(jsonBody.getBytes(StandardCharsets.UTF_8));
         return conn.getResponseCode() == HttpURLConnection.HTTP_OK;
     }
 

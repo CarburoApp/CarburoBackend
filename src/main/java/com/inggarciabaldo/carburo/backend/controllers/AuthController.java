@@ -6,18 +6,13 @@ import com.inggarciabaldo.carburo.backend.entities.Usuario;
 import com.inggarciabaldo.carburo.backend.services.AuthService;
 import com.inggarciabaldo.carburo.backend.services.ProvinciaService;
 import com.inggarciabaldo.carburo.backend.services.UsuarioService;
-import com.inggarciabaldo.carburo.backend.validators.LoginFormValidator;
-import com.inggarciabaldo.carburo.backend.validators.PerfilCambioContrasenaFormValidator;
-import com.inggarciabaldo.carburo.backend.validators.RecuperacionFormValidator;
-import com.inggarciabaldo.carburo.backend.validators.RegistroFormValidator;
+import com.inggarciabaldo.carburo.backend.validators.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -42,12 +37,14 @@ public class AuthController {
     public static final String VISTA_REGISTRO = "auth/registro";
     public static final String VISTA_RECUPERACION_CONTRASENA = "auth/recuperacion";
     public static final String VISTA_CAMBIAR_CONTRASENA = "auth/perfil/editarContrasena";
+    public static final String VISTA_RESTABLECER_CONTRASENA = "auth/restablecerContrasena";
 
     // Rutas
     public static final String RUTA_REDIRECT = "redirect:";
     public static final String RUTA_LOGIN = "/login";
     public static final String RUTA_REGISTRO = "/registro";
     public static final String RUTA_RECUPERACION = "/recuperacion";
+    public static final String RUTA_RESTABLECER_CONTRASENA = "/recoverPassword";
     public static final String RUTA_CAMBIAR_CONTRASENA = "/change-password";
 
     private final ProvinciaService provinciaService;
@@ -56,6 +53,7 @@ public class AuthController {
     private final RegistroFormValidator registroFormValidator;
     private final LoginFormValidator loginFormValidator;
     private final RecuperacionFormValidator recuperacionFormValidator;
+    private final PerfilRestablecerContrasenaFormValidator restablecerContrasenaFormValidator;
     private final PerfilCambioContrasenaFormValidator perfilCambioContrasenaFormValidator;
 
     /**
@@ -67,6 +65,7 @@ public class AuthController {
                           RegistroFormValidator registroFormValidator,
                           LoginFormValidator loginFormValidator,
                           RecuperacionFormValidator recuperacionFormValidator,
+                          PerfilRestablecerContrasenaFormValidator restablecerContrasenaFormValidator,
                           PerfilCambioContrasenaFormValidator perfilCambioContrasenaFormValidator) {
         this.authService                         = authService;
         this.usuarioService                      = usuarioService;
@@ -74,6 +73,7 @@ public class AuthController {
         this.registroFormValidator               = registroFormValidator;
         this.loginFormValidator                  = loginFormValidator;
         this.recuperacionFormValidator           = recuperacionFormValidator;
+        this.restablecerContrasenaFormValidator = restablecerContrasenaFormValidator;
         this.perfilCambioContrasenaFormValidator = perfilCambioContrasenaFormValidator;
     }
 
@@ -217,8 +217,9 @@ public class AuthController {
      * </p>
      */
     @PostMapping(RUTA_RECUPERACION)
-    public String doGetRepuceracion(@ModelAttribute("usuario") @Validated UsuarioDto usuarioDto,
-                                    BindingResult bindingResult) {
+    public String doPostRecuperacion(
+            @ModelAttribute("usuario") @Validated UsuarioDto usuarioDto,
+            BindingResult bindingResult, Model model) {
         if (authService.isAuthenticated()) return RUTA_REDIRECT + RUTA_PERFIL;
         // Validación del formulario
         recuperacionFormValidator.validate(usuarioDto, bindingResult);
@@ -227,10 +228,10 @@ public class AuthController {
 
         //  Registro del usuario
         try {
-            bindingResult.rejectValue(USUARIO_DTO_FIELD_CORREO,
-                                      (authService.recuperacionDeContrasena(
-                                              usuarioDto.getCorreo())) ?
-                    "Error.auth.recuperacion.exito" : "Error.auth.recuperacion.fallo");
+            if (!authService.recuperacionDeContrasena(usuarioDto.getCorreo())) {
+                bindingResult.rejectValue(USUARIO_DTO_FIELD_CORREO,
+                                          "Error.auth.recuperacion.fallo");
+            } else model.addAttribute("exito", true);
             return VISTA_RECUPERACION_CONTRASENA;
         } catch (IOException | IllegalStateException e) {
             bindingResult.rejectValue(USUARIO_DTO_FIELD_CORREO,
@@ -263,7 +264,7 @@ public class AuthController {
 
         // Validaciones manuales
         // Se comprueba que el usuario existe en el sistema de autenticación con esa contraseña
-        String token = null;
+        String token;
         try {
             token = authService.login(request, usuarioAutenticado.get().getEmail(),
                                       usuarioDto.getCorreo()); //dto.correo guarda la contraseña
@@ -291,5 +292,50 @@ public class AuthController {
             return returnRegistroConDatos(model);
         }
         return RUTA_REDIRECT + RUTA_PERFIL + "?passwordChanged=true";
+    }
+
+    /**
+     * Muestra la vista del formulario para restablecer la contraseña.
+     */
+    @GetMapping(RUTA_RESTABLECER_CONTRASENA)
+    public String doGetRestablecerContrasena(@RequestParam(name = "token") String token,
+                                             Model model) {
+        if (token == null || token.isEmpty()) return RUTA_REDIRECT + "/";
+        //Pasamos los valores al modelo
+        model.addAttribute("token", token);
+        model.addAttribute("usuario", new UsuarioDto());
+        return VISTA_RESTABLECER_CONTRASENA;
+    }
+
+    /**
+     * Procesa la solicitud de restablecimiento de la contraseña.
+     *
+     * <p>
+     * Validación de las contraseñas introducidas y delega en el servicio de autenticación
+     * el envío del proceso de restablecimiento.
+     * </p>
+     */
+    @PostMapping(RUTA_RESTABLECER_CONTRASENA +"/{token}")
+    public String doPostRestablecerContrasena(@PathVariable String token,
+            @ModelAttribute("usuario") @Validated UsuarioDto usuarioDto,
+            BindingResult bindingResult, Model model) {
+        System.out.println(usuarioDto.toString());
+        System.out.println(token);
+        // Validación del formulario
+        restablecerContrasenaFormValidator.validate(usuarioDto, bindingResult);
+        // Si hay errores, volvemos a la vista de la recuperación de contraseña
+        if (bindingResult.hasErrors()) return VISTA_RESTABLECER_CONTRASENA;
+        if (token == null || token.isEmpty()) return RUTA_REDIRECT + "/";
+        //  Registro del usuario
+        try {
+            if (authService.restablecerContrasena(token, usuarioDto.getContrasena())) {
+                bindingResult.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
+                                          "Error.auth.restablecer.contrasena.fallo");
+            } else model.addAttribute("exito", true);
+        } catch (IOException | IllegalStateException e) {
+            bindingResult.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
+                                      "Error.auth.restablecer.contrasena.fallo");
+        }
+        return VISTA_RESTABLECER_CONTRASENA;
     }
 }
