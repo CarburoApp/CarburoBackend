@@ -50,6 +50,7 @@ public class WebSecurityConfig {
 				})
 				.sessionManagement(session ->
 						session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+
 				)
 				.authorizeHttpRequests(auth -> auth
 						// Recursos estáticos (públicos)
@@ -66,7 +67,7 @@ public class WebSecurityConfig {
 				// Formulario de login personalizado deshabilitado
 				.formLogin(AbstractHttpConfigurer::disable)
 				// Funcionalidad de logout
-				.logout(logout -> logout.logoutUrl("/logout").logoutSuccessUrl("/login?logout=true").invalidateHttpSession(true).clearAuthentication(true));
+				.logout(AbstractHttpConfigurer::disable);
 		return http.build();
 	}
 

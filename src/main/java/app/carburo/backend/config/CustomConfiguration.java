@@ -10,7 +10,6 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
-import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import java.time.Duration;
 import java.util.List;
@@ -42,6 +41,13 @@ public class CustomConfiguration implements WebMvcConfigurer {
 	public static final Locale IDIOMA_POR_DEFECTO = Locale.of("es", "ES");
 	// Nombre del parámetro utilizado para cambiar el idioma en las peticiones.
 	public static final String IDIOMA_PARAMETRO_PATH = "lang";
+
+	// Dependencias
+	private final TokenExpiryInterceptor tokenExpiryInterceptor;
+
+	public CustomConfiguration(TokenExpiryInterceptor tokenExpiryInterceptor) {
+		this.tokenExpiryInterceptor = tokenExpiryInterceptor;
+	}
 
 	/**
 	 * Configura resolutores de argumentos personalizados para los métodos
@@ -104,15 +110,11 @@ public class CustomConfiguration implements WebMvcConfigurer {
 	 * Registra interceptores personalizados dentro del ciclo de vida
 	 * de las peticiones web.
 	 *
-	 * <p>
-	 * En este caso, se añade el interceptor encargado de gestionar
-	 * el cambio de idioma.
-	 * </p>
-	 *
 	 * @param registry registro de interceptores de Spring MVC
 	 */
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 		registry.addInterceptor(localeChangeInterceptor());
+		registry.addInterceptor(tokenExpiryInterceptor);
 	}
 }

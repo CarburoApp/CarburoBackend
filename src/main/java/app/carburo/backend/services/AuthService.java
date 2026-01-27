@@ -62,6 +62,7 @@ public class AuthService {
     private static final String AUTH_ENDPOINT_SIGNUP = "/signup";
     private static final String AUTH_ENDPOINT_RECOVER = "/recover";
     private static final String AUTH_ENDPOINT_LOGIN = "/token?grant_type=password";
+    private static final String AUTH_ENDPOINT_LOGOUT = "/logout";
     private static final String AUTH_ENDPOINT_ADMIN_USERS = "/admin/users";
     private static final String AUTH_ENDPOINT_USER = "/user";
 
@@ -100,6 +101,23 @@ public class AuthService {
         if (!isAuthenticated()) return Optional.empty();
         return usuarioService.findByUUID(UUID.fromString((String) auth.getPrincipal()));
     }
+
+    /**
+     * Devuelve el token actual del usuario logueado (JWT de Supabase)
+     *
+     * @return Optional con el token o vacío si no hay sesión
+     */
+    public Optional<String> getTokenActual() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated()) return Optional.empty();
+
+        Object credentials = auth.getCredentials();
+        if (credentials instanceof String token && !token.isBlank()) {
+            return Optional.of(token);
+        }
+        return Optional.empty();
+    }
+
 
     /**
      * Realiza el login manual en Spring Security utilizando el token
@@ -158,15 +176,9 @@ public class AuthService {
      */
     public String login(HttpServletRequest request, String email, String password)
             throws IOException, IllegalStateException {
-        // Construir la URL completa del endpoint admin
-        URL url = URI.create(SUPABASE_AUTH_URL + AUTH_ENDPOINT_LOGIN).toURL();
         // Conexión HTTP
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod(HTTP_METHOD_POST);
-        // Headers
-        conn.setRequestProperty(CONTENT_TYPE, CONTENT_TYPE_JSON);
+        HttpURLConnection conn = getHttpURLConnectionToSupabaseAuthWithJSONContent(AUTH_ENDPOINT_LOGIN, HTTP_METHOD_POST);
         conn.setDoOutput(true);
-
         // Crear JSON de registro
         String jsonBody = String.format("""
                 {
@@ -174,7 +186,6 @@ public class AuthService {
                     "password": "%s"
                 }
                 """, email, password);
-
         // Enviar JSON
         try (OutputStream os = conn.getOutputStream()) {
             os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
@@ -205,6 +216,25 @@ public class AuthService {
     }
 
     /**
+     * Cierra la sesión del usuario actual.
+     *
+     * @param tokenActualDelUsuario Token de autenticación del usuario
+     * @return true si el logout fue exitoso, false en caso contrario
+     * @throws IOException si hay errores de conexión
+     */
+    public boolean logout(String tokenActualDelUsuario) throws IOException, IllegalStateException {
+        if (tokenActualDelUsuario == null || tokenActualDelUsuario.isEmpty())
+            throw new IllegalStateException("Token inválido para el logout.");
+        // Conexión HTTP
+        HttpURLConnection conn = getHttpURLConnectionToSupabaseAuthWithJSONContent(AUTH_ENDPOINT_LOGOUT, HTTP_METHOD_POST);
+        // Headers complementarios
+        conn.setRequestProperty(AUTHORIZATION,
+                String.format(AUTHORIZATION_BEARER, tokenActualDelUsuario));
+        int responseCode = conn.getResponseCode();
+        return responseCode == HttpURLConnection.HTTP_NO_CONTENT;
+    }
+
+    /**
      * Registra un usuario nuevo.
      * Aquí se haría la creación en Supabase y luego la persistencia en la base de datos local.
      *
@@ -215,15 +245,9 @@ public class AuthService {
     @Transactional
     public UsuarioDto registro(UsuarioDto usuario)
             throws IOException, IllegalStateException {
-        // Construir la URL completa del endpoint admin
-        URL url = URI.create(SUPABASE_AUTH_URL + AUTH_ENDPOINT_SIGNUP).toURL();
         // Conexión HTTP
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod(HTTP_METHOD_POST);
-        // Headers
-        conn.setRequestProperty(CONTENT_TYPE, CONTENT_TYPE_JSON);
+        HttpURLConnection conn = getHttpURLConnectionToSupabaseAuthWithJSONContent(AUTH_ENDPOINT_SIGNUP, HTTP_METHOD_POST);
         conn.setDoOutput(true);
-
         // Crear JSON de registro
         String jsonBody = String.format("""
                 {
@@ -272,16 +296,11 @@ public class AuthService {
      * @throws IOException si hay errores de conexión
      */
     public boolean containsEmail(String email) throws IOException {
-        // Construir la URL completa del endpoint admin
-        URL url = URI.create(SUPABASE_AUTH_URL + AUTH_ENDPOINT_ADMIN_USERS).toURL();
         // Conexión HTTP
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod(HTTP_METHOD_GET);
-        // Headers
-        conn.setRequestProperty(CONTENT_TYPE, CONTENT_TYPE_JSON);
+        HttpURLConnection conn = getHttpURLConnectionToSupabaseAuthWithJSONContent(AUTH_ENDPOINT_ADMIN_USERS, HTTP_METHOD_GET);
+        // Headers complementarios
         conn.setRequestProperty(AUTHORIZATION,
                                 String.format(AUTHORIZATION_BEARER, SERVICE_ROLE_KEY));
-        conn.setDoOutput(false);
 
         int responseCode = conn.getResponseCode();
 
@@ -312,13 +331,8 @@ public class AuthService {
     public boolean recuperacionDeContrasena(String correo) throws IOException {
         if (correo == null || correo.isBlank())
             throw new IllegalArgumentException("Correo inválida para la recuperación.");
-        // Construir la URL completa del endpoint admin
-        URL url = URI.create(SUPABASE_AUTH_URL + AUTH_ENDPOINT_RECOVER).toURL();
         // Conexión HTTP
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod(HTTP_METHOD_POST);
-        // Headers
-        conn.setRequestProperty(CONTENT_TYPE, CONTENT_TYPE_JSON);
+        HttpURLConnection conn = getHttpURLConnectionToSupabaseAuthWithJSONContent(AUTH_ENDPOINT_RECOVER, HTTP_METHOD_POST);
         conn.setDoOutput(true);
         // Crear JSON de registro
         String jsonBody = String.format("""
@@ -342,13 +356,9 @@ public class AuthService {
      */
     public boolean modificarContrasenaUsuario(String tokenDelUsuario,
                                               String contrasenaNueva) throws IOException {
-        // Construir la URL completa del endpoint admin
-        URL url = URI.create(SUPABASE_AUTH_URL + AUTH_ENDPOINT_USER).toURL();
         // Conexión HTTP
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod(HTTP_METHOD_PUT);
-        // Headers
-        conn.setRequestProperty(CONTENT_TYPE, CONTENT_TYPE_JSON);
+        HttpURLConnection conn = getHttpURLConnectionToSupabaseAuthWithJSONContent(AUTH_ENDPOINT_USER, HTTP_METHOD_PUT);
+        // Headers complementarios
         conn.setRequestProperty(AUTHORIZATION,
                                 String.format(AUTHORIZATION_BEARER, tokenDelUsuario));
         conn.setDoOutput(true);
@@ -368,5 +378,29 @@ public class AuthService {
     public boolean isAuthenticated() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return !(auth == null || auth.getPrincipal() == null || auth.getPrincipal().equals("anonymousUser"));
+    }
+
+    /**
+     * Retorna una conexión HttpURLConnection ya creada y configurada hacia la url de Supabase Auth base + /path
+     * introducida. Configura también el http method deseado, en función del introducido por parámetro y declara en el
+     * header el Content-Type:application/json.
+     * Por defecto deja el body a false, pudiendo cambiarlo si se desea -> conn.setDoOutput(false);
+     *
+     * @param path       path complementario de la petición http base de supabase.
+     * @param metodoHTTP función http deseada.
+     * @return Objeto HttpURLConnection ya preconfigurado
+     * @throws IOException Si hay errores de conexión.
+     */
+    private HttpURLConnection getHttpURLConnectionToSupabaseAuthWithJSONContent(String path, String metodoHTTP) throws IOException {
+        // Construir la URL completa del endpoint admin
+        URL url = URI.create(SUPABASE_AUTH_URL + path).toURL();
+        // Conexión HTTP
+        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+        conn.setRequestMethod(metodoHTTP);
+        // Headers
+        conn.setRequestProperty(CONTENT_TYPE, CONTENT_TYPE_JSON);
+        // Body a false, si se desea se puede modificar.
+        conn.setDoOutput(false);
+        return conn;
     }
 }

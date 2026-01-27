@@ -122,6 +122,31 @@ public class AuthController {
     }
 
     /**
+     * Controlador encargado del cierre de sesión de usuarios.
+     * Primero se encarga de cerrar la sesión en Supabase Auth y luego
+     * invalida la sesión web actual.
+     *
+     * @param request petición HTTP entrante
+     * @return redirección a la página de login tras el logout
+     */
+    @PostMapping("/logout")
+    public String doPostLogout(HttpServletRequest request) {
+        Optional<String> token = authService.getTokenActual();
+        if (token.isEmpty()) return RUTA_REDIRECT + RUTA_LOGIN;
+        // Llamar a Supabase Auth para cerrar sesión
+        try {
+            authService.logout(authService.getTokenActual().get());
+        } catch (IOException | IllegalStateException e) {
+            return RUTA_REDIRECT + RUTA_PERFIL;
+        }
+        // Borrar cualquier cookie/session web (por si acaso)
+        request.getSession(false).invalidate();
+        // Redirigir al login con mensaje de exito
+        return RUTA_REDIRECT + RUTA_LOGIN + "?logout=true";
+    }
+
+
+    /**
      * Muestra el formulario de registro junto con los datos necesarios
      * para su cumplimentación (provincias).
      */
