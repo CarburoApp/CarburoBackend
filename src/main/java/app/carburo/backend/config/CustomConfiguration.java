@@ -8,9 +8,11 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.i18n.CookieLocaleResolver;
 import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Locale;
 
@@ -73,10 +75,12 @@ public class CustomConfiguration implements WebMvcConfigurer {
 	 */
 	@Bean
 	public LocaleResolver localeResolver() {
-		SessionLocaleResolver localeResolver = new SessionLocaleResolver();
-		localeResolver.setDefaultLocale(IDIOMA_POR_DEFECTO);
-		return localeResolver;
+		CookieLocaleResolver cookieResolver = new CookieLocaleResolver();
+		cookieResolver.setDefaultLocale(IDIOMA_POR_DEFECTO);
+		cookieResolver.setCookieMaxAge(Duration.ofDays(30));  // 30 días
+		return cookieResolver;
 	}
+
 
 	/**
 	 * Define un interceptor que permite cambiar el idioma de la aplicación
