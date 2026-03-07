@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>app.carburo</groupId>
-	<artifactId>backend</artifactId>
+	<artifactId>CarburoBackend</artifactId>
 	<version>0.5</version>
 	<name>CarburoBackend</name>
 	<description>Backend para la gestión de la aplicación Carburo. TFG - Manuel García Baldó 2025-2026</description>
