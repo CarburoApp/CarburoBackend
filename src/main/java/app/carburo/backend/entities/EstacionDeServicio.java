@@ -299,12 +299,19 @@ public class EstacionDeServicio {
 				.equals(LocalDate.now())).toList());
 	}
 
+	public List<PrecioCombustible> getPreciosCombustiblesSorted() {
+		return preciosCombustibles.stream()
+				.filter(p -> p.getId().getFecha().equals(LocalDate.now()))
+				.sorted(Comparator.comparing(p -> p.getCombustible().getCodigo()))
+				.toList(); // devuelve lista ordenada
+	}
+
 	public Map<LocalDate, Map<Combustible, Double>> getAllPreciosCombustiblesMap(
 			LocalDate fechaInicio) {
 
 		Map<LocalDate, Map<Combustible, Double>> result = new HashMap<>();
 
-		// 1️⃣ Rellenar con los datos reales
+		// Rellenar con los datos reales
 		for (PrecioCombustible pc : preciosCombustibles) {
 			LocalDate fecha = pc.getId().getFecha();
 
@@ -317,7 +324,7 @@ public class EstacionDeServicio {
 					.put(pc.getCombustible(), pc.getPrecio());
 		}
 
-		// 2️⃣ Asegurar que existen TODOS los días desde fechaInicio hasta hoy
+		// Asegurar que existen TODOS los días desde fechaInicio hasta hoy
 		LocalDate hoy = LocalDate.now();
 		LocalDate fecha = fechaInicio;
 
@@ -326,7 +333,7 @@ public class EstacionDeServicio {
 			fecha = fecha.plusDays(1);
 		}
 
-		// 3️⃣ Ordenar por cercanía a hoy
+		// Ordenar por cercanía a hoy
 		return result.entrySet().stream().sorted(Comparator.comparing(
 				e -> Math.abs(ChronoUnit.DAYS.between(e.getKey(), hoy)))).collect(
 				Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> a,
