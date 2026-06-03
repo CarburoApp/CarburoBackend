@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.2</version>
+		<version>4.0.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.inggarciabaldo.carburo</groupId>
-	<artifactId>backend</artifactId>
+	<groupId>app.carburo</groupId>
+	<artifactId>CarburoBackend</artifactId>
 	<version>0.5</version>
 	<name>CarburoBackend</name>
 	<description>Backend para la gestión de la aplicación Carburo. TFG - Manuel García Baldó 2025-2026</description>
@@ -18,7 +18,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compiler.release>21</maven.compiler.release>
 		<java.version>21</java.version>
-		<main.class>com.inggarciabaldo.carburo.backend.CarburoBackendApplication</main.class>
+		<main.class>app.carburo.backend.CarburoBackendApplication</main.class>
 		<lombok.version>1.18.42</lombok.version>
 	</properties>
 
@@ -149,11 +149,11 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+					<mainClass>${main.class}</mainClass>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
-							<version>${lombok.version}</version>
 						</exclude>
 					</excludes>
 				</configuration>
