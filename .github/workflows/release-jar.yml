@@ -13,13 +13,18 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
       - name: Set up Java
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
+
+      - name: Prepare Frontend Environment
+        run: |
+            mkdir -p node
+            chmod +x -R node || true
 
       - name: Build with Maven
         run: mvn clean package -DskipTests
