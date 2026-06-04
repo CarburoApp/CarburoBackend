@@ -182,8 +182,7 @@ public class AuthService {
             try {
                 Usuario nuevoUsuario = new Usuario(uuid,
                                                    provinciaRepository.getProvinciaById(
-                                                           Integer.valueOf(1)
-                                                                   .shortValue()));
+														   (short) 1));
                 nuevoUsuario.setCombustiblesFavoritos(
                         new HashSet<>(combustibleRepository.findAll()));
 

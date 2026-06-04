@@ -133,7 +133,7 @@ public class AuthController {
     public String doGetLoginAndHandleGoogleOauth(
             @RequestParam(value = "access_token", required = false) String accessToken,
             @RequestParam(value = "error", required = false) String error, Model model,
-            HttpServletRequest request) throws IOException {
+            HttpServletRequest request) {
         if (authService.isAuthenticated()) return RUTA_REDIRECT + RUTA_PERFIL;
 
         if (error != null) {

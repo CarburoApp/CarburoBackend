@@ -245,10 +245,8 @@ public class EstacionDeServicioController {
 		// Defino si tiene posibilidad de estar en favoritas
 		// Usuario autenticado
 		Optional<Usuario> usuario = authService.getUsuarioAutenticado();
-		if (usuario.isPresent()) {
-			model.addAttribute("favorita",
-							   usuario.get().getEessFavoritas().contains(estacion));
-		}
+		usuario.ifPresent(value -> model.addAttribute("favorita", value.getEessFavoritas()
+				.contains(estacion)));
 		// Si no se proporciona fechaInicio o es futura, se toman los últimos 5 días
 		if (fechaInicio == null || fechaInicio.isAfter(hoy)) {
 			fechaInicio = hoy.minusDays(5);

@@ -3,7 +3,6 @@ package app.carburo.backend.validators;
 import app.carburo.backend.dto.UsuarioDto;
 import app.carburo.backend.services.AuthService;
 import app.carburo.backend.services.ProvinciaService;
-import app.carburo.backend.services.UsuarioService;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
@@ -61,14 +60,11 @@ public class RegistroFormValidator implements Validator {
             Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
     // Inyección de dependencias
-    private final UsuarioService usuarioService;
     private final AuthService authService;
     private final ProvinciaService provinciaService;
 
-    public RegistroFormValidator(UsuarioService usuarioService,
-                                 AuthService authService,
+    public RegistroFormValidator(AuthService authService,
                                  ProvinciaService provinciaService) {
-        this.usuarioService = usuarioService;
         this.authService = authService;
         this.provinciaService = provinciaService;
     }
