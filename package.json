@@ -1,0 +1,19 @@
+{
+  "name": "carburobackend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "tailwind.config.js",
+  "private": true,
+  "scripts": {
+    "tailwindcss": "tailwindcss"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CarburoApp/CarburoBackend.git"
+  },
+  "dependencies": {
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/forms": "^0.5.7",
+    "tailwindcss": "^3.4.1"
+  }
+}

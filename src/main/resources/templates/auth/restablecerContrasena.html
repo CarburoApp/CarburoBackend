@@ -8,12 +8,6 @@
 
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
-
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-    </style>
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
@@ -32,33 +26,29 @@
                 <p class="text-text-secondary text-sm" th:text="#{auth.restablecer.contrasena.subtitulo}"></p>
             </div>
             <!--Mensaje de cambio de contraseña exitoso-->
-            <div class="mb-6 flex items-center gap-3 px-4 py-3 bg-green-50 border border-green-100 rounded-xl text-green-800 animate-in fade-in duration-500"
-                 th:if="${param.exito}">
-                <span class="material-symbols-outlined text-green-500 text-xl">info</span>
-                <p class="text-sm font-medium" th:text="#{auth.restablecer.contrasena.exito}"></p>
-            </div>
-            <form class="space-y-6" th:action="@{/recoverPassword/{token}(token=${token})}"
+            <form class="space-y-6" th:action="@{/auth/reset-password}"
                   method="post" th:object="${usuario}">
+
+                <input type="hidden" id="token" th:field="*{token}">
+
                 <div>
                     <label class="block text-[10px] font-bold text-text-secondary uppercase tracking-[0.1em] mb-2 px-1"
                            for="newPassword" th:text="#{auth.restablecer.contrasena.nueva.titulo}">
                     </label>
-                    <div class="relative mb-4">
+                    <div class="relative mb-2">
                         <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary/60">lock</span>
                         <input class="w-full pl-12 pr-12 py-4 bg-background-light border border-border-color rounded-2xl text-lg font-bold text-text-main focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                                id="newPassword" th:placeholder="#{auth.contrasena.placeholder}"
                                th:field="*{contrasena}" type="password"/>
                     </div>
-                    <p th:if="${#fields.hasErrors('contrasena')}" th:errors="*{contrasena}"
-                       class="text-red-600 text-xs mt-1"></p>
-                    <!-- Password Requirements -->
+                    <p th:if="${#fields.hasErrors('contrasena')}" th:errors="*{contrasena}" class="text-red-600 text-xs mt-1 mb-2"></p>
+
                     <div class="bg-background-light dark:bg-[#221910] p-3 rounded-lg border border-[#e8dbce] dark:border-[#4d3a29]">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-[10px] font-bold text-text-secondary uppercase tracking-wider"
                                   th:text="#{auth.perfil.editar.contrasena.seguridad}"></span>
                         </div>
-                        <p class="text-[#9c7349] dark:text-[#b59b7c] text-xs font-medium mb-1"
-                           th:text="#{auth.contrasena.info}"></p>
+                        <p class="text-[#9c7349] dark:text-[#b59b7c] text-xs font-medium mb-1" th:text="#{auth.contrasena.info}"></p>
                         <ul class="text-[#9c7349] dark:text-[#b59b7c] text-xs grid grid-cols-2 gap-x-2">
                             <li class="flex items-center gap-1">
                                 <span class="material-symbols-outlined text-[10px] text-green-500">check_circle</span>
@@ -68,13 +58,10 @@
                                 <span class="material-symbols-outlined text-[10px] text-green-500">check_circle</span>
                                 <span th:text="#{auth.contrasena.info.letra.numero}"></span>
                             </li>
-                            <li class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[10px] text-green-500">check_circle</span>
-                                <span th:text="#{auth.contrasena.info.simbolo}"></span>
-                            </li>
                         </ul>
                     </div>
                 </div>
+
                 <div>
                     <label class="block text-[10px] font-bold text-text-secondary uppercase tracking-[0.1em] mb-2 px-1"
                            for="confirmPassword" th:text="#{auth.restablecer.contrasena.confirmacion.titulo}">
@@ -85,9 +72,9 @@
                                id="confirmPassword" th:placeholder="#{auth.contrasena.placeholder}" type="password"
                                th:field="*{confirmacionContrasena}"/>
                     </div>
-                    <p th:if="${#fields.hasErrors('confirmacionContrasena')}" th:errors="*{confirmacionContrasena}"
-                       class="text-red-600 text-xs mt-1"></p>
+                    <p th:if="${#fields.hasErrors('confirmacionContrasena')}" th:errors="*{confirmacionContrasena}" class="text-red-600 text-xs mt-1"></p>
                 </div>
+
                 <div class="flex flex-col gap-4 pt-4">
                     <button class="flex items-center justify-center gap-2 w-full h-14 rounded-xl bg-primary text-white hover:bg-primary/90 font-bold text-base transition-all shadow-lg shadow-primary/20"
                             type="submit">
@@ -95,14 +82,14 @@
                         <span th:text="#{auth.restablecer.contrasena.boton.enviar}"></span>
                     </button>
                 </div>
-                <div class="mt-8 text-center">
-                    <a class="text-primary font-bold hover:underline inline-flex items-center gap-2 text-sm"
-                       th:href="@{/login}">
-                        <span class="material-symbols-outlined text-sm">arrow_back</span>
-                        <span th:text="#{auth.restablecer.contrasena.volver.inicio.sesion}"></span>
-                    </a>
-                </div>
             </form>
+            <div class="mt-8 text-center">
+                <a class="text-primary font-bold hover:underline inline-flex items-center gap-2 text-sm"
+                   th:href="@{/login}">
+                    <span class="material-symbols-outlined text-sm">arrow_back</span>
+                    <span th:text="#{auth.recuperacion.volver.inicio.sesion}"></span>
+                </a>
+            </div>
         </div>
     </div>
 </main>
@@ -111,4 +98,7 @@
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 
 </body>
+
+<script th:src="@{/script/auth/extractRecoverPathInformation.js}"></script>
+
 </html>

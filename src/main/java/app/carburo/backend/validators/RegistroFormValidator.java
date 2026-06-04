@@ -53,7 +53,6 @@ public class RegistroFormValidator implements Validator {
     public static final Pattern PASSWORD_UPPERCASE = Pattern.compile(".*[A-Z].*");
     public static final Pattern PASSWORD_LOWERCASE = Pattern.compile(".*[a-z].*");
     public static final Pattern PASSWORD_DIGIT = Pattern.compile(".*\\d.*");
-    public static final Pattern PASSWORD_SPECIAL = Pattern.compile(".*[^a-zA-Z0-9].*");
 
     /**
      * Expresión regular básica para correo electrónico
@@ -134,7 +133,7 @@ public class RegistroFormValidator implements Validator {
         // Unicidad del correo
         else {
             try {
-                if (usuarioService.containsCorreo(correo) || authService.containsEmail(correo)) {
+                if (authService.containsEmail(correo)) {
                     errors.rejectValue(USUARIO_DTO_FIELD_CORREO,
                                        "Error.auth.login.correo.existente");
                 }
@@ -198,8 +197,7 @@ public class RegistroFormValidator implements Validator {
         } else if (!PASSWORD_DIGIT.matcher(contrasena).matches()) {
             errors.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
                                "Error.auth.login.contrasena.numero");
-        } else if (!PASSWORD_SPECIAL.matcher(contrasena).matches()) errors.rejectValue(
-                USUARIO_DTO_FIELD_CONTRASENA, "Error.auth.login.contrasena.simbolo");
+        }
         else return true;
         return false;
     }

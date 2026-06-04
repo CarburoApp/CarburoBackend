@@ -9,7 +9,7 @@
     <link rel="icon" type="image/ico" th:href="@{/images/Logo.ico}"/>
 
     <!-- Tailwind y fuentes -->
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link rel="stylesheet" th:href="@{/style/output.css}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
           rel="stylesheet"/>
@@ -26,29 +26,5 @@
     <script src="/script/idioma.js"></script>
     <script th:src="@{/script/paginacion.js}"></script>
 
-    <!-- Scripts -->
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#f48c25",
-                        "background-light": "#fcfaf8",
-                        "background-dark": "#221910",
-                        "surface": "#ffffff",
-                        "border-color": "#f4ede7",
-                        "text-main": "#1c140d",
-                        "text-secondary": "#9c7349",
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"],
-                        "body": ["Inter", "sans-serif"],
-                    },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
-            },
-        }
-    </script>
 </th:block>
 <!--/head-->

@@ -7,15 +7,12 @@ import lombok.Setter;
 
 import java.time.OffsetDateTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Table(name = "usuario",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "usuario_email_key", columnNames = "email"),
-                @UniqueConstraint(name = "usuario_uuid_unique", columnNames = "uuid")
-        })
+@Table(name = "usuario")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,11 +23,14 @@ public class Usuario {
     @Column(nullable = false, updatable = false)
     private UUID uuid;
 
-    @Column(nullable = false, length = 50)
+    @Transient
     private String nombre;
 
-    @Column(nullable = false, length = 150, unique = true)
+    @Transient
     private String email;
+
+    @Transient
+    private String avatarUrl;
 
     // Contraseñas temporales, no se guardan en BD
     @Transient
@@ -48,12 +48,26 @@ public class Usuario {
     // FK a provincia, unidireccional
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(
-            name = "provincia_favorita",
+            name = "id_provincia_favorita",
             referencedColumnName = "id",
             foreignKey = @ForeignKey(name = "usuario_provincia_favorita_fkey"),
             nullable = false
     )
     private Provincia provinciaFavorita;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "combustible_favorito",
+            joinColumns = @JoinColumn(
+                    name = "uuid_usuario",
+                    referencedColumnName = "uuid"
+            ),
+            inverseJoinColumns = @JoinColumn(
+                    name = "id_combustible",
+                    referencedColumnName = "id"
+            )
+    )
+    private Set<Combustible> combustiblesFavoritos = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -69,27 +83,48 @@ public class Usuario {
     )
     private Set<EstacionDeServicio> eessFavoritas = new HashSet<>();
 
+    @PrePersist
+    public void prePersist() {
+        if (fechaRegistro == null) {
+            fechaRegistro = OffsetDateTime.now();
+        }
+        if (fechaActualizacion == null) {
+            fechaActualizacion = OffsetDateTime.now();
+        }
+    }
 
-    public Usuario(UUID uuid, String nombre, String email,
-                   OffsetDateTime fechaRegistro,
+    @PreUpdate
+    public void preUpdate() {
+        fechaActualizacion = OffsetDateTime.now();
+    }
+
+
+    public Usuario(UUID uuid, OffsetDateTime fechaRegistro,
                    OffsetDateTime fechaActualizacion,
                    Provincia provinciaFavorita) {
         setUuid(uuid);
-        setNombre(nombre);
-        setEmail(email);
         setFechaRegistro(fechaRegistro);
         setFechaActualizacion(fechaActualizacion);
         setProvinciaFavorita(provinciaFavorita);
     }
 
-    public Usuario(UUID uuid, String nombre, String email,
+    public Usuario(UUID uuid,
                    Provincia provinciaFavorita) {
         setUuid(uuid);
-        setNombre(nombre);
-        setEmail(email);
         setFechaRegistro(OffsetDateTime.now());
         setFechaActualizacion(OffsetDateTime.now());
         setProvinciaFavorita(provinciaFavorita);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Usuario usuario = (Usuario) o;
+        return Objects.equals(uuid, usuario.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(uuid);
+    }
 }

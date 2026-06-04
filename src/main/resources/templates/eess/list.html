@@ -4,32 +4,6 @@
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
     <title th:text="#{app.name} + ' - ' + #{eess.list.title}"></title>
-
-    <style>
-        /* Custom scrollbar for filter lists */
-
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #d1d5db;
-            border-radius: 4px;
-        }
-
-        body {
-        font-family: 'Inter', sans-serif;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #9ca3af;
-        }
-
-    </style>
-
-
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">

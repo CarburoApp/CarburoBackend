@@ -41,20 +41,6 @@ public class UsuarioService {
     }
 
     /**
-     * Comprueba si un correo electrónico ya está registrado en el sistema.
-     *
-     * @param correo correo electrónico a comprobar
-     * @return {@code true} si el correo ya existe, {@code false} en caso contrario
-     * @throws IllegalArgumentException si el correo es {@code null} o está vacío
-     */
-    public boolean containsCorreo(String correo) {
-        if (correo == null || correo.isBlank()) {
-            throw new IllegalArgumentException("El correo no puede ser nulo ni vacío.");
-        }
-        return usuarioRepository.existsUsuarioByEmail(correo);
-    }
-
-    /**
      * Guarda un usuario en el sistema.
      *
      * @param usuario entidad {@link Usuario} a persistir
@@ -68,23 +54,13 @@ public class UsuarioService {
     }
 
     /**
-     * Actualiza el nombre de un usuario existente.
-     *
-     * @param id                   identificador UUID del usuario
-     * @param nuevoNombreDeUsuario nuevo nombre a asignar
-     * @throws IllegalArgumentException si alguno de los parámetros es inválido
+     * Elimina un usuario en el sistema.
      */
-    public void updateNombreDeUsuario(UUID id, String nuevoNombreDeUsuario) {
-        if (id == null || nuevoNombreDeUsuario == null || nuevoNombreDeUsuario.isBlank()) {
-            throw new IllegalArgumentException("Parámetros inválidos para la actualización del nombre.");
+    public void delete(UUID uuidUsuario) {
+        if (uuidUsuario == null ) {
+            throw new IllegalArgumentException("El UUID del usuario no puede ser nulo.");
         }
-
-        Optional<Usuario> usuarioOpt = usuarioRepository.findById(id);
-        if (usuarioOpt.isPresent()) {
-            Usuario usuario = usuarioOpt.get();
-            usuario.setNombre(nuevoNombreDeUsuario);
-            usuarioRepository.save(usuario);
-        }
+        usuarioRepository.deleteById(uuidUsuario);
     }
 
     /**

@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>app.carburo</groupId>
 	<artifactId>CarburoBackend</artifactId>
-	<version>0.5</version>
+	<version>0.6</version>
 	<name>CarburoBackend</name>
 	<description>Backend para la gestión de la aplicación Carburo. TFG - Manuel García Baldó 2025-2026</description>
 
@@ -157,6 +157,48 @@
 						</exclude>
 					</excludes>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>1.15.0</version>
+				<executions>
+					<execution>
+						<id>download-tailwind</id>
+						<goals>
+							<goal>install-node-and-npm</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<nodeVersion>v20.11.0</nodeVersion>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>npm-install</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<arguments>install</arguments>
+						</configuration>
+					</execution>
+
+					<execution>
+						<id>tailwind-build</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<phase>compile</phase>
+						<configuration>
+							<arguments>run tailwindcss -- -i ./src/main/resources/static/style/input.css -o
+								./src/main/resources/static/style/output.css --minify
+							</arguments>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

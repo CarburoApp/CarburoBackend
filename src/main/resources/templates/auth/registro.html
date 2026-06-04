@@ -7,20 +7,13 @@
     <title th:text="#{app.name} + ' - ' + #{auth.registro.title}"></title>
 
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
-    <script src="https://apis.google.com/js/api:client.js"></script>
     <link rel="stylesheet" th:href="@{/style/auth/google.css}">
+
     <script src="/script/auth/google.js"></script>
     <script src="/script/auth/password.js"></script>
-    <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
 
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
-
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-    </style>
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
@@ -39,19 +32,17 @@
                th:text="#{auth.registro.subtitulo}"></p>
         </div>
 
-        <!-- Actions -->
+        <!-- Auth de google para inicio de sesión-->
         <div class="px-6 md:px-12 pb-10 space-y-1 pt-6">
-            <!-- Auth de google para inicio de sesión-->
-            <!-- In the callback, you would hide the gSignInWrapper element on a successful sign in -->
-            <div class="w-full flex items-center justify-center gap-3 bg-white border border-border-color hover:bg-background-light text-text-main font-bold py-3 rounded-xl transition-all"
-                 id="gSignInWrapper">
-                <div id="customBtn" class="customGPlusSignIn">
-                    <span class="icon"></span>
+            <button type="button"
+                    onclick="iniciarSesionConGoogle()"
+                    class="w-full flex items-center justify-center gap-3 bg-white border border-border-color hover:bg-background-light text-text-main font-bold py-3 rounded-xl transition-all cursor-pointer"
+                    id="gSignInWrapper">
+                <div id="customBtn" class="flex items-center gap-2">
                     <span class="buttonText">Google</span>
                 </div>
-            </div>
-            <div id="name"></div>
-            <script>startApp();</script>
+            </button>
+
             <div class="relative flex items-center py-2">
                 <div class="flex-grow border-t border-[#e8dbce] dark:border-[#3d2e1f]"></div>
                 <span class="flex-shrink mx-4 text-[#9c7349] text-xs uppercase font-medium"
@@ -114,10 +105,6 @@
                     <li class="flex items-center gap-1">
                         <span class="material-symbols-outlined text-[10px] text-green-500">check_circle</span>
                         <span th:text="#{auth.contrasena.info.letra.numero}"></span>
-                    </li>
-                    <li class="flex items-center gap-1">
-                        <span class="material-symbols-outlined text-[10px] text-green-500">check_circle</span>
-                        <span th:text="#{auth.contrasena.info.caracteres}"></span>
                     </li>
                     <li class="flex items-center gap-1">
                         <span class="material-symbols-outlined text-[10px] text-green-500">check_circle</span>

@@ -16,6 +16,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -89,6 +90,7 @@ public class UsuarioController {
     public String doGetPerfil(Model model) {
         Optional<Usuario> usuario = authService.getUsuarioAutenticado();
         if (usuario.isEmpty()) return RUTA_REDIRECT + RUTA_LOGIN;
+        model.addAttribute("avatar_url", usuario.get().getAvatarUrl());
         model.addAttribute("nombre", usuario.get().getNombre());
         model.addAttribute("correo", usuario.get().getEmail());
         model.addAttribute("provincia", usuario.get().getProvinciaFavorita().getDenominacion());
@@ -123,15 +125,18 @@ public class UsuarioController {
      */
     @PostMapping(RUTA_PERFIL_EDITAR_NOMBRE_SIN_PERFIL)
     public String doPostCambioDeNombrePerfil(@ModelAttribute("usuario") @Validated UsuarioDto usuarioDto,
-                                             BindingResult bindingResult) {
+                                             BindingResult bindingResult)
+            throws IOException {
         Optional<Usuario> usuario = authService.getUsuarioAutenticado();
         if (usuario.isEmpty()) return RUTA_REDIRECT + RUTA_LOGIN;
         // Validación del formulario
         perfilCambioDeNombreFormValidator.validate(usuarioDto, bindingResult);
         // Si hay errores, volvemos a la vista de la recuperación de contraseña
-        if (bindingResult.hasErrors()) return VISTA_EDITAR_NOMBRE;
+        if (bindingResult.hasErrors() || authService.getTokenActual().isEmpty())
+            return VISTA_EDITAR_NOMBRE;
         //  Registro del usuario
-        usuarioService.updateNombreDeUsuario(usuario.get().getUuid(), usuarioDto.getNombre());
+        authService.modificarNombreUsuario(authService.getTokenActual().get(),
+                                           usuarioDto.getNombre());
         return RUTA_REDIRECT + RUTA_PERFIL;
     }
 

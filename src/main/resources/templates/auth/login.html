@@ -7,20 +7,12 @@
     <title th:text="#{app.name} + ' - ' + #{auth.login.title}"></title>
 
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
-    <script src="https://apis.google.com/js/api:client.js"></script>
     <link rel="stylesheet" th:href="@{/style/auth/google.css}">
     <script src="/script/auth/google.js"></script>
     <script src="/script/auth/password.js"></script>
-    <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
 
     <meta name="_csrf" th:content="${_csrf.token}">
     <meta name="_csrf_header" th:content="${_csrf.headerName}">
-
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-    </style>
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
@@ -41,6 +33,12 @@
                  th:if="${param.logout}">
                 <span class="material-symbols-outlined text-red-500 text-xl">info</span>
                 <p class="text-sm font-medium" th:text="#{auth.logout.exitoso}"></p>
+            </div>
+
+            <div class="mb-6 flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-100 rounded-xl text-red-800 animate-in fade-in duration-500"
+                 th:if="${param.passwordChanged}">
+                <span class="material-symbols-outlined text-red-500 text-xl">info</span>
+                <p class="text-sm font-medium" th:text="#{auth.recover.exitoso}"></p>
             </div>
 
             <form class="space-y-5" method="post" th:action="@{/login}" th:object="${usuario}">
@@ -103,29 +101,31 @@
                 </div>
             </div>
 
-            <!-- Auth de google para inicio de sesión-->
-            <!-- In the callback, you would hide the gSignInWrapper element on a successful sign in -->
-            <div class="w-full flex items-center justify-center gap-3 bg-white border border-border-color hover:bg-background-light text-text-main font-bold py-3 rounded-xl transition-all"
-                 id="gSignInWrapper">
-                <div id="customBtn" class="customGPlusSignIn">
-                    <span class="icon"></span>
+            <button type="button"
+                    onclick="iniciarSesionConGoogle()"
+                    class="w-full flex items-center justify-center gap-3 bg-white border border-border-color hover:bg-background-light text-text-main font-bold py-3 rounded-xl transition-all cursor-pointer"
+                    id="gSignInWrapper">
+                <div id="customBtn" class="flex items-center gap-2">
                     <span class="buttonText">Google</span>
                 </div>
-            </div>
-            <div id="name"></div>
-            <script>startApp();</script>
+            </button>
 
             <p class="mt-4 text-center text-sm text-text-secondary">
                 <span th:text="#{auth.login.registro.alternativa}"></span>
-                <a class="text-primary font-bold hover:underline" th:href="@{/registro}"
-                   th:text="#{auth.login.registro.boton}"></a>
+                <a class="text-primary font-bold hover:underline" th:href="@{/registro}" th:text="#{auth.login.registro.boton}"></a>
             </p>
-        </div>
-    </div>
-</main>
+        </div> </div> </main>
 
-<!-- Footer -->
 <footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<script>
+    (function() {
+        if (window.location.hash && window.location.hash.includes('access_token=')) {
+            const queryParams = window.location.hash.replace('#', '?');
+            window.location.href = window.location.origin + window.location.pathname + queryParams;
+        }
+    })();
+</script>
 
 </body>
 </html>

@@ -2,7 +2,12 @@ package app.carburo.backend.services;
 
 import app.carburo.backend.dto.UsuarioDto;
 import app.carburo.backend.entities.Usuario;
+import app.carburo.backend.repositories.CombustibleRepository;
+import app.carburo.backend.repositories.ProvinciaRepository;
+import app.carburo.backend.services.api.model.SupabaseUserResponse;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.Method;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,423 +26,473 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.time.OffsetDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-/**
- * Servicio de autenticación encargado de gestionar todos los servicios relacionados con la autenticación del usuario.
- *
- * <p>
- * La autenticación se realiza contra Supabase Auth y posteriormente se integra
- * manualmente con Spring Security y almacenándolo en sesión.
- * </p>
- */
+import static app.carburo.backend.controllers.AuthController.URL_RESTABLECER_CONTRASENA;
+
+
+@Slf4j
 @Service
 public class AuthService {
 
-    // Constantes para los headers
+    // ===================== HEADERS =====================
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String CONTENT_TYPE_JSON = "application/json";
-
     private static final String AUTHORIZATION = "Authorization";
-    private static final String AUTHORIZATION_BEARER = "Bearer %s";
+    private static final String API_KEY = "apikey";
+    private static final String BEARER = "Bearer %s";
 
-    // Constantes para la autorización
-    private static final String AUTH_USER_EMAIL = "email";
-    private static final String AUTH_USER_PASSWORD = "password";
-    private static final String AUTH_USER_TOKEN = "access_token";
+    // ===================== JSON KEYS =====================
     private static final String AUTH_USER = "user";
     private static final String AUTH_USERS = "users";
     private static final String AUTH_USER_ID = "id";
+    private static final String AUTH_USER_EMAIL = "email";
+    private static final String AUTH_USER_TOKEN = "access_token";
     private static final String AUTH_USER_CREATED = "created_at";
     private static final String AUTH_USER_UPDATED = "updated_at";
 
-    // Constantes para los endpoints
-    private static final String HTTP_METHOD_GET = "GET";
-    private static final String HTTP_METHOD_POST = "POST";
-    private static final String HTTP_METHOD_PUT = "PUT";
-    private static final String HTTP_METHOD_DELETE = "DELETE";
-    private static final String AUTH_ENDPOINT_SIGNUP = "/signup";
-    private static final String AUTH_ENDPOINT_RECOVER = "/recover";
-    private static final String AUTH_ENDPOINT_RESET = "/user/reset";
-    private static final String AUTH_ENDPOINT_LOGIN = "/token?grant_type=password";
-    private static final String AUTH_ENDPOINT_LOGOUT = "/logout";
-    private static final String AUTH_ENDPOINT_ADMIN_USERS = "/admin/users";
-    private static final String AUTH_ENDPOINT_USER = "/user";
+    // ===================== ENDPOINTS =====================
+    private static final String LOGIN = "/token?grant_type=password";
+    private static final String SIGNUP = "/signup";
+    private static final String LOGOUT = "/logout";
+    private static final String ADMIN_USERS = "/admin/users";
+    private static final String USER = "/user";
+    private static final String RECOVER = "/recover";
+    private static final String RESET = "/user/reset";
 
-    // Inyección de dependencias
     private final UsuarioService usuarioService;
+    private final ProvinciaRepository provinciaRepository;
+    private final CombustibleRepository combustibleRepository;
 
-    /**
-     * Service Role Key de Supabase (acceso admin)
-     */
-    @Value("${SERVICE_ROLE_KEY}")
-    private String SERVICE_ROLE_KEY;
-
-    /**
-     * URL base del servicio Supabase Auth
-     */
-    @Value("${SUPABASE_AUTH_URL}")
+    @Value("${security.supabase.auth.url}")
     private String SUPABASE_AUTH_URL;
 
+    @Value("${security.supabase.auth.role-key}")
+    private String SERVICE_ROLE_KEY;
 
-    // Mapper JSON reutilizable
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
-
-    // Constructor inyectando el repositorio de usuarios
-    public AuthService(UsuarioService usuarioService) {
-        this.usuarioService = usuarioService;
+    public AuthService(UsuarioService usuarioService,
+                       ProvinciaRepository provinciaRepository,
+                       CombustibleRepository combustibleRepository) {
+        this.usuarioService        = usuarioService;
+        this.provinciaRepository   = provinciaRepository;
+        this.combustibleRepository = combustibleRepository;
     }
 
-    /**
-     * Devuelve el usuario actualmente autenticado.
-     *
-     * @return Optional con el usuario o vacío si no hay sesión
-     */
+    // =====================================================
+    // SPRING SECURITY HELPERS
+    // =====================================================
+
     public Optional<Usuario> getUsuarioAutenticado() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (!isAuthenticated()) return Optional.empty();
-        return usuarioService.findByUUID(UUID.fromString((String) auth.getPrincipal()));
+
+        Optional<Usuario> usuarioOpt = usuarioService.findByUUID(
+                UUID.fromString((String) auth.getPrincipal()));
+
+        if (usuarioOpt.isEmpty()) return Optional.empty();
+
+        Usuario usuario = usuarioOpt.get();
+
+        Optional<String> tokenOpt = getTokenActual();
+        if (tokenOpt.isPresent()) {
+            try {
+                SupabaseUserResponse sbUser = getSupabaseUserData(tokenOpt.get());
+
+                // 1. Asignar Email de la raíz de Supabase
+                usuario.setEmail(sbUser.email());
+
+                // 2. Procesar Metadatos del Usuario (Nombre y Foto)
+                if (sbUser.userMetadata() != null) {
+                    SupabaseUserResponse.UserMetadata meta = sbUser.userMetadata();
+
+                    // Lógica para el Nombre (Prioridad a Name -> Full Name -> Prefijo Email)
+                    String nombreFinal =
+                            meta.name() != null ? meta.name() : meta.fullName();
+                    if (nombreFinal == null || nombreFinal.isBlank()) {
+                        nombreFinal = sbUser.email() != null ? sbUser.email()
+                                .split("@")[0] : "Usuario";
+                    }
+                    usuario.setNombre(nombreFinal);
+
+                    // Lógica para el Avatar/Imagen (Prioridad a avatarUrl -> picture)
+                    String fotoFinal =
+                            meta.avatarUrl() != null ? meta.avatarUrl() : meta.picture();
+                    usuario.setAvatarUrl(fotoFinal);
+                }
+
+            } catch (IOException e) {
+                log.error("Error al enriquecer usuario dinámicamente con Supabase {}",
+                          usuario.getUuid(), e);
+            }
+        }
+
+        return Optional.of(usuario);
     }
 
-    /**
-     * Devuelve el token actual del usuario logueado (JWT de Supabase)
-     *
-     * @return Optional con el token o vacío si no hay sesión
-     */
+    public SupabaseUserResponse getSupabaseUserData(String token) throws IOException {
+        HttpURLConnection conn = open(USER, Method.GET);
+        conn.setRequestProperty(AUTHORIZATION, String.format(BEARER, token));
+
+        int code = conn.getResponseCode();
+        if (code != 200) {
+            String error = readError(conn);
+            log.error("Error cargando info de usuario Supabase code={}. Detalle: {}",
+                      code, error);
+            throw new IOException("Failed to fetch user data from Supabase");
+        }
+
+        return MAPPER.readValue(conn.getInputStream(), SupabaseUserResponse.class);
+    }
+
     public Optional<String> getTokenActual() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) return Optional.empty();
+        if (auth == null) return Optional.empty();
 
-        Object credentials = auth.getCredentials();
-        if (credentials instanceof String token && !token.isBlank()) {
-            return Optional.of(token);
-        }
+        Object cred = auth.getCredentials();
+        if (cred instanceof String t && !t.isBlank()) return Optional.of(t);
+
         return Optional.empty();
     }
 
-
-    /**
-     * Realiza el login manual en Spring Security utilizando el token
-     * devuelto por Supabase.
-     *
-     * @param request     petición HTTP actual
-     * @param token       JWT de Supabase
-     * @param usuarioUuid UUID del usuario autenticado
-     */
-    public void login(HttpServletRequest request, String token, UUID usuarioUuid) {
-        if (usuarioUuid == null)
-            throw new IllegalArgumentException("Usuario inválido para el inicio de sesión.");
-        Authentication authentication = getAuthentication(request, token, usuarioUuid);
-        // Inyectar autenticación en el contexto de seguridad
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+    public boolean isAuthenticated() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && auth.getPrincipal() != null &&
+                !"anonymousUser".equals(auth.getPrincipal());
     }
 
-    /**
-     * Crea y almacena manualmente el objeto {@link Authentication}
-     * dentro del contexto de Spring Security y de la sesión HTTP.
-     */
-    private Authentication getAuthentication(HttpServletRequest request, String token, UUID usuarioUuid) {
-        if (token == null || token.isEmpty())
-            throw new IllegalArgumentException("Token de sesión inválido.");
-        // Crear authorities mínimo
-        List<SimpleGrantedAuthority> authorities = List.of(
-                new SimpleGrantedAuthority("ROLE_USER") // rol básico para todas las rutas protegidas
-        );
-        // Crear autenticación manual
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                usuarioUuid.toString(), // principal
-                token,            // credentials
-                authorities       // authorities
-        );
-        //authenticationManager.authenticate(authentication);
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        context.setAuthentication(authentication);
-        SecurityContextHolder.setContext(context);
+    // =====================================================
+    // LOGIN SPRING
+    // =====================================================
 
-        request.getSession(true)
-                .setAttribute(
-                        HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-                        context
-                );
-        return authentication;
+    public void login(HttpServletRequest request, String token, UUID uuid) {
+        login(request, token, uuid, false);
     }
 
-    /**
-     * Inicia sesión un usuario utilizando email/contraseña.
-     * Aquí normalmente se haría la petición a Supabase Auth para verificar credenciales.
-     *
-     * @param email    Email del usuario
-     * @param password Contraseña del usuario
-     * @return token de sesión (JWT) si el login es exitoso, en caso contrarío null
-     * @throws IOException si hay errores de conexión
-     */
-    public String login(HttpServletRequest request, String email, String password)
-            throws IOException, IllegalStateException {
-        // Conexión HTTP
-        HttpURLConnection conn = getHttpURLConnectionToSupabaseAuthWithJSONContent(AUTH_ENDPOINT_LOGIN, HTTP_METHOD_POST);
-        conn.setDoOutput(true);
-        // Crear JSON de registro
-        String jsonBody = String.format("""
-                {
-                    "email": "%s",
-                    "password": "%s"
-                }
-                """, email, password);
-        // Enviar JSON
-        try (OutputStream os = conn.getOutputStream()) {
-            os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
-        }
+    public void login(HttpServletRequest request, String token, UUID uuid,
+                      boolean oAuthGoogle) {
+        if (oAuthGoogle && usuarioService.findByUUID(uuid).isEmpty()) {
+            log.info(
+                    "Detectado primer acceso OAuth de Google para el UUID: {}. Creando registro local...",
+                    uuid);
+            try {
+                Usuario nuevoUsuario = new Usuario(uuid,
+                                                   provinciaRepository.getProvinciaById(
+                                                           Integer.valueOf(1)
+                                                                   .shortValue()));
+                nuevoUsuario.setCombustiblesFavoritos(
+                        new HashSet<>(combustibleRepository.findAll()));
 
-        int responseCode = conn.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_BAD_REQUEST)
-            return null;
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-
-            // Parsear la respuesta JSON
-            JsonNode root = OBJECT_MAPPER.readTree(conn.getInputStream());
-
-            if (!root.has(AUTH_USER_TOKEN) || !root.has(AUTH_USER) || root.get(AUTH_USER) == null ||
-                    !root.get(AUTH_USER).has(AUTH_USER_ID))
+                usuarioService.save(nuevoUsuario);
+                log.info("Usuario guardado en base de datos local con éxito.");
+            } catch (Exception e) {
+                log.error(
+                        "Fallo crítico al sincronizar de forma persistente el usuario de Google con la BD local",
+                        e);
                 throw new IllegalStateException(
-                        "No se recibió información de usuario en la respuesta");
-
-            String uuidStr = root.get(AUTH_USER).get(AUTH_USER_ID).asText();
-            String accessToken = root.get(AUTH_USER_TOKEN).asText();
-
-            // Realizar el login
-            login(request, accessToken, UUID.fromString(uuidStr));
-            return accessToken;
+                        "No se pudo crear el usuario en el entorno local", e);
+            }
         }
-        throw new IllegalStateException(
-                "Error al registrar usuario: HTTP " + responseCode);
+
+        Authentication auth = buildAuth(request, token, uuid);
+
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        log.debug("Login Spring OK user={}", uuid);
     }
 
-    /**
-     * Cierra la sesión del usuario actual.
-     *
-     * @param tokenActualDelUsuario Token de autenticación del usuario
-     * @return true si el logout fue exitoso, false en caso contrario
-     * @throws IOException si hay errores de conexión
-     */
-    public boolean logout(String tokenActualDelUsuario) throws IOException, IllegalStateException {
-        if (tokenActualDelUsuario == null || tokenActualDelUsuario.isEmpty())
-            throw new IllegalStateException("Token inválido para el logout.");
-        // Conexión HTTP
-        HttpURLConnection conn = getHttpURLConnectionToSupabaseAuthWithJSONContent(AUTH_ENDPOINT_LOGOUT, HTTP_METHOD_POST);
-        // Headers complementarios
-        conn.setRequestProperty(AUTHORIZATION,
-                String.format(AUTHORIZATION_BEARER, tokenActualDelUsuario));
-        int responseCode = conn.getResponseCode();
-        return responseCode == HttpURLConnection.HTTP_NO_CONTENT;
+    private Authentication buildAuth(HttpServletRequest request, String token,
+                                     UUID uuid) {
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(uuid.toString(),
+                                                                      token,
+                                                                      List.of(new SimpleGrantedAuthority(
+                                                                              "ROLE_USER")));
+
+        SecurityContext ctx = SecurityContextHolder.createEmptyContext();
+        ctx.setAuthentication(auth);
+
+        request.getSession(true).setAttribute(
+                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, ctx);
+
+        return auth;
     }
 
-    /**
-     * Registra un usuario nuevo.
-     * Aquí se haría la creación en Supabase y luego la persistencia en la base de datos local.
-     *
-     * @param usuario Objeto Usuario con datos a registrar
-     * @return DTO con información del usuario registrado
-     * @throws IOException si hay errores de conexión
-     */
+    // =====================================================
+    // LOGIN SUPABASE
+    // =====================================================
+
+    public String login(HttpServletRequest request, String email, String password)
+            throws IOException {
+
+        HttpURLConnection conn = open(LOGIN, Method.POST);
+
+        String body = """
+                      {
+                          "email": "%s",
+                          "password": "%s"
+                      }
+                      """.formatted(email, password);
+
+        write(conn, body);
+
+        int code = conn.getResponseCode();
+        log.debug("LOGIN Supabase code={}", code);
+
+        if (code == 400) return null;
+
+        if (code != 200) {
+            log.error("LOGIN error {}", readError(conn));
+            throw new IllegalStateException("Login failed");
+        }
+
+        JsonNode root = MAPPER.readTree(conn.getInputStream());
+
+        String token = root.get(AUTH_USER_TOKEN).asString();
+        String uuid = root.get(AUTH_USER).get(AUTH_USER_ID).asString();
+
+        login(request, token, UUID.fromString(uuid));
+
+        return token;
+    }
+
+    // =====================================================
+    // REGISTRO
+    // =====================================================
+
     @Transactional
-    public UsuarioDto registro(UsuarioDto usuario)
-            throws IOException, IllegalStateException {
-        // Conexión HTTP
-        HttpURLConnection conn = getHttpURLConnectionToSupabaseAuthWithJSONContent(AUTH_ENDPOINT_SIGNUP, HTTP_METHOD_POST);
-        conn.setDoOutput(true);
-        // Crear JSON de registro
-        String jsonBody = String.format("""
-                {
-                    "email": "%s",
-                    "password": "%s"
-                }
-                """, usuario.getCorreo(), usuario.getContrasena());
+    public UUID registro(UsuarioDto u) throws IOException {
 
-        // Enviar JSON
-        try (OutputStream os = conn.getOutputStream()) {
-            os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
+        HttpURLConnection conn = open(SIGNUP, Method.POST);
+
+        String body = """
+                      {
+                          "email": "%s",
+                          "password": "%s",
+                          "data": {
+                                                    "name": "%s",
+                                                    "full_name": "%s"
+                                                }
+                      }
+                      """.formatted(u.getCorreo(), u.getContrasena(), u.getNombre(),
+                                    u.getNombre());
+
+        write(conn, body);
+
+        int code = conn.getResponseCode();
+        log.info("REGISTRO Supabase code={}", code);
+
+        if (code != 200 && code != 201) {
+            log.error("REGISTRO error {}", readError(conn));
+            throw new IllegalStateException("Signup error");
         }
 
-        int responseCode = conn.getResponseCode();
-        if (responseCode != HttpURLConnection.HTTP_OK && responseCode != HttpURLConnection.HTTP_CREATED) {
-            throw new IllegalStateException(
-                    "Error al registrar usuario: HTTP " + responseCode);
-        }
+        JsonNode root = MAPPER.readTree(conn.getInputStream());
 
-        // Parsear la respuesta JSON
-        JsonNode root = OBJECT_MAPPER.readTree(conn.getInputStream());
+        JsonNode user = root.get(AUTH_USER);
 
-        if (!root.has(AUTH_USER_TOKEN) || !root.has(AUTH_USER) || root.get(AUTH_USER) == null ||
-                !root.get(AUTH_USER).has(AUTH_USER_ID)) throw new IllegalStateException(
-                "No se recibió información de usuario en la respuesta");
-
-        // Extraer campos importantes
-        String accessToken = root.get(AUTH_USER_TOKEN).asText();
-        JsonNode userNode = root.get(AUTH_USER);
-        String uuidStr = userNode.get(AUTH_USER_ID).asText();
-        String createdAtStr = userNode.get(AUTH_USER_CREATED).textValue();
-        String updatedAtStr = userNode.get(AUTH_USER_UPDATED).asText();
-
-        // Parsear fechas ISO 8601 a OffsetDateTime
-        OffsetDateTime createdAt = OffsetDateTime.parse(createdAtStr);
-        OffsetDateTime updatedAt = OffsetDateTime.parse(updatedAtStr);
-
-        return new UsuarioDto(UUID.fromString(uuidStr), usuario.getNombre(), usuario.getCorreo(), createdAt, updatedAt, usuario.getProvinciaFavorita(), accessToken);
+        return UUID.fromString(user.get(AUTH_USER_ID).asString());
     }
 
-    /**
-     * Verifica si el sistema de autenticación contiene un email registrado.
-     *
-     * @param email Email a comprobar
-     * @return true si el email existe, false en caso contrario
-     * @throws IOException si hay errores de conexión
-     */
+    // =====================================================
+    // LOGOUT
+    // =====================================================
+
+    public boolean logout(String token) throws IOException {
+
+        HttpURLConnection conn = open(LOGOUT, Method.POST);
+        conn.setRequestProperty(AUTHORIZATION, String.format(BEARER, token));
+
+        int code = conn.getResponseCode();
+
+        log.debug("LOGOUT code={}", code);
+
+        return code == 204;
+    }
+
+    // =====================================================
+    // ADMIN EMAIL CHECK
+    // =====================================================
+
     public boolean containsEmail(String email) throws IOException {
-        // Conexión HTTP
-        HttpURLConnection conn = getHttpURLConnectionToSupabaseAuthWithJSONContent(AUTH_ENDPOINT_ADMIN_USERS, HTTP_METHOD_GET);
-        // Headers complementarios
-        conn.setRequestProperty(AUTHORIZATION,
-                                String.format(AUTHORIZATION_BEARER, SERVICE_ROLE_KEY));
 
-        int responseCode = conn.getResponseCode();
+        HttpURLConnection conn = open(ADMIN_USERS, Method.GET);
 
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            // Parsear la respuesta JSON
-            JsonNode root = OBJECT_MAPPER.readTree(conn.getInputStream());
+        conn.setRequestProperty(AUTHORIZATION, "Bearer " + SERVICE_ROLE_KEY);
+        conn.setRequestProperty(API_KEY, SERVICE_ROLE_KEY);
 
-            // "users" es el array que nos interesa
-            JsonNode usersNode = root.get(AUTH_USERS);
+        int code = conn.getResponseCode();
 
-            if (usersNode != null && usersNode.isArray())
-                // Buscar email exacto en el array
-                for (JsonNode userNode : usersNode)
-                    if (userNode.has(AUTH_USER_EMAIL) && email.equalsIgnoreCase(userNode.get(AUTH_USER_EMAIL).asText()))
-                        return true;
+        log.debug("containsEmail code={}", code);
+
+        if (code != 200) {
+            log.error("containsEmail error {}", readError(conn));
+            return false;
         }
-        // No encontrado → email no existe
+
+        JsonNode root = MAPPER.readTree(conn.getInputStream());
+
+        for (JsonNode u : root.get(AUTH_USERS)) {
+            if (email.equalsIgnoreCase(u.get(AUTH_USER_EMAIL).asString())) {
+                return true;
+            }
+        }
+
         return false;
     }
 
-    /**
-     * Envía un email de recuperación de contraseña al correo indicado.
-     *
-     * @param correo Correo electrónico del usuario a recuperar.
-     * @return true si la solicitud fue exitosa, false en caso contrario.
-     * @throws IOException si hay errores de conexión
-     */
+    // =====================================================
+    // RECUPERACIÓN EMAIL
+    // =====================================================
+
     public boolean recuperacionDeContrasena(String correo) throws IOException {
-        if (correo == null || correo.isBlank())
-            throw new IllegalArgumentException("Correo inválida para la recuperación.");
-        // Conexión HTTP
-        HttpURLConnection conn = getHttpURLConnectionToSupabaseAuthWithJSONContent(AUTH_ENDPOINT_RECOVER, HTTP_METHOD_POST);
-        conn.setDoOutput(true);
-        // Crear JSON de registro
-        String jsonBody = String.format("""
-                {
-                    "email": "%s"
-                }
-                """, correo);
-        // Enviar JSON
-        conn.getOutputStream().write(jsonBody.getBytes(StandardCharsets.UTF_8));
-        return conn.getResponseCode() == HttpURLConnection.HTTP_OK;
+
+        HttpURLConnection conn = open(RECOVER, Method.POST);
+
+        write(conn, """
+                    {
+                     "email": "%s",
+                     "redirect_to": "%s",
+                     "redirectTo": "%s",
+                     "options": {
+                                     "redirect_to": "%s",
+                                     "redirectTo": "%s",
+                                     "redirectUrl": "%s"
+                                 }
+                    }
+                    """.formatted(correo, URL_RESTABLECER_CONTRASENA,
+                                  URL_RESTABLECER_CONTRASENA, URL_RESTABLECER_CONTRASENA,
+                                  URL_RESTABLECER_CONTRASENA,
+                                  URL_RESTABLECER_CONTRASENA));
+
+        int code = conn.getResponseCode();
+
+        log.debug("RECOVER code={}", code);
+
+        return code == 200;
     }
 
-    /**
-     * Envía un email de recuperación de contraseña al correo indicado.
-     *
-     * @param nuevaContrasena Nueva contraseña del usuario a resablecer.
-     * @param tokenDeRecover  Token de recuperación recibido por email.
-     * @return true si la solicitud fue exitosa, false en caso contrario.
-     * @throws IOException si hay errores de conexión
-     */
-    @Transactional
-    public boolean restablecerContrasena(String tokenDeRecover, String nuevaContrasena)
+    // =====================================================
+    // RESET PASSWORD (TOKEN EMAIL)
+    // =====================================================
+
+    public boolean restablecerContrasena(String token, String pass)
             throws IOException {
-        if (nuevaContrasena == null || tokenDeRecover == null ||
-                tokenDeRecover.isBlank() || nuevaContrasena.isBlank())
-            throw new IllegalArgumentException("Correo inválida para la recuperación.");
-        // Construir la URL completa del endpoint admin
-        URL url = URI.create(SUPABASE_AUTH_URL + AUTH_ENDPOINT_RESET).toURL();
-        // Conexión HTTP
-        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod(HTTP_METHOD_POST);
-        // Headers
-        conn.setRequestProperty(CONTENT_TYPE, CONTENT_TYPE_JSON);
-        conn.setRequestProperty(AUTHORIZATION,
-                                String.format(AUTHORIZATION_BEARER, SERVICE_ROLE_KEY));
-        conn.setDoOutput(true);
-        // TODO ACABAR DE IMPLEMENTAR
-        // Crear JSON de registro
-        String jsonBody = String.format("""
-                                        {
-                                           "password": "%s",
-                                           "token": "%s"
-                                         }
-                                        """, nuevaContrasena, tokenDeRecover);
-        // Enviar JSON
-        conn.getOutputStream().write(jsonBody.getBytes(StandardCharsets.UTF_8));
-        return conn.getResponseCode() == HttpURLConnection.HTTP_OK;
+
+        HttpURLConnection conn = open(USER, Method.PUT);
+        conn.setRequestProperty(AUTHORIZATION, String.format(BEARER, token));
+
+        write(conn, """
+                    {"password": "%s"}
+                    """.formatted(pass));
+
+        int code = conn.getResponseCode();
+        log.debug("RESET (PUT /user) code={}", code);
+
+        if (code != 200) {
+            log.error("RESET error {}", readError(conn));
+        }
+
+        return code == 200;
+    }
+
+    // =====================================================
+    // CHANGE PASSWORD AUTH USER
+    // =====================================================
+
+    public boolean modificarContrasenaUsuario(String token, String pass)
+            throws IOException {
+
+        HttpURLConnection conn = open(USER, Method.PUT);
+
+        conn.setRequestProperty(AUTHORIZATION, String.format(BEARER, token));
+
+        write(conn, """
+                    { "password": "%s" }
+                    """.formatted(pass));
+
+        int code = conn.getResponseCode();
+
+        log.debug("CHANGE PASS code={}", code);
+
+        return code == 200;
     }
 
     /**
-     * Encargado de modificar la contraseña de un usuario a través de una petición HTTP
-     * PUT a la API REST de Supabase Auth.
+     * Actualiza el nombre de un usuario existente.
      *
-     * @param tokenDelUsuario Token de autenticación del usuario
-     * @param contrasenaNueva Nueva contraseña a establecer
-     * @throws IOException si hay errores de conexión
+     * @param token                   identificador UUID del usuario
+     * @param nuevoNombre nuevo nombre a asignar
+     * @throws IllegalArgumentException si alguno de los parámetros es inválido
      */
-    public boolean modificarContrasenaUsuario(String tokenDelUsuario,
-                                              String contrasenaNueva) throws IOException {
-        // Conexión HTTP
-        HttpURLConnection conn = getHttpURLConnectionToSupabaseAuthWithJSONContent(AUTH_ENDPOINT_USER, HTTP_METHOD_PUT);
-        // Headers complementarios
-        conn.setRequestProperty(AUTHORIZATION,
-                                String.format(AUTHORIZATION_BEARER, tokenDelUsuario));
-        conn.setDoOutput(true);
-        // Enviar JSON
-        conn.getOutputStream().write(String.format("""
-                                                   {
-                                                       "password": "%s"
-                                                   }
-                                                   """, contrasenaNueva)
-                                             .getBytes(StandardCharsets.UTF_8));
-        return conn.getResponseCode() == HttpURLConnection.HTTP_OK;
+    public boolean modificarNombreUsuario(String token, String nuevoNombre)
+            throws IOException {
+        if (token == null || nuevoNombre == null || nuevoNombre.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Parámetros inválidos para la actualización del nombre.");
+        }
+        HttpURLConnection conn = open(USER, "PUT");
+        conn.setRequestProperty(AUTHORIZATION, String.format(BEARER, token));
+
+        // Los datos del perfil como el nombre en Supabase se guardan bajo "data"
+        String body = """
+                      {
+                          "data": {
+                              "name": "%s",
+                              "full_name": "%s"
+                          }
+                      }
+                      """.formatted(nuevoNombre.trim(), nuevoNombre.trim());
+
+        write(conn, body);
+
+        int code = conn.getResponseCode();
+        log.debug("UPDATE USER NAME code={}", code);
+
+        if (code != 200) {
+            log.error("Error al modificar nombre en Supabase: {}", readError(conn));
+        }
+
+        return code == 200;
     }
 
-    /**
-     * Comprueba si existe un usuario autenticado en el contexto de seguridad.
-     */
-    public boolean isAuthenticated() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return !(auth == null || auth.getPrincipal() == null || auth.getPrincipal().equals("anonymousUser"));
-    }
+    // =====================================================
+    // HTTP HELPERS
+    // =====================================================
 
-    /**
-     * Retorna una conexión HttpURLConnection ya creada y configurada hacia la url de Supabase Auth base + /path
-     * introducida. Configura también el http method deseado, en función del introducido por parámetro y declara en el
-     * header el Content-Type:application/json.
-     * Por defecto deja el body a false, pudiendo cambiarlo si se desea -> conn.setDoOutput(false);
-     *
-     * @param path       path complementario de la petición http base de supabase.
-     * @param metodoHTTP función http deseada.
-     * @return Objeto HttpURLConnection ya preconfigurado
-     * @throws IOException Si hay errores de conexión.
-     */
-    private HttpURLConnection getHttpURLConnectionToSupabaseAuthWithJSONContent(String path, String metodoHTTP) throws IOException {
-        // Construir la URL completa del endpoint admin
+    private HttpURLConnection open(String path, String method) throws IOException {
+
         URL url = URI.create(SUPABASE_AUTH_URL + path).toURL();
-        // Conexión HTTP
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setRequestMethod(metodoHTTP);
-        // Headers
+
+        conn.setRequestMethod(method);
         conn.setRequestProperty(CONTENT_TYPE, CONTENT_TYPE_JSON);
-        // Body a false, si se desea se puede modificar.
-        conn.setDoOutput(false);
+        conn.setRequestProperty(API_KEY, SERVICE_ROLE_KEY);
+
+        if (!Method.GET.equalsIgnoreCase(method)) {
+            conn.setDoOutput(true);
+        }
+
+        log.debug("HTTP {} {}", method, url);
+
         return conn;
+    }
+
+    private void write(HttpURLConnection conn, String body) throws IOException {
+        try (OutputStream os = conn.getOutputStream()) {
+            os.write(body.getBytes(StandardCharsets.UTF_8));
+        }
+    }
+
+    private String readError(HttpURLConnection conn) {
+        try {
+            if (conn.getErrorStream() == null) return "";
+            return new String(conn.getErrorStream().readAllBytes());
+        } catch (Exception e) {
+            return "error-read";
+        }
     }
 }

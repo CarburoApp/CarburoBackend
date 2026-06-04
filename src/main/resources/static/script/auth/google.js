@@ -1,26 +1,9 @@
-// Script propio de google para autenticación de usuarios
-// https://developers.google.com/identity/sign-in/web/build-button
-var googleUser = {};
-var startApp = function() {
-    gapi.load('auth2', function(){
-        // Retrieve the singleton for the GoogleAuth library and set up the client.
-        auth2 = gapi.auth2.init({
-            client_id: 'YOUR_CLIENT_ID.apps.googleusercontent.com',
-            cookiepolicy: 'single_host_origin',
-            // Request scopes in addition to 'profile' and 'email'
-            //scope: 'additional_scope'
-        });
-        attachSignin(document.getElementById('customBtn'));
-    });
-};
+function iniciarSesionConGoogle() {
+    const SUPABASE_URL = "https://cwkimswbyczukkjdvjbt.supabase.co";
 
-function attachSignin(element) {
-    console.log(element.id);
-    auth2.attachClickHandler(element, {},
-        function(googleUser) {
-            document.getElementById('name').innerText = "Signed in: " +
-                googleUser.getBasicProfile().getName();
-        }, function(error) {
-            alert(JSON.stringify(error, undefined, 2));
-        });
+    // Modificamos esto para que apunte directamente al login general:
+    const REDIRECT_TO = "https://carburo.app/login";
+
+    const urlAuth = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(REDIRECT_TO)}`;
+    window.location.href = urlAuth;
 }

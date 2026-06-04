@@ -36,4 +36,6 @@ public interface ProvinciaRepository extends CrudRepository<Provincia, Short> {
 	 */
 	@Query("SELECT p FROM Provincia p ORDER BY p.denominacion ASC")
 	Iterable<Provincia> findAllOrderByDenominacion();
+
+	Provincia getProvinciaById(short id);
 }

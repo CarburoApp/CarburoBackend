@@ -82,7 +82,7 @@ public class LoginFormValidator implements Validator {
         // Unicidad del correo
         else {
             try {
-                if (!usuarioService.containsCorreo(correo) || !authService.containsEmail(correo)) {
+                if (!authService.containsEmail(correo)) {
                     errors.rejectValue(USUARIO_DTO_FIELD_CORREO,
                                        "Error.auth.login.correo.no.existente");
                 }

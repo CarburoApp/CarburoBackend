@@ -3,19 +3,27 @@ package app.carburo.backend.controllers;
 import app.carburo.backend.dto.UsuarioDto;
 import app.carburo.backend.entities.Provincia;
 import app.carburo.backend.entities.Usuario;
+import app.carburo.backend.repositories.CombustibleRepository;
 import app.carburo.backend.services.AuthService;
 import app.carburo.backend.services.ProvinciaService;
 import app.carburo.backend.services.UsuarioService;
 import app.carburo.backend.validators.*;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.UUID;
 
 import static app.carburo.backend.controllers.UsuarioController.RUTA_PERFIL;
 import static app.carburo.backend.validators.RegistroFormValidator.USUARIO_DTO_FIELD_CONTRASENA;
@@ -29,6 +37,7 @@ import static app.carburo.backend.validators.RegistroFormValidator.USUARIO_DTO_F
  * y acceso al perfil del usuario autenticado.
  * </p>
  */
+@Slf4j
 @Controller
 public class AuthController {
 
@@ -44,8 +53,15 @@ public class AuthController {
     public static final String RUTA_LOGIN = "/login";
     public static final String RUTA_REGISTRO = "/registro";
     public static final String RUTA_RECUPERACION = "/recuperacion";
-    public static final String RUTA_RESTABLECER_CONTRASENA = "/recoverPassword";
+    public static final String RUTA_RESTABLECER_CONTRASENA = "/auth/reset-password";
     public static final String RUTA_CAMBIAR_CONTRASENA = "/change-password";
+
+
+    @Value("${app.url}")
+    public static String URL;
+
+    public static final String URL_RESTABLECER_CONTRASENA =
+            URL + RUTA_RESTABLECER_CONTRASENA;
 
     private final ProvinciaService provinciaService;
     private final AuthService authService;
@@ -55,6 +71,7 @@ public class AuthController {
     private final RecuperacionFormValidator recuperacionFormValidator;
     private final PerfilRestablecerContrasenaFormValidator restablecerContrasenaFormValidator;
     private final PerfilCambioContrasenaFormValidator perfilCambioContrasenaFormValidator;
+    private final CombustibleRepository combustibleRepository;
 
     /**
      * Constructor con inyección de dependencias de servicios y validadores.
@@ -66,7 +83,8 @@ public class AuthController {
                           LoginFormValidator loginFormValidator,
                           RecuperacionFormValidator recuperacionFormValidator,
                           PerfilRestablecerContrasenaFormValidator restablecerContrasenaFormValidator,
-                          PerfilCambioContrasenaFormValidator perfilCambioContrasenaFormValidator) {
+                          PerfilCambioContrasenaFormValidator perfilCambioContrasenaFormValidator,
+                          CombustibleRepository combustibleRepository) {
         this.authService                         = authService;
         this.usuarioService                      = usuarioService;
         this.provinciaService                    = provinciaService;
@@ -75,17 +93,7 @@ public class AuthController {
         this.recuperacionFormValidator           = recuperacionFormValidator;
         this.restablecerContrasenaFormValidator = restablecerContrasenaFormValidator;
         this.perfilCambioContrasenaFormValidator = perfilCambioContrasenaFormValidator;
-    }
-
-    /**
-     * Muestra la vista de login si el usuario no está autenticado.
-     * Si ya existe sesión activa, redirige directamente al perfil.
-     */
-    @GetMapping(RUTA_LOGIN)
-    public String doGetLogin(Model model) {
-        if (authService.isAuthenticated()) return RUTA_REDIRECT + RUTA_PERFIL;
-        model.addAttribute("usuario", new UsuarioDto());
-        return VISTA_LOGIN;
+        this.combustibleRepository              = combustibleRepository;
     }
 
     /**
@@ -121,6 +129,39 @@ public class AuthController {
         }
     }
 
+    @GetMapping(RUTA_LOGIN)
+    public String doGetLoginAndHandleGoogleOauth(
+            @RequestParam(value = "access_token", required = false) String accessToken,
+            @RequestParam(value = "error", required = false) String error, Model model,
+            HttpServletRequest request) throws IOException {
+        if (authService.isAuthenticated()) return RUTA_REDIRECT + RUTA_PERFIL;
+
+        if (error != null) {
+            log.error("Error devuelto desde el OAuth de Supabase: {}", error);
+            return RUTA_REDIRECT + RUTA_PERFIL + "?error=oauth";
+        }
+
+        // Si Supabase envía los parámetros en el Query Server-Side:
+        if (accessToken != null && !accessToken.isBlank()) {
+            try {
+                var sbUser = authService.getSupabaseUserData(accessToken);
+                UUID uuidUsuario = UUID.fromString(sbUser.id());
+
+                // 2. Autenticamos al usuario en el contexto de Spring Security
+                authService.login(request, accessToken, uuidUsuario, true);
+
+                log.info("Usuario logueado con Google exitosamente: {}", uuidUsuario);
+                return RUTA_REDIRECT + RUTA_PERFIL;
+
+            } catch (Exception e) {
+                log.error("Error al procesar el login de Google", e);
+                return RUTA_REDIRECT + RUTA_LOGIN + "?error=true";
+            }
+        }
+        model.addAttribute("usuario", new UsuarioDto());
+        return VISTA_LOGIN;
+    }
+
     /**
      * Controlador encargado del cierre de sesión de usuarios.
      * Primero se encarga de cerrar la sesión en Supabase Auth y luego
@@ -135,7 +176,7 @@ public class AuthController {
         if (token.isEmpty()) return RUTA_REDIRECT + RUTA_LOGIN;
         // Llamar a Supabase Auth para cerrar sesión
         try {
-            authService.logout(authService.getTokenActual().get());
+            authService.logout(token.get());
         } catch (IOException | IllegalStateException e) {
             return RUTA_REDIRECT + RUTA_PERFIL;
         }
@@ -196,38 +237,50 @@ public class AuthController {
         }
         //  Registro del usuario
         try {
-            usuarioDto = authService.registro(usuarioDto);
+            usuarioDto.setUuid(authService.registro(usuarioDto));
         } catch (IOException | IllegalStateException e) {
-            bindingResult.rejectValue("contraseña", "Error.auth.login.registro.fallo");
+            log.error("Ha ocurrido un error", e);
+            bindingResult.rejectValue(USUARIO_DTO_FIELD_CONTRASENA, "Error.auth.login.registro.fallo");
             return returnRegistroConDatos(model);
         }
         Optional<Provincia> provincia = provinciaService.getProvinciaById(usuarioDto.getProvinciaFavorita());
         // Error inesperado en el servicio de autenticación
-        if (usuarioDto == null || provincia.isEmpty()) {
-            bindingResult.rejectValue("contraseña", "Error.auth.login.registro.fallo");
+        if (provincia.isEmpty()) {
+            bindingResult.rejectValue(USUARIO_DTO_FIELD_CONTRASENA, "Error.auth.login.registro.fallo");
             model.addAttribute("usuario", new UsuarioDto());
             return returnRegistroConDatos(model);
         }
         //  Persistencia del usuario
         Usuario usuario = new Usuario(
                 usuarioDto.getUuid(),
-                usuarioDto.getNombre(),
-                usuarioDto.getCorreo(),
                 provincia.get()
         );
+        usuario.setNombre(usuarioDto.getNombre());
+        usuario.setEmail(usuarioDto.getCorreo());
+        usuario.setCombustiblesFavoritos(new HashSet<>(combustibleRepository.findAll()));
         usuarioService.save(usuario);
 
         //Realizar el Login
-        authService.login(request, usuarioDto.getToken(), usuario.getUuid());
-
-        return RUTA_REDIRECT + RUTA_PERFIL;
+        try {
+            if (authService.login(request, usuarioDto.getCorreo(), usuarioDto.getContrasena()) == null) {
+                bindingResult.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
+                                          "Error.auth.login.fallo.sesion");
+                return returnRegistroConDatos(model);
+            }
+            return RUTA_REDIRECT + RUTA_PERFIL;
+        } catch (IOException | IllegalStateException e) {
+            bindingResult.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
+                                      "Error.auth.login.fallo.sesion");
+            usuarioService.delete(usuario.getUuid());
+            return returnRegistroConDatos(model);
+        }
     }
 
     /**
      * Muestra el formulario de recuperación de contraseña.
      */
     @GetMapping(RUTA_RECUPERACION)
-    public String doGetRepuceracion(Model model) {
+    public String doGetRecuperacion(Model model) {
         if (authService.isAuthenticated()) return RUTA_REDIRECT + RUTA_PERFIL;
         model.addAttribute("usuario", new UsuarioDto());
         return VISTA_RECUPERACION_CONTRASENA;
@@ -321,46 +374,53 @@ public class AuthController {
 
     /**
      * Muestra la vista del formulario para restablecer la contraseña.
+     * Se inicializa el objeto UsuarioDto vacío para que Thymeleaf pueda ligar los campos.
      */
     @GetMapping(RUTA_RESTABLECER_CONTRASENA)
-    public String doGetRestablecerContrasena(@RequestParam(name = "token") String token,
-                                             Model model) {
-        if (token == null || token.isEmpty()) return RUTA_REDIRECT + "/";
-        //Pasamos los valores al modelo
-        model.addAttribute("token", token);
+    public String doGetRestablecerContrasena(Model model) {
+        if (authService.isAuthenticated()) return RUTA_REDIRECT + RUTA_PERFIL;
         model.addAttribute("usuario", new UsuarioDto());
+
         return VISTA_RESTABLECER_CONTRASENA;
     }
 
+
     /**
-     * Procesa la solicitud de restablecimiento de la contraseña.
-     *
-     * <p>
-     * Validación de las contraseñas introducidas y delega en el servicio de autenticación
-     * el envío del proceso de restablecimiento.
+     * Procesa la solicitud de restablecimiento de la contraseña utilizando
+     * el validador del Framework de Spring y el DTO correspondiente.
      * </p>
      */
-    @PostMapping(RUTA_RESTABLECER_CONTRASENA +"/{token}")
-    public String doPostRestablecerContrasena(@PathVariable String token,
+    @PostMapping(RUTA_RESTABLECER_CONTRASENA)
+    public String doPostRestablecerContrasena(
             @ModelAttribute("usuario") @Validated UsuarioDto usuarioDto,
             BindingResult bindingResult, Model model) {
-        System.out.println(usuarioDto.toString());
-        System.out.println(token);
-        // Validación del formulario
         restablecerContrasenaFormValidator.validate(usuarioDto, bindingResult);
-        // Si hay errores, volvemos a la vista de la recuperación de contraseña
+
+        String token = usuarioDto.getToken();
+
+        if (token == null || token.isBlank()) return RUTA_REDIRECT + RUTA_LOGIN;
+
         if (bindingResult.hasErrors()) return VISTA_RESTABLECER_CONTRASENA;
-        if (token == null || token.isEmpty()) return RUTA_REDIRECT + "/";
-        //  Registro del usuario
+
+
         try {
-            if (authService.restablecerContrasena(token, usuarioDto.getContrasena())) {
+            boolean ok = authService.restablecerContrasena(token,
+                                                           usuarioDto.getContrasena());
+
+            if (!ok) {
                 bindingResult.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
-                                          "Error.auth.restablecer.contrasena.fallo");
-            } else model.addAttribute("exito", true);
-        } catch (IOException | IllegalStateException e) {
+                                          "Error.auth.change.password.fallo");
+                return VISTA_RESTABLECER_CONTRASENA;
+            }
+
+        } catch (IOException e) {
+            log.error("Error al restablecer contraseña en Supabase", e);
             bindingResult.rejectValue(USUARIO_DTO_FIELD_CONTRASENA,
-                                      "Error.auth.restablecer.contrasena.fallo");
+                                      "Error.auth.change.password.fallo");
+            return VISTA_RESTABLECER_CONTRASENA;
         }
-        return VISTA_RESTABLECER_CONTRASENA;
+
+        // Redirección al login con éxito
+        return RUTA_REDIRECT + RUTA_LOGIN + "?passwordChanged=true";
     }
 }
