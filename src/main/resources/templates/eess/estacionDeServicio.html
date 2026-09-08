@@ -19,7 +19,7 @@
             <a class="text-text-secondary font-medium hover:underline" th:href="@{/}"
                th:text="#{home.title}"></a>
             <span class="text-text-secondary font-medium">/</span>
-            <a class="text-text-secondary font-medium hover:underline" th:href="@{/estacionesDeServicio}"
+            <a class="text-text-secondary font-medium hover:underline" th:href="@{/estaciones-de-servicio}"
                th:text="#{eess.list.title}"></a>
             <span class="text-text-secondary font-medium">/</span>
             <a class="text-text-secondary font-medium hover:underline"
@@ -31,7 +31,7 @@
         <div class="bg-surface rounded-xl border border-[#e8dbce] p-6 md:p-8 shadow-sm mb-8 relative overflow-visible">
             <!-- Botón de me gusta-->
             <form th:fragment="botonFavorita(estacion, favorita)" method="post" sec:authorize="isAuthenticated()"
-                  th:action="@{/perfil/estacionesDeServicio/favoritas/{id}(id=${estacion.id})}">
+                  th:action="@{/perfil/estaciones-de-servicio/favoritas/{id}(id=${estacion.id})}">
                 <button type="submit"
                         class="absolute -top-6 -right-1 md:right-8 w-12 h-12 md:w-14 md:h-14
                    rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all group z-20
@@ -129,7 +129,7 @@
                                 th:text="#{eess.combustible.precios.historico}"></h2>
                         </div>
                         <form class="flex items-center gap-2" method="get"
-                              th:action="@{/estacionesDeServicio/{id}(id=${estacion.id})}">
+                              th:action="@{/estaciones-de-servicio/{id}(id=${estacion.id})}">
                             <label class="text-sm font-medium text-text-secondary"
                                    th:text="#{eess.combustible.precios.historico.desde}" for="precios_calendario"></label>
                             <input class="form-input h-9 py-1 px-3 text-sm rounded-lg border-[#e8dbce] bg-[#fcfaf8] text-text-main focus:ring-primary focus:border-primary"

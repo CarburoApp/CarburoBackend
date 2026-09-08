@@ -26,7 +26,7 @@
         <a class="text-text-secondary font-medium hover:underline" th:href="@{/perfil}"
            th:text="#{auth.perfil.title}"></a>
         <span class="text-text-secondary font-medium">/</span>
-        <a class="text-text-main font-medium" th:href="@{/perfil/estacionesDeServicio/favoritas}"
+        <a class="text-text-main font-medium" th:href="@{/perfil/estaciones-de-servicio/favoritas}"
            th:text="#{eess.favoritas.title}"></a>
     </div>
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8 border-b border-border-color pb-4">
@@ -47,9 +47,9 @@
                     <p class="text-text-secondary mt-1 max-w-md" th:text="#{eess.favoritas.anadir.subtitulo}"
                        th:if="${#lists.isEmpty(eess)}"></p>
                 </div>
-                <a th:href="@{/estacionesDeServicio}"
+                <a th:href="@{/estaciones-de-servicio}"
                         class="flex min-w-[240px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-12 px-6 bg-primary hover:bg-primary/90 transition-colors text-white text-sm font-bold leading-normal tracking-[0.015em] shadow-sm">
-                    <span class="truncate" th:text="#{eess.favotitas.boton.buscar}"></span>
+                    <span class="truncate" th:text="#{eess.favoritas.boton.buscar}"></span>
                 </a>
             </div>
             <!-- Station Card -->

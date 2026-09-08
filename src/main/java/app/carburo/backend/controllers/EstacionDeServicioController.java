@@ -21,15 +21,15 @@ public class EstacionDeServicioController {
 
 	// Constantes de vistas
 	public static final String VISTA_EESS_DESCRIPTION = "eess/estacionDeServicio";
-	public static final String VISTA_EESS_LIST = "eess/list";
+	public static final String VISTA_EESS_LIST = "eess/estaciones-de-servicio";
 
 	// Rutas
 	public static final String RUTA_REDIRECT = "redirect:";
-	public static final String RUTA_ESTACIONES_DE_SERVICIO = "/estacionesDeServicio";
-	public static final String RUTA_ESTACION_DE_SERVICIO = "/estacionesDeServicio/";
+	public static final String RUTA_ESTACIONES_DE_SERVICIO = "/estaciones-de-servicio";
+	public static final String RUTA_ESTACION_DE_SERVICIO = "/estaciones-de-servicio/";
 	// A las siguientes rutas les hace falta al comienzo /perfil/....
-	public static final String RUTA_ESTACIONES_DE_SERVICIO_FAVORITAS_SIN_PERFIL = "/estacionesDeServicio/favoritas";
-	public static final String RUTA_ESTACION_DE_SERVICIO_FAVORITA_SIN_PERFIL = "/estacionesDeServicio/favoritas/";
+	public static final String RUTA_ESTACIONES_DE_SERVICIO_FAVORITAS_SIN_PERFIL = "/estaciones-de-servicio/favoritas";
+	public static final String RUTA_ESTACION_DE_SERVICIO_FAVORITA_SIN_PERFIL = "/estaciones-de-servicio/favoritas/";
 
 	private final EstacionDeServicioService estacionDeServicioService;
 	private final ComunidadAutonomaService comunidadAutonomaService;
@@ -54,8 +54,15 @@ public class EstacionDeServicioController {
 		this.authService = authService;
 	}
 
+	@GetMapping("")
+	public String doGetEstacionesDeServicios() {
+		return VISTA_EESS_LIST;
+	}
+
 
 	/**
+	 * TODO A ELIMINAR
+	 *
 	 * Lista estaciones de servicio con filtros opcionales y paginación.
 	 *
 	 * @param model                 Modelo para la vista
@@ -70,7 +77,7 @@ public class EstacionDeServicioController {
 	 * @param ordenSeleccionado     Criterio de orden: name_asc, name_desc, price_asc, price_desc
 	 * @return Vista "eess/list" con la información filtrada
 	 */
-	@GetMapping("")
+	@GetMapping("/old")
 	public String doGetEstacionesDeServicio(Model model, Pageable pageable,
 											@RequestParam(required = false)
 										  String comunidadSeleccionada,
@@ -190,7 +197,7 @@ public class EstacionDeServicioController {
 				marcaSeleccionada)) ? marcaSeleccionada : "0NOTSELECTED"; // Si no hay selección o la selección no es válida
 		model.addAttribute("marcaSeleccionada", marcaFinal);
 
-		return VISTA_EESS_LIST;
+		return "eess/list";
 	}
 
 	/**
@@ -218,7 +225,7 @@ public class EstacionDeServicioController {
 	 * @param id          ID de la estación de servicio (debe ser mayor que 0)
 	 * @param fechaInicio fecha de inicio opcional para filtrar los precios históricos (formato ISO, por ejemplo "2026-01-17")
 	 * @param model       modelo de Spring para pasar atributos a la vista
-	 * @return nombre de la vista "/eess/estacionDeServicio" o redirección a "/estacionesDeServicio" si el ID no es válido o la estación no existe
+	 * @return nombre de la vista "/eess/estacionDeServicio" o redirección a "/estaciones-de-servicio" si el ID no es válido o la estación no existe
 	 */
 	@GetMapping("/{id}")
 	public String doGet(@PathVariable Long id,

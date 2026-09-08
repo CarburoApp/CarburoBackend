@@ -1,0 +1,496 @@
+<!-- eess/estacionDeServicio.html -->
+<!DOCTYPE html>
+<html lang="es" class="light">
+<head>
+    <th:block th:replace="~{fragments/head :: head}"></th:block>
+    <title th:text="#{app.name} + ' - ' + #{eess.list.title}"></title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
+<div id="overlayFiltros"></div>
+
+
+<!-- Header -->
+<th:block th:replace="~{fragments/header :: header}"></th:block>
+
+<!-- Contenido principal -->
+<div id="app"
+     class="flex flex-1 w-full max-w-[1400px] mx-auto px-4 py-6 md:px-8 gap-8"
+     th:attr="data-api-key=${@environment.getProperty('security.api.public-key')}
+                ,data-api-url=${@environment.getProperty('security.api.public-url')}">
+
+    <!-- Left Sidebar: Filters (desktop y móvil) -->
+    <aside id="asideFiltros" class="flex flex-col w-80 min-w-[320px] gap-6 shrink-0 h-fit sticky top-24">
+        <div class="bg-surface rounded-xl border border-border-color p-5 shadow-sm">
+
+            <!-- Cabecera visible siempre -->
+            <div class="flex items-center gap-2 mb-6 border-b border-border-color pb-4" id="cabeceraFiltros">
+                <span class="material-symbols-outlined text-primary">filter_list</span>
+                <h3 class="text-lg font-bold text-text-main" th:text="#{eess.list.filtros}"></h3>
+            </div>
+
+            <div class="flex flex-col gap-5">
+                <!-- Search Text -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-xs font-bold text-text-secondary uppercase tracking-wider"
+                           for="filtro_buscador"
+                           th:text="#{eess.list.filtros.buscar}"></label>
+                    <div class="flex w-full items-stretch rounded-lg h-10 bg-[#f4ede7]">
+                        <div class="text-[#9c7349] flex items-center justify-center pl-3 pr-1">
+                            <span class="material-symbols-outlined text-[20px]">search</span>
+                        </div>
+                        <input id="filtro_buscador" type="text"
+                               v-model="filtros.busqueda"
+                               class="w-full bg-transparent border-none focus:ring-0 text-sm placeholder:text-[#9c7349]/70 text-text-main"
+                               th:placeholder="#{eess.list.filtros.buscar.placeholder}"/>
+                    </div>
+                </div>
+
+                <!-- Location Filters -->
+                <div class="flex flex-col gap-3">
+
+                    <!-- Label global del bloque -->
+                    <label class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-1"
+                           th:text="#{eess.list.filtros.ubicacion}">
+                    </label>
+
+
+                    <label class="text-sm font-medium text-text-main" for="filtro_ccaa"
+                           th:text="#{eess.list.filtros.ubicacion.ccaa}"></label>
+                    <select id="filtro_ccaa"
+                            v-model="filtros.ccaa"
+                            @change="cambioCCAA"
+                            :disabled="cargandoComunidades"
+                            class="w-full h-10 rounded-lg border border-[#e8dbce] bg-[#fcfaf8] text-sm text-text-main
+                               focus:ring-1 focus:ring-primary focus:border-primary">
+                        <option value="0" th:text="#{eess.list.filtros.indiferente}"></option>
+                        <option v-for="comunidad in comunidades"
+                                :key="comunidad.id"
+                                :value="String(comunidad.id)">
+                            {{comunidad.denominacion}}
+                        </option>
+                    </select>
+
+                    <label class="text-sm font-medium text-text-main" for="filtro_provincia"
+                           th:text="#{eess.list.filtros.ubicacion.provincia}"></label>
+                    <select id="filtro_provincia"
+                            v-model="filtros.provincia"
+                            @change="cambioProvincia"
+                            :disabled="filtros.ccaa === '0' || cargandoProvincias"
+                            class="w-full h-10 rounded-lg border border-[#e8dbce] bg-[#fcfaf8] text-sm text-text-main
+                               focus:ring-1 focus:ring-primary focus:border-primary">
+                        <option value="0" th:text="#{eess.list.filtros.indiferente}"></option>
+                        <option v-for="provincia in provincias"
+                                :key="provincia.id"
+                                :value="String(provincia.id)">
+                            {{ provincia.denominacion }}
+                        </option>
+                    </select>
+
+                    <label class="text-sm font-medium text-text-main" for="filtro_municipio"
+                           th:text="#{eess.list.filtros.ubicacion.municipio}"></label>
+                    <select id="filtro_municipio"
+                            v-model="filtros.municipio"
+                            :disabled="filtros.provincia === '0' || cargandoMunicipios"
+                            class="w-full h-10 rounded-lg border border-[#e8dbce] bg-[#fcfaf8] text-sm text-text-main
+                               focus:ring-1 focus:ring-primary focus:border-primary">
+                        <option th:value="0" th:text="#{eess.list.filtros.indiferente}"></option>
+                        <option v-for="municipio in municipiosProvincia"
+                                :key="municipio.id"
+                                :value="String(municipio.id)">
+                            {{ municipio.denominacion }}
+                        </option>
+                    </select>
+                </div>
+
+                <!-- Order By -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-xs font-bold text-text-secondary uppercase tracking-wider"
+                           for="ordenacion"
+                           th:text="#{eess.list.filtros.ordenar.label}">
+                    </label>
+
+                    <select id="ordenacion"
+                            v-model="filtros.orden"
+                            class="w-full h-10 rounded-lg border border-[#e8dbce] bg-[#fcfaf8] text-sm text-text-main
+                   focus:ring-1 focus:ring-primary focus:border-primary">
+
+                        <option value="price_asc"
+                                th:text="#{eess.list.filtros.orden.precio.asc}">
+                        </option>
+
+                        <option value="price_desc"
+                                th:text="#{eess.list.filtros.orden.precio.desc}">
+                        </option>
+
+                        <option value="name_asc"
+                                th:text="#{eess.list.filtros.orden.alfabetico.asc}">
+                        </option>
+
+                        <option value="name_desc"
+                                th:text="#{eess.list.filtros.orden.alfabetico.desc}">
+                        </option>
+
+                    </select>
+                </div>
+
+                <!-- Status Slider -->
+                <div class="flex flex-col gap-2">
+
+                    <label class="text-xs font-bold text-text-secondary uppercase tracking-wider"
+                           for="filtro_estado"
+                           th:text="#{eess.list.filtros.estado}">
+                    </label>
+
+
+                    <div id="filtro_estado"
+                         class="flex bg-[#f4ede7] p-1 rounded-lg">
+
+                        <!-- ABIERTO -->
+
+                        <button type="button"
+                                @click="filtros.estado = 'ABIERTO'"
+                                class="flex-1 py-1.5 text-xs font-medium rounded-md hover:bg-white/50 transition-colors"
+                                :class="filtros.estado === 'ABIERTO'
+                                    ? 'bg-white text-primary shadow-sm'
+                                    : ''"
+                                th:text="#{eess.estado.abierto}">
+                        </button>
+
+
+                        <!-- CERRADO -->
+
+                        <button type="button"
+                                @click="filtros.estado = 'CERRADO'"
+                                class="flex-1 py-1.5 text-xs font-medium rounded-md hover:bg-white/50 transition-colors"
+                                :class="filtros.estado === 'CERRADO'
+                                    ? 'bg-white text-primary shadow-sm'
+                                    : ''"
+                                th:text="#{eess.estado.cerrado}">
+                        </button>
+
+
+                        <!-- INDEFERENTE -->
+
+                        <button type="button"
+                                @click="filtros.estado = 'INDEFERENTE'"
+                                class="flex-1 py-1.5 text-xs font-medium rounded-md hover:bg-white/50 transition-colors"
+                                :class="filtros.estado === 'INDEFERENTE'
+                                    ? 'bg-white text-primary shadow-sm'
+                                    : ''"
+                                th:text="#{eess.list.estado.indiferente}">
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Fuel Types -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-xs font-bold text-text-secondary uppercase tracking-wider"
+                           for="filtro_combustibles_disponibles"
+                           th:text="#{eess.list.filtros.combustibles}"></label>
+                    <div id="filtro_combustibles_disponibles"
+                         class="h-32 overflow-y-auto custom-scrollbar border border-[#e8dbce] rounded-lg p-3 bg-[#fcfaf8]">
+                        <div class="space-y-2">
+                            <label v-for="combustible in combustiblesDisponibles"
+                                   :key="combustible.id"
+                                   class="flex items-center gap-2 cursor-pointer">
+                                <input class="rounded text-primary focus:ring-primary border-[#e8dbce]"
+                                       type="checkbox"
+                                       :value="String(combustible.id)"
+                                       v-model="filtros.combustibles"/>
+                                <span>    {{ combustible.denominacion }}</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Brand -->
+                <div class="flex flex-col gap-2">
+                    <label class="text-xs font-bold text-text-secondary uppercase tracking-wider" for="filtro_marca"
+                           th:text="#{eess.list.filtros.marca}"></label>
+                    <select id="filtro_marca"
+                            v-model="filtros.marca"
+                            class="w-full h-10 rounded-lg border border-[#e8dbce] bg-[#fcfaf8] text-sm text-text-main focus:ring-1 focus:ring-primary focus:border-primary">
+                        <option value="0NOTSELECTED"
+                                th:text="#{eess.list.filtros.indiferente}">
+                        </option>
+
+                        <option v-for="marca in marcas"
+                                :key="marca"
+                                :value="marca">
+                            {{ marca }}
+                        </option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col min-w-0">
+        <!-- Breadcrumbs -->
+        <div class="flex flex-wrap gap-2 py-2 mb-4 text-sm">
+            <a class="text-text-secondary font-medium hover:underline" th:href="@{/}"
+               th:text="#{home.title}"></a>
+            <span class="text-text-secondary font-medium">/</span>
+            <a class="text-text-secondary font-medium hover:underline" th:href="@{/estaciones-de-servicio}"
+               th:text="#{eess.list.title}"></a>
+        </div>
+        <!-- Page Header -->
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 mb-8 border-b border-border-color pb-4">
+            <div>
+                <h1 class="text-text-main text-3xl font-bold leading-tight mb-2" th:text="#{eess.list.title}"></h1>
+                <p id="contadorEess"
+                   class="text-text-secondary text-sm"
+                   th:attr="data-texto=#{eess.list.introduccion}">
+                </p>
+            </div>
+            <!-- Mobile Filter Toggle (Visible only on small screens) -->
+            <button id="btnMobileFiltros"
+                    class="lg:hidden flex items-center gap-2 px-4 py-2 bg-white border border-[#e8dbce] rounded-lg shadow-sm text-sm font-medium"
+                    th:text="#{eess.list.filtros}">
+                <span class="material-symbols-outlined">filter_list</span>
+            </button>
+        </div>
+        <!-- Results List -->
+        <div class="flex flex-col gap-4">
+
+            <!-- Sin CCAA seleccionada -->
+            <div v-if="filtros.ccaa === '0'"
+                 class="bg-surface rounded-xl border border-[#e8dbce] shadow-sm p-8">
+                <div class="flex flex-col items-center justify-center text-center py-10">
+                    <span class="material-symbols-outlined text-primary text-5xl mb-4">
+                        location_on
+                    </span>
+                    <h2 class="text-text-main text-xl font-bold mb-2"
+                        th:text="#{eess.list.seleccionar.ccaa.titulo}"></h2>
+                    <p class="text-text-secondary text-sm max-w-md"
+                       th:text="#{eess.list.seleccionar.ccaa.subtitulo}"></p>
+                </div>
+            </div>
+
+
+            <!-- Cargando estaciones -->
+            <div v-else-if="cargandoEstaciones"
+                 class="bg-surface rounded-xl border border-[#e8dbce] shadow-sm p-8">
+                <div class="flex flex-col items-center justify-center text-center py-10">
+                    <span class="material-symbols-outlined animate-spin text-primary text-5xl mb-4">
+                        progress_activity
+                    </span>
+
+                    <h2 class="text-text-main text-xl font-bold mb-2"
+                        th:text="#{eess.list.cargando.titulo}">
+                    </h2>
+
+                    <p class="text-text-secondary text-sm mb-6"
+                       th:text="#{eess.list.cargando.subtitulo}">
+                    </p>
+
+                    <!-- Barra de carga indeterminada -->
+                    <div class="w-full max-w-md h-2 bg-[#f4ede7] rounded-full overflow-hidden">
+                        <div class="h-full bg-primary rounded-full animate-pulse w-2/3">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+            <!-- Error cargando estaciones -->
+            <div v-else-if="errorEstaciones"
+                 class="bg-surface rounded-xl border border-[#e8dbce] shadow-sm p-8">
+                <div class="flex flex-col items-center justify-center text-center py-10">
+                    <span class="material-symbols-outlined text-red-500 text-5xl mb-4">
+                        error
+                    </span>
+
+                    <h2 class="text-text-main text-xl font-bold mb-2"
+                        th:text="#{eess.list.error.titulo}">
+                    </h2>
+
+                    <p class="text-text-secondary text-sm"
+                       th:text="#{eess.list.error.subtitulo}">
+                    </p>
+
+                </div>
+            </div>
+
+
+            <!-- No hay resultados -->
+            <div v-else-if="eessMostradas.length === 0"
+                 class="bg-surface rounded-xl border border-[#e8dbce] shadow-sm p-8">
+                <div class="flex flex-col items-center justify-center text-center py-10">
+
+                    <span class="material-symbols-outlined text-text-secondary text-5xl mb-4">
+                        search_off
+                    </span>
+
+                    <h2 class="text-text-main text-xl font-bold mb-2"
+                        th:text="#{eess.list.sin.resultados.titulo}">
+                    </h2>
+
+                    <p class="text-text-secondary text-sm"
+                       th:text="#{eess.list.sin.resultados.subtitulo}">
+                    </p>
+
+                </div>
+            </div>
+
+
+            <article v-for="estacion in eessMostradas" :key="estacion.id"
+                     class="bg-surface rounded-xl border border-[#e8dbce] shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden group"
+                     :class="!estacion.abierto ? 'opacity-90' : ''">
+                <a :href="`/estaciones-de-servicio/${estacion.id}`" class="block h-full">
+                    <div class="p-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-3">
+                                <div class="size-8 bg-primary/10 rounded-full flex items-center justify-center text-primary">
+                                    <span class="material-symbols-outlined">local_gas_station</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-text-main group-hover:text-primary transition-colors">
+                                    {{ estacion.rotulo }}
+                                </h3>
+                            </div>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[#f4ede7] text-text-secondary">
+                                <span th:text="#{eess.id}"></span>&nbsp;{{ estacion.id }}
+                            </span>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div class="flex flex-col gap-1.5">
+                                <div class="flex items-start gap-2">
+                                    <span class="material-symbols-outlined text-text-secondary text-[20px] mt-0.5">location_on</span>
+                                    <div>
+                                        <p class="text-text-main font-medium">{{ estacion.direccion }}</p>
+                                        <p class="text-text-secondary text-sm">{{ estacion.localidad }},
+                                            {{ estacion.codigo_postal }}</p>
+                                        <p class="text-text-secondary text-xs mt-1 uppercase tracking-wide">
+                                            {{ nombreMunicipio(estacion.id_municipio) }},
+                                            {{ nombreProvincia(estacion.id_provincia) }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col gap-1.5 items-start md:items-end text-left md:text-right">
+                                <div class="flex items-center gap-1.5 font-bold text-lg"
+                                     :class="estacion.abierto ? 'text-green-600' : 'text-red-600'">
+                                    <span v-if="estacion.abierto"
+                                          class="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse"></span>
+                                    <span v-else class="material-symbols-outlined text-[20px]">block</span>
+                                    <span>{{ estacion.abierto ? 'Abierto' : 'Cerrado' }}</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 text-sm text-text-secondary">
+                                    <span class="material-symbols-outlined text-[18px]">schedule</span>
+                                    <span>{{ estacion.horario }}</span>
+                                </div>
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 mt-1">
+                        {{ estacion.venta }}
+                    </span>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-[#f4ede7] pt-4">
+                            <p class="text-xs font-bold text-text-secondary uppercase tracking-wider mb-3"
+                               th:text="#{eess.list.combustible.precios}">
+                            </p>
+                            <div class="flex flex-wrap gap-3">
+                                <div v-for="precio in preciosOrdenados(estacion)"
+                                     :key="`${estacion.id}-${precio.id_combustible}`"
+                                     class="flex flex-col items-center justify-center bg-[#fcfaf8] border border-[#e8dbce] rounded-lg p-3 min-w-[100px] hover:border-primary/50 transition-colors">
+                        <span class="text-xs text-text-secondary mb-1">
+                            {{ nombreCombustible(precio.id_combustible) }}
+                        </span>
+                                    <span class="text-lg font-bold text-primary font-mono">
+                            {{ Number(precio.precio).toFixed(3).replace('.', ',') }} €
+                        </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </article>
+
+        </div>
+
+        <!-- Paginacion -->
+        <div v-if="totalPaginas() > 1"
+             id="paginacion"
+             class="mt-8 flex justify-center"
+             th:attr="data-primera=#{paginacion.primera},data-ultima=#{paginacion.ultima}">
+
+            <ul class="flex items-center gap-1">
+
+                <li>
+                    <button type="button"
+                            @click="irAPagina(1)"
+                            :disabled="paginaActual === 1"
+                            class="pagination-link px-3 py-1 rounded-lg text-text-secondary hover:bg-[#f4ede7] disabled:opacity-50 disabled:pointer-events-none">
+                        {{ textoPrimera }}
+                    </button>
+                </li>
+
+                <li>
+                    <button type="button"
+                            @click="paginaAnterior"
+                            :disabled="paginaActual === 1"
+                            class="pagination-link px-3 py-1 rounded-lg text-text-secondary hover:bg-[#f4ede7] disabled:opacity-50 disabled:pointer-events-none">
+                        ←
+                    </button>
+                </li>
+
+                <li v-if="paginasVisibles()[0] > 1">
+                    <span class="px-2 text-text-secondary">…</span>
+                </li>
+
+                <li v-for="pagina in paginasVisibles()" :key="pagina">
+                    <button type="button"
+                            @click="irAPagina(pagina)"
+                            class="pagination-link w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors"
+                            :class="pagina === paginaActual
+                        ? 'bg-primary text-[#1c140d] font-bold'
+                        : 'text-text-secondary hover:bg-[#f4ede7]'">
+                        {{ pagina }}
+                    </button>
+                </li>
+
+                <li v-if="paginasVisibles()[paginasVisibles().length - 1] < totalPaginas()">
+                    <span class="px-2 text-text-secondary">…</span>
+                </li>
+
+                <li>
+                    <button type="button"
+                            @click="paginaSiguiente"
+                            :disabled="paginaActual === totalPaginas()"
+                            class="pagination-link px-3 py-1 rounded-lg text-text-secondary hover:bg-[#f4ede7] disabled:opacity-50 disabled:pointer-events-none">
+                        →
+                    </button>
+                </li>
+
+                <li>
+                    <button type="button"
+                            @click="irAPagina(totalPaginas())"
+                            :disabled="paginaActual === totalPaginas()"
+                            class="pagination-link px-3 py-1 rounded-lg text-text-secondary hover:bg-[#f4ede7] disabled:opacity-50 disabled:pointer-events-none">
+                        {{ textoUltima }}
+                    </button>
+                </li>
+
+            </ul>
+        </div>
+
+    </main>
+</div>
+
+<!-- Footer -->
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<script th:src="@{/script/vuejs/estaciones/estaciones-de-servicio.js}"></script>
+<script th:src="@{/script/filtrosListadoEstacionesDeServicio.js}"></script>
+
+</body>
+</html>

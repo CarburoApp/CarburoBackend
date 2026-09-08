@@ -58,12 +58,12 @@ public class WebSecurityConfig {
 						// Páginas públicas principales
 						.requestMatchers("/", "/login", "/registro", "/logout", "/recuperacion", "/contacto").permitAll()
 						// Estaciones de servicio
-						.requestMatchers("/estacionesDeServicio", "/estacionesDeServicio/*").permitAll()
+						.requestMatchers("/estaciones-de-servicio", "/estaciones-de-servicio/*").permitAll()
 						// Sistema de Auth de Supabase
 						.requestMatchers("/recoverPassword/*").permitAll()
 						// Rutas que requieren autenticación
 						.requestMatchers("/perfil", "/perfil/**").hasRole("USER")
-						.requestMatchers("/vehiculos/**", "/repostajes/**", "/perfil/estacionesDeServicio/favoritas/*").hasRole("USER")
+						.requestMatchers("/vehiculos/**", "/repostajes/**", "/perfil/estaciones-de-servicio/favoritas/*").hasRole("USER")
 						// Cualquier otra petición (por ahora público)
 						.anyRequest().permitAll())
 				// Formulario de login personalizado deshabilitado

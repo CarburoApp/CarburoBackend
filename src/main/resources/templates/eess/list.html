@@ -26,7 +26,7 @@
                 <h3 class="text-lg font-bold text-text-main" th:text="#{eess.list.filtros}"></h3>
             </div>
 
-            <form id="formFiltros" method="get" th:action="@{/estacionesDeServicio}">
+            <form id="formFiltros" method="get" th:action="@{/estaciones-de-servicio/old}">
 
                 <div class="flex flex-col gap-5">
                     <!-- Search Text -->
@@ -190,7 +190,7 @@
             <a class="text-text-secondary font-medium hover:underline" th:href="@{/}"
                th:text="#{home.title}"></a>
             <span class="text-text-secondary font-medium">/</span>
-            <a class="text-text-secondary font-medium hover:underline" th:href="@{/estacionesDeServicio}"
+            <a class="text-text-secondary font-medium hover:underline" th:href="@{/estaciones-de-servicio/old}"
                th:text="#{eess.list.title}"></a>
         </div>
         <!-- Page Header -->
