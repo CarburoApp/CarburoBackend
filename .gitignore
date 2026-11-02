@@ -32,3 +32,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Dependencias y recursos compilados del frontend.
+node_modules/
+node/
+*.tsbuildinfo
