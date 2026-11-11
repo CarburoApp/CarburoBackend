@@ -1,5 +1,6 @@
 package app.carburo.backend.entities;
 
+import app.carburo.backend.util.ConSlug;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +23,7 @@ import java.util.Set;
 @Table(name = "ccaa")
 @Getter
 @NoArgsConstructor
-public class ComunidadAutonoma {
+public class ComunidadAutonoma implements ConSlug {
 
 	// ==============================
 	// CAMPOS

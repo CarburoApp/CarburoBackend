@@ -1,5 +1,6 @@
 package app.carburo.backend.entities;
 
+import app.carburo.backend.util.ConSlug;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +23,7 @@ import java.util.Set;
 @Entity
 @Getter
 @NoArgsConstructor
-public class Provincia {
+public class Provincia implements ConSlug {
 
 	// ==============================
 	// CAMPOS
