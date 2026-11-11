@@ -26,7 +26,7 @@ public class EstacionDeServicioController implements SitemapUrlProvider {
 
     @Override
     public List<String> getSitemapPaths() {
-        return estacionDeServicioService.getIdsParaSitemap().stream()
+        return estacionDeServicioService.getIds().stream()
                 .map(id -> RUTA_ESTACION_DE_SERVICIO + id).toList();
     }
 

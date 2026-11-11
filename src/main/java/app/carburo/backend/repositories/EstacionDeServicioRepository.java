@@ -17,6 +17,10 @@ import java.util.List;
 @Repository
 public interface EstacionDeServicioRepository extends CrudRepository<EstacionDeServicio, Integer> {
 
+	/** Devuelve todas las ids de las estaciones de servicio ordenadas ascendentemente.*/
+	@Query("SELECT e.id FROM EstacionDeServicio e WHERE e.id > 0 ORDER BY e.id")
+    List<Integer> findIds();
+
 	/** Devuelve todas las estaciones de servicio paginadas */
 	Page<EstacionDeServicio> findAll(Pageable pageable);
 

@@ -30,6 +30,10 @@ public class EstacionDeServicioService {
 		this.combustibleService           = combustibleService;
 	}
 
+	public List<Integer> getIds() {
+		return estacionDeServicioRepository.findIds();
+	}
+
 	/**
 	 * Devuelve todas las estaciones de servicio sin paginación
 	 */
