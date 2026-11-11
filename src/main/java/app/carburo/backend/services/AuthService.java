@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static app.carburo.backend.controllers.AuthController.URL_RESTABLECER_CONTRASENA;
+import static app.carburo.backend.controllers.AuthController.RUTA_RESTABLECER_CONTRASENA;
 
 
 @Slf4j
@@ -63,6 +63,7 @@ public class AuthService {
     private static final String RECOVER = "/recover";
     private static final String RESET = "/user/reset";
 
+    private final String urlRestablecerContrasena;
     private final UsuarioService usuarioService;
     private final ProvinciaRepository provinciaRepository;
     private final CombustibleRepository combustibleRepository;
@@ -75,9 +76,12 @@ public class AuthService {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    public AuthService(UsuarioService usuarioService,
+    public AuthService(@Value("${app.url}") String appUrl,
+                       UsuarioService usuarioService,
                        ProvinciaRepository provinciaRepository,
                        CombustibleRepository combustibleRepository) {
+        this.urlRestablecerContrasena = appUrl + RUTA_RESTABLECER_CONTRASENA;
+
         this.usuarioService        = usuarioService;
         this.provinciaRepository   = provinciaRepository;
         this.combustibleRepository = combustibleRepository;
@@ -362,10 +366,12 @@ public class AuthService {
                                      "redirectUrl": "%s"
                                  }
                     }
-                    """.formatted(correo, URL_RESTABLECER_CONTRASENA,
-                                  URL_RESTABLECER_CONTRASENA, URL_RESTABLECER_CONTRASENA,
-                                  URL_RESTABLECER_CONTRASENA,
-                                  URL_RESTABLECER_CONTRASENA));
+                """.formatted(correo,
+                urlRestablecerContrasena,
+                urlRestablecerContrasena,
+                urlRestablecerContrasena,
+                urlRestablecerContrasena,
+                urlRestablecerContrasena));
 
         int code = conn.getResponseCode();
 

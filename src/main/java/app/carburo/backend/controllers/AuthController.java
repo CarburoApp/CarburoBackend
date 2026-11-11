@@ -10,7 +10,6 @@ import app.carburo.backend.services.UsuarioService;
 import app.carburo.backend.validators.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -55,13 +54,6 @@ public class AuthController {
     public static final String RUTA_RECUPERACION = "/recuperacion";
     public static final String RUTA_RESTABLECER_CONTRASENA = "/auth/reset-password";
     public static final String RUTA_CAMBIAR_CONTRASENA = "/change-password";
-
-
-    @Value("${app.url}")
-    public static String URL;
-
-    public static final String URL_RESTABLECER_CONTRASENA =
-            URL + RUTA_RESTABLECER_CONTRASENA;
 
     private final ProvinciaService provinciaService;
     private final AuthService authService;
