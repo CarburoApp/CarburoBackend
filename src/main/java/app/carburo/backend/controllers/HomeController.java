@@ -2,6 +2,7 @@ package app.carburo.backend.controllers;
 
 import app.carburo.backend.entities.EstacionDeServicio;
 import app.carburo.backend.services.EstacionDeServicioService;
+import app.carburo.backend.seo.SitemapUrlProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.List;
 
 import static app.carburo.backend.controllers.EstacionDeServicioController.RUTA_ESTACIONES_DE_SERVICIO;
 
@@ -28,7 +30,12 @@ import static app.carburo.backend.controllers.EstacionDeServicioController.RUTA_
  * </p>
  */
 @Controller
-public class HomeController {
+public class HomeController implements SitemapUrlProvider {
+
+    @Override
+    public List<String> getSitemapPaths() {
+        return List.of("/", RUTA_CONTACTO);
+    }
 
 	// Constantes de vistas
 	public static final String VISTA_INICIO = "inicio";

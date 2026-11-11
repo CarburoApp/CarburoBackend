@@ -53,6 +53,7 @@ public class WebSecurityConfig {
 
 				)
 				.authorizeHttpRequests(auth -> auth
+						.requestMatchers("/sitemap.xml", "/sitemap/**", "/robots.txt").permitAll()
 						// Recursos estáticos (públicos)
 						.requestMatchers("/css/**", "/js/**", "/images/**", "/fonts/**", "/favicon.ico").permitAll()
 						// Páginas públicas principales

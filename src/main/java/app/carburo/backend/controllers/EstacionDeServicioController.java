@@ -1,6 +1,8 @@
 package app.carburo.backend.controllers;
 
 import app.carburo.backend.dto.CombustibleDto;
+import app.carburo.backend.seo.SitemapUrlProvider;
+import app.carburo.backend.seo.SitemapGroup;
 import app.carburo.backend.entities.*;
 import app.carburo.backend.services.*;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +19,16 @@ import java.util.*;
 
 @Controller
 @RequestMapping(EstacionDeServicioController.RUTA_ESTACIONES_DE_SERVICIO)
-public class EstacionDeServicioController {
+public class EstacionDeServicioController implements SitemapUrlProvider {
+
+    @Override
+    public SitemapGroup getSitemapGroup() { return SitemapGroup.ESTACIONES; }
+
+    @Override
+    public List<String> getSitemapPaths() {
+        return estacionDeServicioService.getIdsParaSitemap().stream()
+                .map(id -> RUTA_ESTACION_DE_SERVICIO + id).toList();
+    }
 
 	// Constantes de vistas
 	public static final String VISTA_EESS_DESCRIPTION = "eess/estacionDeServicio";
@@ -227,7 +238,7 @@ public class EstacionDeServicioController {
 	 * @param model       modelo de Spring para pasar atributos a la vista
 	 * @return nombre de la vista "/eess/estacionDeServicio" o redirección a "/estaciones-de-servicio" si el ID no es válido o la estación no existe
 	 */
-	@GetMapping("/{id}")
+	@GetMapping("/{id:[0-9]+}")
 	public String doGet(@PathVariable Long id,
 						@RequestParam(name = "fechaInicio", required = false)
 						@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
