@@ -1,5 +1,6 @@
 package app.carburo.backend.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.PageRequest;
@@ -9,7 +10,6 @@ import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.CookieLocaleResolver;
-import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 
 import java.time.Duration;
 import java.util.List;
@@ -38,9 +38,8 @@ public class CustomConfiguration implements WebMvcConfigurer {
 	// Tamaño de página por defecto para la paginación.
 	public static final int PAGINATION_SIZE = 10;
 	// Idioma por defecto de la aplicación.
-	public static final Locale IDIOMA_POR_DEFECTO = Locale.of("es", "ES");
-	// Nombre del parámetro utilizado para cambiar el idioma en las peticiones.
-	public static final String IDIOMA_PARAMETRO_PATH = "lang";
+	@Value("${app.language.default:es-ES}")
+	private String idiomaPredeterminado;
 
 	// Dependencias
 	private final TokenExpiryInterceptor tokenExpiryInterceptor;
@@ -69,42 +68,21 @@ public class CustomConfiguration implements WebMvcConfigurer {
 	}
 
 	/**
-	 * Define el {@link LocaleResolver} encargado de determinar el idioma
-	 * actual del usuario.
-	 *
+	 * Define el {@link LocaleResolver} encargado de determinar el language actual del usuario.
 	 * <p>
-	 * Se utiliza una implementación basada en sesión, estableciendo
-	 * un idioma por defecto para toda la aplicación.
-	 * </p>
+	 * Se utiliza una implementación basada en cookie, estableciendo un language por defecto para toda la aplicación.
 	 *
-	 * @return resolvedor de idioma basado en sesión
+	 * @return resolvedor de language basado en cookie
 	 */
 	@Bean
 	public LocaleResolver localeResolver() {
 		CookieLocaleResolver cookieResolver = new CookieLocaleResolver();
-		cookieResolver.setDefaultLocale(IDIOMA_POR_DEFECTO);
+		Locale idioma = Locale.forLanguageTag(idiomaPredeterminado);
+		cookieResolver.setDefaultLocale(idioma);
 		cookieResolver.setCookieMaxAge(Duration.ofDays(30));  // 30 días
 		return cookieResolver;
 	}
 
-
-	/**
-	 * Define un interceptor que permite cambiar el idioma de la aplicación
-	 * a través de un parámetro en la petición HTTP.
-	 *
-	 * <p>
-	 * El nombre del parámetro se configura mediante una constante
-	 * de la propia clase.
-	 * </p>
-	 *
-	 * @return interceptor para el cambio de idioma
-	 */
-	@Bean
-	public LocaleChangeInterceptor localeChangeInterceptor() {
-		LocaleChangeInterceptor localeChangeInterceptor = new LocaleChangeInterceptor();
-		localeChangeInterceptor.setParamName(IDIOMA_PARAMETRO_PATH);
-		return localeChangeInterceptor;
-	}
 
 	/**
 	 * Registra interceptores personalizados dentro del ciclo de vida
@@ -114,7 +92,6 @@ public class CustomConfiguration implements WebMvcConfigurer {
 	 */
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
-		registry.addInterceptor(localeChangeInterceptor());
 		registry.addInterceptor(tokenExpiryInterceptor);
 	}
 }

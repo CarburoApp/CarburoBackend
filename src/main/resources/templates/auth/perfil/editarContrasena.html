@@ -1,13 +1,10 @@
 <!-- auth/perfil/editarContrasena.html -->
 <!DOCTYPE html>
-<html lang="es" class="light">
+<html th:lang="${#locale.toLanguageTag()}" class="light">
 <!-- head -->
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
     <title th:text="#{app.name} + ' - ' + #{auth.perfil.editar.nombre.title}"></title>
-
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">

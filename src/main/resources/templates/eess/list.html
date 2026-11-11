@@ -1,6 +1,6 @@
 <!-- eess/estacionDeServicio.html -->
 <!DOCTYPE html>
-<html lang="es" class="light">
+<html th:lang="${#locale.toLanguageTag()}" class="light">
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
     <title th:text="#{app.name} + ' - ' + #{eess.list.title}"></title>

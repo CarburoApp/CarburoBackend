@@ -1,6 +1,6 @@
 <!-- eess/estacionDeServicio.html -->
 <!DOCTYPE html>
-<html lang="es" class="light" xmlns:sec="http://www.w3.org/1999/xhtml">
+<html th:lang="${#locale.toLanguageTag()}" class="light" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
     <title th:text="#{app.name} + ' - ' + ${estacion.getRotulo()}"></title>
