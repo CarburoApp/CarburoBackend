@@ -3,7 +3,7 @@ module.exports = {
     // Le dice a Tailwind dónde buscar tus clases para compilarlas
     content: [
         "./src/main/resources/templates/**/*.html",
-        "./src/main/resources/static/script/**/*.js"
+        "./src/main/resources/static/script/**/*.{js,vue}"
     ],
     darkMode: "class",
     theme: {

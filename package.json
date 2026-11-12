@@ -5,7 +5,12 @@
   "main": "tailwind.config.js",
   "private": true,
   "scripts": {
-    "tailwindcss": "tailwindcss"
+    "tailwindcss": "tailwindcss",
+    "build:css": "tailwindcss -i ./src/main/resources/static/css/tailwind/input.css -o ./target/generated-resources/frontend/static/css/tailwind/output.css --minify",
+    "build:vue": "vite build",
+    "build": "npm run build:css && npm run build:vue",
+    "dev": "vite build --watch --outDir target/classes/static/assets",
+    "dev:css": "tailwindcss -i ./src/main/resources/static/css/tailwind/input.css -o ./target/classes/static/css/tailwind/output.css --watch"
   },
   "repository": {
     "type": "git",
@@ -14,6 +19,10 @@
   "dependencies": {
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.7",
-    "tailwindcss": "^3.4.1"
+    "tailwindcss": "^3.4.1",
+    "vue": "^3.5.45"
+  },
+  "devDependencies": {
+    "vite": "^8.3.8"
   }
 }

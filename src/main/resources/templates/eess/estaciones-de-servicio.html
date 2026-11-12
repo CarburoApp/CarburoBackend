@@ -4,7 +4,6 @@
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
     <title th:text="#{app.name} + ' - ' + #{eess.list.title}"></title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 
 <body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
@@ -489,7 +488,7 @@
 <!-- Footer -->
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 
-<script th:src="@{/script/vuejs/estaciones/estaciones-de-servicio.js}"></script>
+<script type="module" th:src="@{/assets/estaciones-de-servicio.js}"></script>
 <script th:src="@{/script/filtrosListadoEstacionesDeServicio.js}"></script>
 
 </body>
