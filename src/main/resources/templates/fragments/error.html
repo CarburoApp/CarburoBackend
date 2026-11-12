@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html th:fragment="page(code, title, description)" th:lang="${#locale.toLanguageTag()}" class="light">
+
+<head>
+    <th:block th:replace="~{fragments/head :: head}"></th:block>
+    <title th:text="#{app.name} + ' - ' + ${title}"></title>
+    <meta name="robots" content="noindex">
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
+<th:block th:replace="~{fragments/header :: header}"></th:block>
+<main class="flex-1 flex items-center justify-center py-4 px-4">
+    <section
+            class="max-w-3xl w-full text-center bg-surface rounded-2xl border border-border-color p-8 md:p-12 shadow-sm">
+        <p class="text-primary text-5xl font-bold mb-6" aria-hidden="true" th:text="${code}"></p>
+        <h1 class="text-text-main text-3xl font-bold mb-6" th:text="${title}"></h1>
+        <p class="text-text-secondary mb-8" th:text="${description}"></p>
+        <nav class="flex flex-wrap justify-center gap-4" th:attr="aria-label=#{error.navigation}">
+            <a class="bg-primary text-white rounded-xl px-6 py-3 font-medium hover:underline"
+               th:href="@{/}" th:text="#{error.home}"></a>
+            <a class="text-primary border border-border-color rounded-xl px-6 py-3 font-medium hover:underline"
+               th:href="@{/estaciones-de-servicio}" th:text="#{eess.list.title}"></a>
+        </nav>
+    </section>
+</main>
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

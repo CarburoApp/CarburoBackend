@@ -1,19 +1,18 @@
 package app.carburo.backend.controllers;
 
 import app.carburo.backend.entities.EstacionDeServicio;
-import app.carburo.backend.services.EstacionDeServicioService;
 import app.carburo.backend.seo.SitemapUrlProvider;
+import app.carburo.backend.services.EstacionDeServicioService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 import static app.carburo.backend.controllers.EstacionDeServicioController.RUTA_ESTACIONES_DE_SERVICIO;
 
@@ -50,7 +49,6 @@ public class HomeController implements SitemapUrlProvider {
 
 	/**
 	 * Constructor del controlador para la inyección de dependencias.
-	 *
 	 */
 	public HomeController(EstacionDeServicioService estacionDeServicioService) {
 		this.estacionDeServicioService = estacionDeServicioService;
@@ -127,18 +125,6 @@ public class HomeController implements SitemapUrlProvider {
 		EstacionDeServicio e = estacionDeServicioService.getEstacionDeServicioMasProxima(lat, lon);
 		model.addAttribute("estacion", e);
 		return VISTA_INICIO + " :: estacionCercanaFragment";
-	}
-
-	/**
-	 * Maneja las solicitudes GET a todas las URLs no registradas.
-	 *
-	 * <p>Redirige automáticamente toda url no controlada a '/' - Inicio.</p>
-	 *
-	 * @return un string de redirección a "/".
-	 */
-	@GetMapping("/{path:[^.]{1,100}}")
-	public String doGetBase(@PathVariable(required = false) String path ) {
-		return "redirect:/";
 	}
 
 	// Inyección del correo de contacto desde application.properties

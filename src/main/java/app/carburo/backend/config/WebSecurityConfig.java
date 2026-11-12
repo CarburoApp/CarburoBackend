@@ -1,5 +1,6 @@
 package app.carburo.backend.config;
 
+import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -53,6 +54,9 @@ public class WebSecurityConfig {
 
 				)
 				.authorizeHttpRequests(auth -> auth
+						// Páginas predefinidas (públicos)
+						.dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
+						// Recursos de SEO (públicos)
 						.requestMatchers("/sitemap.xml", "/sitemap/**", "/robots.txt").permitAll()
 						// Recursos estáticos (públicos)
 						.requestMatchers("/css/**", "/js/**", "/images/**", "/fonts/**", "/favicon.ico").permitAll()

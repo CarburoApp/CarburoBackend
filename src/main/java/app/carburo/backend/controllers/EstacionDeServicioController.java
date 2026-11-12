@@ -9,6 +9,8 @@ import app.carburo.backend.services.AuthService;
 import app.carburo.backend.services.EstacionDeServicioService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -92,7 +94,8 @@ public class EstacionDeServicioController implements SitemapUrlProvider {
 	 * @param id          ID de la estación de servicio (debe ser mayor que 0)
 	 * @param fechaInicio fecha de inicio opcional para filtrar los precios históricos (formato ISO, por ejemplo "2026-01-17")
 	 * @param model       modelo de Spring para pasar atributos a la vista
-	 * @return nombre de la vista "/eess/estacionDeServicio" o redirección a "/estaciones-de-servicio" si el ID no es válido o la estación no existe
+	 * @return nombre de la vista de detalle de la estación
+	 * @throws ResponseStatusException con estado 404 si el ID no es válido o la estación no existe
 	 */
 	@GetMapping("/{id:[0-9]+}")
 	public String doGet(@PathVariable Long id,
@@ -100,16 +103,14 @@ public class EstacionDeServicioController implements SitemapUrlProvider {
 						@DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
 						LocalDate fechaInicio, Model model) {
 		// Validación rápida del ID
-		if (id <= 0) return RUTA_REDIRECT + RUTA_ESTACIONES_DE_SERVICIO;
+		if (id <= 0 || id > Integer.MAX_VALUE) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
 		// Se obtiene la estación de servicio por ID
 		EstacionDeServicio estacion = estacionDeServicioService.getEstacionDeServicioById(
 				Math.toIntExact(id));
 
-		// Si la estación no existe, se redirige a la página principal
-		if (estacion == null) {
-			return RUTA_REDIRECT + RUTA_ESTACIONES_DE_SERVICIO;
-		}
+		// Si la estación no existe, se devuelve un error 404
+		if (estacion == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
 		LocalDate hoy = LocalDate.now();
 
