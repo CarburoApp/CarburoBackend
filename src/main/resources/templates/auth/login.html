@@ -1,66 +1,71 @@
 <!-- auth/login.html -->
 <!DOCTYPE html>
-<html th:lang="${#locale.toLanguageTag()}" class="light">
+<html th:lang="${#locale.toLanguageTag()}">
 <!-- head -->
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
     <title th:text="#{app.name} + ' - ' + #{auth.login.title}"></title>
 
-    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" th:href="@{/style/auth/google.css}">
     <script src="/script/auth/google.js"></script>
     <script src="/script/auth/password.js"></script>
 
 </head>
 
-<body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
+<body class="site-body auth-page">
 
 <!-- Header -->
 <th:block th:replace="~{fragments/header :: header}"></th:block>
 
 <!-- Contenido principal -->
-<main class="flex-grow flex items-center justify-center py-2 px-4">
-    <div class="w-full max-w-md">
-        <div class="bg-surface p-6 rounded-2xl border border-border-color shadow-xl">
-            <div class="text-center mb-6">
-                <h1 class="text-2xl font-bold text-text-main mb-2" th:text="#{auth.login.titulo}">Bienvenido</h1>
-                <p class="text-text-secondary text-sm" th:text="#{auth.login.subtitulo}"></p>
+<main>
+    <div class="auth-layout">
+        <div class="auth-card">
+            <div class="auth-intro">
+                <h1 th:text="#{auth.login.titulo}">Bienvenido</h1>
+                <p th:text="#{auth.login.subtitulo}"></p>
             </div>
             <!--Mensaje de cierre de sesión exitoso-->
-            <div class="mb-6 flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-100 rounded-xl text-red-800 animate-in fade-in duration-500"
+            <div class="form-success"
                  th:if="${param.logout}">
-                <span class="material-symbols-outlined text-red-500 text-xl">info</span>
-                <p class="text-sm font-medium" th:text="#{auth.logout.exitoso}"></p>
+                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="/images/icons.svg#info"></use>
+                </svg>
+                <p th:text="#{auth.logout.exitoso}"></p>
             </div>
 
-            <div class="mb-6 flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-100 rounded-xl text-red-800 animate-in fade-in duration-500"
+            <div class="form-success"
                  th:if="${param.passwordChanged}">
-                <span class="material-symbols-outlined text-red-500 text-xl">info</span>
-                <p class="text-sm font-medium" th:text="#{auth.recover.exitoso}"></p>
+                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="/images/icons.svg#info"></use>
+                </svg>
+                <p th:text="#{auth.recover.exitoso}"></p>
             </div>
 
-            <form class="space-y-5" method="post" th:action="@{/login}" th:object="${usuario}">
+            <form method="post" th:action="@{/login}" th:object="${usuario}">
                 <div>
-                    <label class="block text-sm font-bold text-text-main mb-2" for="email"
+                    <label for="email"
                            th:text="#{auth.correo.titulo}"></label>
-                    <div class="relative">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-[20px]">mail</span>
-                        <input class="w-full pl-10 pr-4 py-2.5 bg-background-light border-border-color rounded-xl text-text-main placeholder:text-text-secondary/50 focus:border-primary focus:ring-1 focus:ring-primary transition-all outline-none"
-                               id="email" th:placeholder="#{auth.correo.placeholder}"
+                    <div class="input-with-icon">
+                        <svg class="icon input-icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                             aria-hidden="true">
+                            <use href="/images/icons.svg#mail"></use>
+                        </svg>
+                        <input id="email" autocomplete="email" th:placeholder="#{auth.correo.placeholder}"
                                type="email" th:field="*{correo}"/>
                     </div>
                 </div>
-                <p th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}" class="text-red-600 text-xs mt-1"></p>
+                <p class="form-error" th:if="${#fields.hasErrors('correo')}" th:errors="*{correo}"></p>
                 <div>
-                    <label class="block text-sm font-bold text-text-main mb-2" for="password-input"
+                    <label for="password-input"
                            th:text="#{auth.contrasena.titulo}"> </label>
 
-                    <div class="relative flex items-center">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary text-[20px] z-10">lock</span>
-                        <input id="password-input" type="password"
-                               class="w-full pl-10 pr-12 py-3 bg-background-light border-border-color rounded-xl
-                               text-text-main placeholder:text-text-secondary/50 focus:border-primary focus:ring-1
-                               focus:ring-primary transition-all outline-none"
+                    <div class="input-with-icon">
+                        <svg class="icon input-icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                             aria-hidden="true">
+                            <use href="/images/icons.svg#lock"></use>
+                        </svg>
+                        <input id="password-input" autocomplete="current-password" type="password"
+                               class="password-input"
                                th:placeholder="#{auth.contrasena.placeholder}" th:field="*{contrasena}"
                                th:attr="data-show-label=#{auth.contrasena.mostrar},
                                data-hide-label=#{auth.contrasena.ocultar},
@@ -68,49 +73,44 @@
                                data-placeholder-visible=#{auth.contrasena.placeholder.ejemplo}"/>
 
 
-                        <button type="button" id="password-toggle-btn"
-                                class="absolute right-3 top-1/2 -translate-y-1/2 cursor-pointer text-text-secondary hover:text-primary transition-colors select-none z-10"
-                                th:attr="aria-label=#{auth.contrasena.mostrar}">
-                            <span class="material-symbols-outlined" data-eye-open>visibility</span>
-                            <span class="material-symbols-outlined hidden" data-eye-closed>visibility_off</span>
+                        <button type="button"
+                                class="password-toggle"
+                                data-password-toggle
+                                aria-controls="password-input"
+                                th:attr="aria-label=#{auth.contrasena.mostrar},data-show-label=#{auth.contrasena.mostrar},data-hide-label=#{auth.contrasena.ocultar}">
+                            <svg data-eye-open class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                                 aria-hidden="true">
+                                <use href="/images/icons.svg#eye"></use>
+                            </svg>
+                            <svg data-eye-closed class="icon is-hidden" focusable="false" width="24" height="24"
+                                 viewBox="0 0 24 24" aria-hidden="true">
+                                <use href="/images/icons.svg#eye-off"></use>
+                            </svg>
                         </button>
                     </div>
-                    <p th:if="${#fields.hasErrors('contrasena')}" th:errors="*{contrasena}"
-                       class="text-red-600 text-xs mt-1"></p>
+                    <p class="form-error" th:if="${#fields.hasErrors('contrasena')}" th:errors="*{contrasena}"></p>
                     <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 </div>
 
-
-                <div class="flex justify-end text-sm">
-                    <a class="text-primary font-bold hover:underline" th:href="@{/recuperacion}"
+                <div class="form-utility">
+                    <a th:href="@{/recuperacion}"
                        th:text="#{auth.login.contrasena.olvidada}"></a>
                 </div>
-                <button class="w-full bg-primary hover:bg-primary/90 text-white font-bold py-3 rounded-xl transition-colors shadow-lg shadow-primary/20"
-                        type="submit" th:text="#{auth.login.boton}">
-                </button>
+                <button class="button-primary" type="submit" th:text="#{auth.login.boton}"></button>
             </form>
-            <div class="relative my-4">
-                <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-border-color"></div>
-                </div>
-                <div class="relative flex justify-center text-sm">
-                    <span class="px-4 bg-surface text-text-secondary uppercase tracking-wider text-xs font-bold"
-                          th:text="#{auth.login.sesion.google}"></span>
-                </div>
-            </div>
+            <div class="auth-divider"><span th:text="#{auth.login.sesion.google}"></span></div>
 
             <button type="button"
                     onclick="iniciarSesionConGoogle()"
-                    class="w-full flex items-center justify-center gap-3 bg-white border border-border-color hover:bg-background-light text-text-main font-bold py-3 rounded-xl transition-all cursor-pointer"
+                    class="google-login"
                     id="gSignInWrapper">
-                <div id="customBtn" class="flex items-center gap-2">
-                    <span class="buttonText">Google</span>
-                </div>
+                <img class="google-logo" th:src="@{/images/google-logo.svg}" width="20" height="20" alt=""/>
+                <span th:text="#{auth.google.continuar}">Continuar con Google</span>
             </button>
 
-            <p class="mt-4 text-center text-sm text-text-secondary">
+            <p class="auth-alternative">
                 <span th:text="#{auth.login.registro.alternativa}"></span>
-                <a class="text-primary font-bold hover:underline" th:href="@{/registro}" th:text="#{auth.login.registro.boton}"></a>
+                <a th:href="@{/registro}" th:text="#{auth.login.registro.boton}"></a>
             </p>
         </div> </div> </main>
 

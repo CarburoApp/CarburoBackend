@@ -4,10 +4,11 @@
 <!-- head -->
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/tailwind/output.css}"/>
     <title th:text="#{app.name} + ' - ' + #{auth.perfil.editar.provincia.title}"></title>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
+<body class="profile-page bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
 
 <!-- Header -->
 <th:block th:replace="~{fragments/header :: header}"></th:block>
@@ -35,21 +36,30 @@
                 <label class="block text-[10px] font-bold text-text-secondary uppercase tracking-[0.1em] mb-2 px-1"
                        for="filtro_provincia" th:text="#{auth.perfil.editar.provincia.provincia.titulo}"> </label>
                 <div class="relative group">
-                    <span class="absolute left-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#9c7349]">search</span>
+                    <svg class="icon absolute left-3.5 top-1/2 -translate-y-1/2 text-[#9c7349]" focusable="false"
+                         width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                        <use href="/images/icons.svg#search"></use>
+                    </svg>
                     <select class="appearance-none w-full rounded-lg border border-[#e8dbce] dark:border-[#4d3a29] bg-white dark:bg-[#221910] text-[#1c140d] dark:text-white py-3.5 pl-11 pr-10 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                             id="filtro_provincia" th:field="*{provinciaFavorita}">
                         <option th:each="provincia : ${provincias}" th:value="${provincia.getId()}"
                                 th:text="${provincia.getDenominacion()}"
                                 th:selected="${provincia.getId() == usuario.getProvinciaFavorita()}"></option>
                     </select>
-                    <span class="absolute right-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[#9c7349] pointer-events-none">expand_more</span>
+                    <svg class="icon absolute right-3.5 top-1/2 -translate-y-1/2 text-[#9c7349] pointer-events-none"
+                         focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                        <use href="/images/icons.svg#chevron-down"></use>
+                    </svg>
                 </div>
                 <p th:if="${#fields.hasErrors('provinciaFavorita')}" th:errors="*{provinciaFavorita}"
                    class="text-red-600 text-xs mt-1"></p>
                 <div class="flex flex-col gap-4 pt-4">
                     <button class="flex items-center justify-center gap-2 w-full h-14 rounded-xl bg-primary text-white hover:bg-primary/90 font-bold text-base transition-all shadow-lg shadow-primary/20"
                             type="submit">
-                        <span class="material-symbols-outlined">save</span>
+                        <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                             aria-hidden="true">
+                            <use href="/images/icons.svg#save"></use>
+                        </svg>
                         <span th:text="#{auth.perfil.editar.provincia.boton.modificar}"></span>
                     </button>
                     <a class="flex items-center justify-center w-full h-12 rounded-xl text-text-secondary hover:text-text-main hover:bg-background-light font-bold text-sm transition-all"

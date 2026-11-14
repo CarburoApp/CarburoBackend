@@ -1,24 +1,28 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const input = document.getElementById('password-input');
-    const toggleBtn = document.getElementById('password-toggle-btn');
-    const eyeOpen = toggleBtn.querySelector('[data-eye-open]');
-    const eyeClosed = toggleBtn.querySelector('[data-eye-closed]');
+    document.querySelectorAll('[data-password-toggle]').forEach((toggle) => {
+        const inputId = toggle.getAttribute('aria-controls');
+        const input = inputId ? document.getElementById(inputId) : null;
+        const eyeOpen = toggle.querySelector('[data-eye-open]');
+        const eyeClosed = toggle.querySelector('[data-eye-closed]');
 
-    const showLabel = input.dataset.showLabel; // "Mostrar contraseña"
-    const hideLabel = input.dataset.hideLabel; // "Ocultar contraseña"
-    const placeholderHidden = input.dataset.placeholderHidden;
-    const placeholderVisible = input.dataset.placeholderVisible;
+        if (!input || !eyeOpen || !eyeClosed) return;
 
-    toggleBtn.addEventListener('click', () => {
-        const isPassword = input.type === 'password';
-        // Cambiar tipo
-        input.type = isPassword ? 'text' : 'password';
-        // Cambiar placeholder
-        input.placeholder = isPassword ? placeholderVisible : placeholderHidden;
-        // Cambiar iconos
-        eyeOpen.classList.toggle('hidden', isPassword);
-        eyeClosed.classList.toggle('hidden', !isPassword);
-        // Cambiar aria-label
-        toggleBtn.setAttribute('aria-label', isPassword ? hideLabel : showLabel);
+        toggle.addEventListener('click', () => {
+            const showPassword = input.type === 'password';
+            input.type = showPassword ? 'text' : 'password';
+
+            if (input.dataset.placeholderHidden && input.dataset.placeholderVisible) {
+                input.placeholder = showPassword
+                    ? input.dataset.placeholderVisible
+                    : input.dataset.placeholderHidden;
+            }
+
+            eyeOpen.classList.toggle('is-hidden', showPassword);
+            eyeClosed.classList.toggle('is-hidden', !showPassword);
+            toggle.setAttribute(
+                'aria-label',
+                showPassword ? toggle.dataset.hideLabel : toggle.dataset.showLabel
+            );
+        });
     });
 });

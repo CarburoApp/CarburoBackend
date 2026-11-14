@@ -1,0 +1,254 @@
+.auth-page main {
+    display: grid;
+    flex: 1;
+    place-items: center;
+    padding: clamp(1.25rem, 4vw, 3rem) 1rem;
+}
+
+.auth-layout {
+    width: min(100%, 40rem);
+}
+
+.auth-card {
+    width: 100%;
+    padding: clamp(1.25rem, 4vw, 2.5rem);
+    border: 1px solid var(--color-border);
+    border-radius: 1rem;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+}
+
+.registration-card {
+    max-width: 48rem;
+    margin-inline: auto;
+}
+
+.auth-intro {
+    margin-bottom: 1.5rem;
+}
+
+.auth-intro h1 {
+    margin-bottom: .5rem;
+}
+
+.auth-intro p {
+    max-width: 58ch;
+    margin-bottom: 0;
+    color: var(--color-muted);
+}
+
+.auth-card .input-with-icon input {
+    padding-inline-start: 3.25rem;
+}
+
+.auth-card .input-with-icon input:has(+ .password-toggle) {
+    padding-inline-end: 3.5rem;
+}
+
+.auth-card .select-with-icon select {
+    padding-right: 2.75rem;
+    padding-inline-start: 3.25rem;
+    appearance: none;
+}
+
+.auth-card .select-icon {
+    position: absolute;
+    top: 50%;
+    right: .85rem;
+    color: var(--color-primary-text);
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+.field-help {
+    display: flex;
+    align-items: flex-start;
+    gap: .45rem;
+    margin: 0;
+    color: var(--color-muted);
+    font-size: .88rem;
+}
+
+.field-help .icon {
+    flex: 0 0 auto;
+    color: var(--color-info);
+    width: 1.15rem;
+    height: 1.15rem;
+}
+
+.auth-card form {
+    display: grid;
+    gap: 1.1rem;
+}
+
+.auth-card form > div {
+    display: grid;
+    gap: .5rem;
+}
+
+.auth-card .form-error {
+    margin: 0;
+}
+
+.form-utility {
+    justify-self: end;
+    font-size: .92rem;
+    font-weight: 650;
+}
+
+.auth-divider {
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    margin-block: 1.25rem;
+    color: var(--color-muted);
+    font-size: .9rem;
+    text-align: center;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    height: 1px;
+    flex: 1;
+    background: var(--color-border);
+    content: "";
+}
+
+.auth-card .google-login {
+    display: flex;
+    width: 100%;
+    min-height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    gap: .75rem;
+    padding: .55rem 1rem;
+    border: 1px solid #747775;
+    border-radius: .25rem;
+    color: #1f1f1f;
+    background: #fff;
+    font-family: Arial, sans-serif;
+    font-size: .875rem;
+    font-weight: 500;
+    letter-spacing: .01em;
+}
+
+.auth-card .google-login:hover {
+    border-color: #5f6368;
+    background: #f8faff;
+    box-shadow: 0 1px 2px rgb(60 64 67 / 30%);
+}
+
+.google-login .google-logo {
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    flex: 0 0 1.25rem;
+}
+
+.auth-alternative {
+    margin: 1.25rem 0 0;
+    color: var(--color-muted);
+    text-align: center;
+}
+
+.auth-return-link {
+    margin-top: 2rem;
+    color: var(--color-muted);
+    text-align: center;
+}
+
+.auth-return-link a {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    font-weight: 700;
+}
+
+.auth-alternative a {
+    margin-left: .25rem;
+    font-weight: 700;
+}
+
+.registration-form .password-field-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.password-requirements {
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+    background: var(--color-background);
+}
+
+.password-requirements > p {
+    margin-bottom: .5rem;
+}
+
+.password-requirements ul {
+    display: grid;
+    gap: .45rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.password-requirements li {
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+    color: var(--color-muted);
+    font-size: .9rem;
+}
+
+.password-requirements .icon {
+    color: var(--color-success);
+    width: 1.1rem;
+    height: 1.1rem;
+}
+
+.auth-card .form-info {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    margin: 0;
+}
+
+.auth-card .form-info p {
+    margin: 0;
+}
+
+.auth-social {
+    margin-bottom: 1.25rem;
+}
+
+.auth-social .auth-divider {
+    margin-bottom: 0;
+}
+
+.auth-card .form-success {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    margin-bottom: 1rem;
+}
+
+.auth-card .form-success p {
+    margin: 0;
+}
+
+.auth-card > .auth-alternative {
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-border);
+}
+
+@media (max-width: 36rem) {
+    .auth-card {
+        padding: 1.25rem;
+    }
+
+    .registration-form .password-field-pair {
+        grid-template-columns: 1fr;
+    }
+}

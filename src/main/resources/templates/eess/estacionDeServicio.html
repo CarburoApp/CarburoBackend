@@ -1,75 +1,77 @@
 <!-- eess/estacionDeServicio.html -->
 <!DOCTYPE html>
-<html th:lang="${#locale.toLanguageTag()}" class="light" xmlns:sec="http://www.w3.org/1999/xhtml">
+<html th:lang="${#locale.toLanguageTag()}" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
     <title th:text="#{app.name} + ' - ' + ${estacion.getRotulo()}"></title>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
+<body class="site-body station-detail-page">
 
 <!-- Header -->
 <th:block th:replace="~{fragments/header :: header}"></th:block>
 
 <!-- Contenido principal -->
-<div class="flex flex-1 w-full max-w-[1400px] mx-auto px-4 py-6 md:px-8 gap-8">
-    <main class="flex-1 flex flex-col min-w-0">
+<div class="station-detail-layout">
+    <main class="station-detail-main">
         <!-- Breadcrumbs -->
-        <div class="flex flex-wrap gap-2 py-2 mb-6 text-sm">
-            <a class="text-text-secondary font-medium hover:underline" th:href="@{/}"
+        <nav class="breadcrumbs" th:aria-label="#{breadcrumb.label}">
+            <a th:href="@{/}"
                th:text="#{home.title}"></a>
-            <span class="text-text-secondary font-medium">/</span>
-            <a class="text-text-secondary font-medium hover:underline" th:href="@{/estaciones-de-servicio}"
+            <span aria-hidden="true">/</span>
+            <a th:href="@{/estaciones-de-servicio}"
                th:text="#{eess.list.title}"></a>
-            <span class="text-text-secondary font-medium">/</span>
-            <a class="text-text-secondary font-medium hover:underline"
-               th:text="${estacion.getProvincia().getDenominacion()}"></a>
-            <span class="text-text-secondary font-medium">/</span>
-            <span class="text-text-main font-medium" th:text="|${estacion.rotulo} (#{eess.id}${estacion.id})|"></span>
-        </div>
+            <span aria-hidden="true">/</span>
+            <span th:text="${estacion.getProvincia().getDenominacion()}"></span>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page" th:text="|${estacion.rotulo} (#{eess.id}${estacion.id})|"></span>
+        </nav>
 
-        <div class="bg-surface rounded-xl border border-[#e8dbce] p-6 md:p-8 shadow-sm mb-8 relative overflow-visible">
+        <section class="station-overview">
             <!-- Botón de me gusta-->
             <form th:fragment="botonFavorita(estacion, favorita)" method="post" sec:authorize="isAuthenticated()"
                   th:action="@{/perfil/estaciones-de-servicio/favoritas/{id}(id=${estacion.id})}">
                 <button type="submit"
-                        class="absolute -top-6 -right-1 md:right-8 w-12 h-12 md:w-14 md:h-14
-                   rounded-full flex items-center justify-center shadow-lg hover:shadow-xl transition-all group z-20
-                   border border-red-400 bg-white"
+                        class="favorite-button"
                         th:attr="aria-label=#{${favorita}? 'eess.favoritas.boton.retirar': 'eess.favoritas.boton.anadir'},
                         title=#{${favorita}? 'eess.favoritas.boton.retirar': 'eess.favoritas.boton.anadir'}">
-                    <span class="material-symbols-outlined text-3xl transition-transform group-hover:scale-110"
-                          th:classappend="${favorita} ? 'favorita-activa' : 'favorita-inactiva'">
-                        favorite
-                    </span>
+                    <svg
+                            th:classappend="${favorita} ? 'favorita-activa' : 'favorita-inactiva'" class="icon"
+                            focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                        <use href="/images/icons.svg#heart"></use>
+                    </svg>
                 </button>
             </form>
-            <div class="flex flex-col md:flex-row justify-between items-start gap-6 relative z-10">
-                <div class="flex items-start gap-5">
-                    <div class="size-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shrink-0">
-                        <span class="material-symbols-outlined text-[36px]">local_gas_station</span>
+            <div class="station-overview-header">
+                <div class="station-primary-info">
+                    <div class="station-brand-icon">
+                        <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                             aria-hidden="true">
+                            <use href="/images/icons.svg#fuel-pump"></use>
+                        </svg>
                     </div>
                     <div>
-                        <div class="flex items-center gap-3 mb-1">
-                            <h1 class="text-text-main text-3xl font-bold leading-tight"
+                        <div class="station-heading">
+                            <h1
                                 th:text="${estacion.getRotulo()}">Rotulo</h1>
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-[#f4ede7] text-text-secondary tracking-wide"
-                                  th:text="|#{eess.id}${estacion.id}|">>
-                            </span>
+                            <span
+                                    th:text="|#{eess.id}${estacion.id}|"></span>
                         </div>
-                        <div class="flex items-center gap-1 text-text-secondary mb-3">
-                            <div class="flex items-start gap-2 text-text-secondary mb-3">
-                                <span class="material-symbols-outlined text-[18px] mt-0.5">location_on</span>
-                                <div class="flex flex-col text-sm">
+                        <div class="station-address">
+                            <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                                 aria-hidden="true">
+                                <use href="/images/icons.svg#map-pin"></use>
+                            </svg>
+                            <div>
                                     <!-- Dirección -->
-                                    <p class="font-medium" th:text="${estacion.getDireccion()}">Dirección</p>
+                                <p th:text="${estacion.getDireccion()}">Dirección</p>
                                     <!-- Localidad y Código Postal -->
                                     <p th:text="${estacion.getLocalidad() + ' (' + estacion.getCodigoPostal() + ')'}">
                                         Localidad (CP)
                                     </p>
 
                                     <!-- Municipio y Provincia -->
-                                    <p class="uppercase" th:text="${estacion.getMunicipio().getDenominacion() + ', ' + estacion.getProvincia().getDenominacion()}">
+                                <p th:text="${estacion.getMunicipio().getDenominacion() + ', ' + estacion.getProvincia().getDenominacion()}">
                                         Municipio, Provincia
                                     </p>
                                 </div>
@@ -77,62 +79,73 @@
 
                         </div>
 
-                        <div class="flex flex-wrap gap-3">
-                            <div class="flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-bold"
-                                 th:classappend="${estacion.abierto} ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-red-50 text-red-700 border border-red-100'">
-                                <span class="w-2 h-2 rounded-full animate-pulse"
-                                      th:classappend="${estacion.isAbierto()} ? 'bg-green-500' : 'bg-red-500'"></span>
+                    <div class="station-summary-status">
+                        <div class="station-status"
+                             th:classappend="${estacion.abierto} ? 'is-open' : 'is-closed'">
+                            <span class="station-status-icon" aria-hidden="true"></span>
                                 <span th:text="${estacion.isAbierto()} ? #{eess.estado.abierto} : #{eess.estado.cerrado}"></span>
                             </div>
 
-                            <div class="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#fcfaf8] text-text-secondary text-sm font-medium border border-[#e8dbce]">
-                                <span class="material-symbols-outlined text-[16px]">schedule</span>
+                        <div class="station-hours">
+                            <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                                 aria-hidden="true">
+                                <use href="/images/icons.svg#clock"></use>
+                            </svg>
                                 <span th:text="${estacion.getHorario()}"></span>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="flex flex-col items-end gap-3 w-full md:w-auto">
-                    <a class="w-full md:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all rounded-lg font-bold text-sm shadow-sm group"
+            <div class="station-actions">
+                <a class="button button-primary"
                        th:href="@{'https://www.google.com/maps/search/?api=1&query=' +${estacion.coordenada.latitud}+ ','+${estacion.coordenada.longitud}}"
-                       target="_blank">
-                        <span class="material-symbols-outlined group-hover:animate-bounce">map</span>
+                   target="_blank" rel="noopener noreferrer">
+                    <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                        <use href="/images/icons.svg#map"></use>
+                    </svg>
                         <span th:text="#{eess.ubicacion.google.maps}"></span>
                     </a>
-                    <div class="text-xs text-text-secondary font-medium"
+                <div
                          th:text="|#{eess.ubicacion.latitud} ${estacion.coordenada.latitud}, #{eess.ubicacion.longitud} ${estacion.coordenada.longitud}|"></div>
                 </div>
-            </div>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-            <div class="lg:col-span-2 flex flex-col gap-8">
-                <section>
-                    <div class="flex items-center gap-2 mb-4">
-                        <span class="material-symbols-outlined text-primary">local_gas_station</span>
-                        <h2 class="text-xl font-bold text-text-main" th:text="#{eess.combustible.disponible}">Combustible Disponible</h2>
+        </section>
+        <div class="station-detail-columns">
+            <div class="station-detail-sections">
+                <section class="available-fuels"
+                         th:if="${preciosCombMap != null and !#maps.isEmpty(preciosCombMap)}">
+                    <div class="section-heading">
+                        <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                             aria-hidden="true">
+                            <use href="/images/icons.svg#fuel-pump"></use>
+                        </svg>
+                        <h2 th:text="#{eess.combustible.disponible}">Combustible Disponible</h2>
                     </div>
-                    <div class="grid gap-4 grid-cols-[repeat(auto-fit,minmax(150px,1fr))]">
-                        <div class="bg-surface border border-[#e8dbce] rounded-xl p-4 shadow-sm hover:shadow-md hover:border-primary/50 transition-all flex flex-col items-center justify-center gap-1 group cursor-default"
+                    <div class="fuel-card-list">
+                        <div class="fuel-card"
                              th:each="entrySetPorCombustible : ${preciosCombMap.values().stream().findFirst().get()}">
-                            <span class="text-xs uppercase tracking-wider font-bold text-text-secondary"
+                            <span 
                                   th:text="${#messages.msg('combustible.' + entrySetPorCombustible.getKey().getCodigo().toLowerCase())}"></span>
-                            <span class="text-2xl font-bold text-primary font-mono group-hover:scale-110 transition-transform"
+                            <span 
                                   th:text="${#numbers.formatDecimal( entrySetPorCombustible.getValue(), 1, 'COMMA', 3, 'POINT')} + ' €'"></span>
                         </div>
                     </div>
                 </section>
-                <section class="bg-surface rounded-xl border border-[#e8dbce] p-6 shadow-sm">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-[#f4ede7] pb-4">
-                        <div class="flex items-center gap-2">
-                            <span class="material-symbols-outlined text-primary">history</span>
-                            <h2 class="text-lg font-bold text-text-main"
+                <section class="price-history"
+                         th:if="${preciosCombMap != null and !#maps.isEmpty(preciosCombMap)}">
+                    <div>
+                        <div>
+                            <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                                 aria-hidden="true">
+                                <use href="/images/icons.svg#history"></use>
+                            </svg>
+                            <h2
                                 th:text="#{eess.combustible.precios.historico}"></h2>
                         </div>
-                        <form class="flex items-center gap-2" method="get"
+                        <form method="get"
                               th:action="@{/estaciones-de-servicio/{id}(id=${estacion.id})}">
-                            <label class="text-sm font-medium text-text-secondary"
+                            <label
                                    th:text="#{eess.combustible.precios.historico.desde}" for="precios_calendario"></label>
-                            <input class="form-input h-9 py-1 px-3 text-sm rounded-lg border-[#e8dbce] bg-[#fcfaf8] text-text-main focus:ring-primary focus:border-primary"
+                            <input
                                    id="precios_calendario"
                                    name="fechaInicio"
                                    type="date"
@@ -142,24 +155,24 @@
                                    onchange="this.form.submit()"/>
                         </form>
                     </div>
-                    <div class="overflow-x-auto custom-scrollbar">
-                        <table class="w-full text-sm text-left">
+                    <div class="table-scroll custom-scrollbar">
+                        <table>
                             <!-- Cabecera dinámica de combustibles -->
-                            <thead class="text-xs text-text-secondary uppercase bg-[#fcfaf8] border-b border-[#e8dbce]">
+                            <thead>
                             <tr>
-                                <th class="px-4 py-3 font-medium rounded-tl-lg" th:text="#{eess.combustible.precios.historico.fecha}"></th>
+                                <th th:text="#{eess.combustible.precios.historico.fecha}"></th>
                                 <!-- Cabecera de combustibles dinámica sin streams -->
                                 <th th:each="combustible : ${preciosCombMap.values().stream().findFirst().get().keySet()}"
-                                    class="px-4 py-3 font-medium"
+
                                     th:text="#{${'combustible.'+combustible.getCodigo().toLowerCase()}}"></th>
                             </tr>
                             </thead>
 
-                            <tbody class="divide-y divide-[#f4ede7]">
-                            <tr class="hover:bg-[#fcfaf8]" th:each="entryXFecha : ${preciosCombMap}">
-                                <td class="px-4 py-3 font-medium text-text-main"
+                            <tbody>
+                            <tr th:each="entryXFecha : ${preciosCombMap}">
+                                <td
                                     th:text="${#temporals.format(entryXFecha.getKey(), 'dd/MM/yy')}"></td>
-                                <td class="px-4 py-3 text-text-secondary"
+                                <td
                                     th:each="precio : ${preciosCombMap.get(entryXFecha.getKey()).values()}"
                                     th:text="${precio + ' €'}"></td>
                             </tbody>
@@ -167,77 +180,91 @@
                     </div>
                 </section>
             </div>
-            <aside class="flex flex-col gap-6">
-                <div class="bg-surface rounded-xl border border-[#e8dbce] p-5 shadow-sm">
-                    <div class="flex items-center gap-2 mb-4 border-b border-[#f4ede7] pb-3">
-                        <span class="material-symbols-outlined text-primary">info</span>
-                        <h3 class="text-lg font-bold text-text-main" th:text="#{eess.datos.tecnicos}"></h3>
+            <aside class="station-aside">
+                <div class="technical-card">
+                    <div>
+                        <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                             aria-hidden="true">
+                            <use href="/images/icons.svg#info"></use>
+                        </svg>
+                        <h3 th:text="#{eess.datos.tecnicos}"></h3>
                     </div>
-                    <ul class="flex flex-col gap-4">
-                        <li class="flex flex-col gap-1">
-                            <span class="text-xs font-bold text-text-secondary uppercase tracking-wider"
-                                  th:text="#{eess.datos.venta}"></span>
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-[18px] text-primary">public</span>
-                                <span class="text-sm font-medium text-text-main"
-                                      th:text="#{${estacion.getVenta().getCodigoMensaje() + '.descripcion'}}"></span>
+                    <ul>
+                        <li>
+                            <div>
+                                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                                     aria-hidden="true">
+                                    <use href="/images/icons.svg#globe"></use>
+                                </svg>
+                                <span th:text="#{eess.datos.venta}"></span>
                             </div>
+                            <span
+                                    th:text="#{${estacion.getVenta().getCodigoMensaje() + '.descripcion'}}"></span>
                         </li>
-                        <li class="flex flex-col gap-1">
-                            <span class="text-xs font-bold text-text-secondary uppercase tracking-wider"
-                                  th:text="#{eess.datos.margen}"></span>
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-[18px] text-primary">add_road</span>
-                                <span class="text-sm font-medium text-text-main"
-                                      th:text="#{${estacion.getMargen().getCodigoMensaje()}}"></span>
+                        <li>
+                            <div>
+                                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                                     aria-hidden="true">
+                                    <use href="/images/icons.svg#road"></use>
+                                </svg>
+                                <span th:text="#{eess.datos.margen}"></span>
                             </div>
+                            <span
+                                    th:text="#{${estacion.getMargen().getCodigoMensaje()}}"></span>
                         </li>
-                        <li class="flex flex-col gap-1">
-                            <span class="text-xs font-bold text-text-secondary uppercase tracking-wider"
-                                  th:text="#{eess.datos.remision}"></span>
-                            <div class="flex items-center gap-2">
-                                <span class="material-symbols-outlined text-[18px] text-primary">storefront</span>
-                                <span class="text-sm font-medium text-text-main"
+                        <li>
+                            <div>
+                                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                                     aria-hidden="true">
+                                    <use href="/images/icons.svg#store"></use>
+                                </svg>
+                                <span th:text="#{eess.datos.remision}"></span>
+                            </div>
+                            <span
                                       th:text="#{${estacion.getRemision().getCodigoMensaje() + '.descripcion'}}"></span>
-                            </div>
                         </li>
                     </ul>
                 </div>
-                <div class="bg-surface rounded-xl border border-[#e8dbce] p-5 shadow-sm">
-                    <div class="flex items-center gap-2 mb-4 border-b border-[#f4ede7] pb-3">
-                        <span class="material-symbols-outlined text-primary">science</span>
-                        <h3 class="text-lg font-bold text-text-main" th:text="#{eess.datos.composicion}"></h3>
+                <div class="technical-card">
+                    <div>
+                        <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                             aria-hidden="true">
+                            <use href="/images/icons.svg#flask"></use>
+                        </svg>
+                        <h3 th:text="#{eess.datos.composicion}"></h3>
                     </div>
-                    <div class="space-y-4">
+                    <div>
                         <div>
-                            <div class="flex justify-between text-sm mb-1">
-                                <span class="text-text-main font-medium"
+                            <div>
+                                <span 
                                       th:text="#{eess.datos.composicion.bioetanol}"></span>
-                                <span class="text-text-secondary font-mono"
+                                <span 
                                       th:text="${estacion.getX100BioEtanol() + '%'}"></span>
                             </div>
-                            <div class="w-full bg-[#f4ede7] rounded-full h-2">
-                                <div class="bg-primary h-2 rounded-full"
+                            <div class="composition-track" role="meter" aria-valuemin="0" aria-valuemax="100"
+                                 th:attr="aria-valuenow=${estacion.getX100BioEtanol()},aria-label=#{eess.datos.composicion.bioetanol}">
+                                <div
                                      th:style="|width: ${estacion.getX100BioEtanol()}%|"></div>
                             </div>
                         </div>
                         <div>
-                            <div class="flex justify-between text-sm mb-1">
-                                <span class="text-text-main font-medium"
+                            <div>
+                                <span 
                                       th:text="#{eess.datos.composicion.ester}"></span>
-                                <span class="text-text-secondary font-mono"
+                                <span 
                                       th:text="${estacion.getX100EsterMetilico() + '%'}"></span>
                             </div>
-                            <div class="w-full bg-[#f4ede7] rounded-full h-2">
-                                <div class="bg-primary h-2 rounded-full"
+                            <div class="composition-track" role="meter" aria-valuemin="0" aria-valuemax="100"
+                                 th:attr="aria-valuenow=${estacion.getX100EsterMetilico()},aria-label=#{eess.datos.composicion.ester}">
+                                <div
                                      th:style="|width: ${estacion.getX100EsterMetilico()}%|"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="bg-primary/5 rounded-xl border border-primary/20 p-5 text-center">
-                    <p class="text-sm text-text-main mb-3" th:text="#{eess.info.incorrecta.pregunta}"></p>
-                    <a class="text-primary text-sm font-bold hover:underline"
+                <div class="station-notice">
+                    <p th:text="#{eess.info.incorrecta.pregunta}"></p>
+                    <a
                        th:text="#{eess.info.incorrecta.reporta}" th:href="@{/contacto}"></a>
                 </div>
             </aside>

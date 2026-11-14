@@ -1,0 +1,44 @@
+h1,
+h2,
+h3,
+h4,
+p,
+ul,
+ol,
+dl {
+    margin-top: 0;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    color: var(--color-ink);
+    line-height: 1.2;
+}
+
+h1 {
+    margin-bottom: 1rem;
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    letter-spacing: -.035em;
+}
+
+h2 {
+    margin-bottom: .85rem;
+    font-size: clamp(1.35rem, 2vw, 1.8rem);
+    letter-spacing: -.02em;
+}
+
+h3 {
+    margin-bottom: .6rem;
+    font-size: 1.15rem;
+}
+
+p {
+    margin-bottom: 1rem;
+}
+
+small {
+    color: var(--color-muted);
+    font-size: .875rem;
+}

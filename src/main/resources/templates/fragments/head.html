@@ -10,21 +10,15 @@
     <!-- FAVICON -->
     <link rel="icon" type="image/ico" th:href="@{/images/Logo.ico}"/>
 
-    <!-- Tailwind y fuentes -->
-    <link rel="stylesheet" th:href="@{/css/tailwind/output.css}">
+    <!-- Fuentes empleadas por las plantillas. -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-          rel="stylesheet"/>
-
-    <!-- JS files: jQuery primero y luego Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="preload" href="/images/icons.svg" as="image" type="image/svg+xml"/>
 
     <!-- CSS propio -->
-    <link rel="stylesheet" th:href="@{/css/styles.css}"/>
+    <link rel="stylesheet" th:href="@{/css/styles.css(v='20261114-icons')}"/>
 
     <!-- Scripts -->
-    <script src="/script/language.js"></script>
+    <script th:src="@{/script/language.js(v='20261114-language-popover')}"></script>
     <script th:src="@{/script/paginacion.js}"></script>
 
 </th:block>

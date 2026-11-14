@@ -1,0 +1,495 @@
+.station-detail-layout {
+    display: block;
+    width: calc(100% - 2rem);
+    max-width: 88rem;
+    margin: 0 auto;
+    padding-block: 1.5rem 3rem;
+}
+
+.station-overview,
+.station-detail-main > .station-detail-columns > .station-detail-sections > .price-history,
+.station-detail-layout aside > div {
+    padding: clamp(1rem, 3vw, 1.5rem);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+    position: relative;
+}
+
+.station-detail-columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(18rem, .8fr);
+    align-items: start;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.station-detail-sections,
+.station-aside {
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+}
+
+.station-detail-sections {
+    display: contents;
+}
+
+.station-detail-sections > .available-fuels {
+    grid-column: 1 / -1;
+    margin-top: 0;
+    padding: clamp(1rem, 3vw, 1.5rem);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-medium);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-card);
+}
+
+.station-detail-sections > .price-history {
+    grid-column: 1;
+    min-width: 0;
+    margin-top: 0;
+}
+
+.station-aside {
+    grid-column: 2;
+    min-width: 0;
+}
+
+.station-overview-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.station-primary-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    min-width: 0;
+    width: 100%;
+}
+
+.station-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem;
+}
+
+.station-heading h1 {
+    margin: 0;
+    font-size: clamp(1.65rem, 3vw, 2.35rem);
+}
+
+.station-heading > span {
+    padding: .2rem .45rem;
+    border-radius: var(--radius-small);
+    color: var(--color-muted);
+    background: #f2ece7;
+    font-size: .82rem;
+    white-space: nowrap;
+}
+
+.station-address {
+    display: flex;
+    align-items: flex-start;
+    gap: .5rem;
+    margin-block: .5rem 0;
+    color: var(--color-muted);
+}
+
+.station-address p {
+    margin-bottom: .2rem;
+}
+
+.station-address p:first-child {
+    color: var(--color-ink);
+    font-weight: 650;
+}
+
+.station-summary-status {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    justify-content: flex-end;
+    margin-left: auto;
+}
+
+.station-brand-icon {
+    display: grid;
+    width: 3.5rem;
+    height: 3.5rem;
+    flex: 0 0 3.5rem;
+    place-items: center;
+    border-radius: var(--radius-medium);
+    color: var(--color-primary-text);
+    background: var(--color-primary-soft);
+}
+
+.station-brand-icon .icon {
+    width: 2rem;
+    height: 2rem;
+}
+
+.station-overview > form {
+    position: absolute;
+    z-index: 2;
+    top: .75rem;
+    right: .75rem;
+}
+
+.station-overview:has(> form) .station-overview-header {
+    padding-right: 3.5rem;
+}
+
+.station-overview .station-primary-info {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: .75rem;
+}
+
+.station-overview .station-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .5rem 1rem;
+    margin-top: .75rem;
+}
+
+.favorite-button {
+    display: grid;
+    width: 2.9rem;
+    min-width: 2.9rem;
+    min-height: 2.9rem;
+    place-items: center;
+    border-radius: 50%;
+}
+
+.favorite-button .icon {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.station-actions {
+    display: grid;
+    justify-items: end;
+    gap: .5rem;
+}
+
+.station-actions .button {
+    min-width: 12rem;
+}
+
+.station-address > .icon {
+    flex: 0 0 auto;
+    margin-top: .2rem;
+    color: var(--color-primary-text);
+}
+
+.station-overview .station-status-and-hours,
+.station-overview .station-state-and-hours {
+    display: grid;
+    gap: .6rem;
+}
+
+.station-overview .station-status {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .35rem .65rem;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-background);
+}
+
+.station-overview .station-status.is-open {
+    color: var(--color-success);
+    background: var(--color-success-soft);
+}
+
+.station-overview .station-status.is-closed {
+    color: var(--color-error);
+    background: var(--color-error-soft);
+}
+
+.station-overview .station-status-icon:not(.icon) {
+    font-size: 0;
+}
+
+.station-overview .station-status-icon:not(.icon)::before {
+    width: .6rem;
+    height: .6rem;
+    border-radius: 50%;
+    background: currentColor;
+    content: "";
+}
+
+.station-overview .station-actions > div {
+    color: var(--color-muted);
+    font-size: .85rem;
+}
+
+.station-overview .station-hours {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .35rem .65rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+    color: var(--color-muted);
+}
+
+.station-overview .station-hours .icon {
+    width: 1.2rem;
+    height: 1.2rem;
+    color: var(--color-primary-text);
+}
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+}
+
+.station-detail-page .section-heading > .icon {
+    width: 1.75rem;
+    height: 1.75rem;
+    color: var(--color-primary-text);
+}
+
+.station-detail-page .section-heading h2 {
+    margin: 0;
+}
+
+.price-history > div:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: .75rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.price-history > div:first-child > div {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+}
+
+.price-history > div:first-child > div > .icon {
+    width: 1.75rem;
+    height: 1.75rem;
+    color: var(--color-primary-text);
+}
+
+.price-history > div:first-child h2 {
+    margin: 0;
+}
+
+.price-history form {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+
+.price-history input[type="date"] {
+    width: auto;
+}
+
+.technical-card > div:first-child {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    margin-bottom: 1rem;
+    padding-bottom: .75rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.technical-card > div:first-child > .icon {
+    width: 1.6rem;
+    height: 1.6rem;
+    color: var(--color-primary-text);
+}
+
+.technical-card > div:last-child > div {
+    margin-top: 1rem;
+}
+
+.technical-card > div:last-child > div > div:first-child {
+    display: flex;
+    justify-content: space-between;
+    gap: .5rem;
+}
+
+.composition-track {
+    width: 100%;
+    height: .65rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #f2ece7;
+}
+
+.composition-track > div {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-primary);
+}
+
+.fuel-card {
+    display: grid;
+    justify-items: center;
+    gap: .5rem;
+}
+
+.fuel-card strong {
+    color: var(--color-primary-text);
+    font-size: 1.35rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.fuel-card span:last-child {
+    color: var(--color-primary-text);
+    font-size: 1.35rem;
+    font-weight: 750;
+    font-variant-numeric: tabular-nums;
+}
+
+.station-aside .technical-card {
+    padding: 1rem;
+}
+
+.station-aside .station-notice {
+    padding: 1rem;
+    border: 1px solid #c7ddec;
+    border-radius: var(--radius-medium);
+}
+
+.fuel-card-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: .75rem;
+    margin-block: 1rem 0;
+}
+
+.fuel-card {
+    flex: 0 1 auto;
+    min-width: min(100%, 9rem);
+    max-width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+    background: var(--color-background);
+    text-align: center;
+}
+
+.station-detail-sections > section {
+    margin-top: 0;
+}
+
+.technical-card h3 {
+    margin: 0;
+}
+
+.technical-card ul {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.technical-card li > span {
+    display: block;
+    color: var(--color-ink);
+    margin-top: .3rem;
+}
+
+.technical-card li > div {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    color: var(--color-ink);
+    font-size: .82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.technical-card li > div > .icon {
+    width: 1.2rem;
+    height: 1.2rem;
+    color: var(--color-primary-text);
+}
+
+.technical-card > div:last-child > div > div:first-child > span:first-child {
+    color: var(--color-ink);
+    font-weight: 650;
+}
+
+.station-notice {
+    color: var(--color-info);
+    background: var(--color-info-soft);
+}
+
+.station-detail-page table {
+    min-width: 36rem;
+}
+
+.station-detail-page .table-scroll {
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+}
+
+@media (max-width: 56rem) {
+    .station-overview .station-primary-info {
+        grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .station-overview .station-summary-status {
+        grid-column: 1 / -1;
+        gap: .5rem;
+    }
+
+    .station-overview .station-actions .button {
+        width: auto;
+    }
+
+    .station-detail-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .station-detail-sections > .available-fuels,
+    .station-detail-sections > .price-history,
+    .station-aside {
+        grid-column: 1;
+    }
+
+    .station-primary-info {
+        flex-wrap: wrap;
+    }
+
+    .station-summary-status {
+        justify-content: flex-start;
+        margin-left: 0;
+        padding-right: 0;
+    }
+
+    .station-overview-header,
+    .price-history > div:first-child {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .station-actions {
+        justify-items: stretch;
+    }
+
+    .station-actions .button {
+        width: 100%;
+    }
+}

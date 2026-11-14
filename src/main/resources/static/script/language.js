@@ -1,44 +1,60 @@
-$(document).ready(function () {
-    let cambiandoIdioma = false;
+document.addEventListener('DOMContentLoaded', () => {
+    let changingLanguage = false;
+    const languageButtons = document.querySelectorAll('.dropdown-menu [data-value]');
 
-    // Función genérica para manejar dropdowns
-    function setupDropdown(buttonId, menuId) {
-        const $button = $(buttonId);
-        const $menu = $(menuId);
+    document.querySelectorAll('.language-picker').forEach((picker) => {
+        const toggle = picker.querySelector('.language-toggle');
+        const popoverId = toggle?.getAttribute('popovertarget');
+        const popover = popoverId ? document.getElementById(popoverId) : null;
+        if (!toggle || !popover) return;
 
-        // Abrir/cerrar dropdown al click o Enter/Space
-        $button.on('click keydown', function (e) {
-            if (e.type === 'click' || e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                $menu.toggle();
-                $button.attr('aria-expanded', $menu.is(':visible'));
-            }
+        const positionPopover = () => {
+            if (!popover.matches(':popover-open')) return;
+
+            const button = toggle.getBoundingClientRect();
+            const width = popover.offsetWidth;
+            const height = popover.offsetHeight;
+            const margin = 8;
+            const left = Math.max(
+                margin,
+                Math.min(button.right - width, window.innerWidth - width - margin)
+            );
+            const below = button.bottom + 6;
+            const top = below + height <= window.innerHeight - margin
+                ? below
+                : Math.max(margin, button.top - height - 6);
+
+            popover.style.left = `${left}px`;
+            popover.style.top = `${top}px`;
+            popover.style.right = 'auto';
+            popover.style.bottom = 'auto';
+        };
+
+        toggle.addEventListener('click', () => requestAnimationFrame(positionPopover));
+        popover.addEventListener('toggle', (event) => {
+            if (event.newState === 'open') requestAnimationFrame(positionPopover);
         });
+        window.addEventListener('resize', positionPopover);
+        window.addEventListener('scroll', positionPopover, true);
+    });
 
-        // Seleccionar idioma
-        $menu.find('button').on('click', async function (e) {
-                e.preventDefault();
-                if (cambiandoIdioma) return;
+    languageButtons.forEach((button) => {
+        button.addEventListener('click', async () => {
+            if (changingLanguage) return;
 
-                const selectedValue = $(this).data("value");
-                const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
-                const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
-                const $error = $menu.find('[data-idioma-error]');
-                const $opciones = $('#languageDropdownMenuButton button, #languageDropdownMobile button');
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+            if (!csrfToken || !csrfHeader) {
+                console.error('No se encontró el token CSRF para cambiar el idioma.');
+                return;
+            }
 
-                cambiandoIdioma = true;
+            changingLanguage = true;
+            languageButtons.forEach((option) => {
+                option.disabled = true;
+            });
 
-                $opciones.prop('disabled', true);
-                $error.prop('hidden', true);
-
-                if (!csrfToken || !csrfHeader) {
-                    $error.prop('hidden', false);
-                    return;
-                }
-
-                if (!csrfToken || !csrfHeader)
-                    throw new Error('Falta el token CSRF.');
-
+            try {
                 const response = await fetch('/idioma', {
                     method: 'POST',
                     credentials: 'same-origin',
@@ -47,55 +63,23 @@ $(document).ready(function () {
                         [csrfHeader]: csrfToken
                     },
                     body: new URLSearchParams({
-                        newLanguage: String(selectedValue).toLowerCase()
+                        newLanguage: String(button.dataset.value).toLowerCase()
                     })
                 });
 
-                if (!response.ok)
-                    throw new Error(`HTTP ${response.status}`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-                // La cookie ya contiene la preferencia; se elimina cualquier lang antiguo.
                 const url = new URL(globalThis.location.href);
                 url.searchParams.delete('lang');
-
                 globalThis.history.replaceState(globalThis.history.state, '', url.pathname + url.search + url.hash);
                 globalThis.location.reload();
-
-                if (!response.ok) {
-                    $error.prop('hidden', false);
-                    return;
-                }
-
-                cambiandoIdioma = false;
-                $opciones.prop('disabled', false);
-
-            }
-        );
-
-        // Cerrar dropdown al hacer click fuera
-        $(document).click(function (event) {
-            if (!$(event.target).closest(buttonId + ', ' + menuId).length) {
-                $menu.hide();
-                $button.attr('aria-expanded', 'false');
+            } catch (error) {
+                console.error('No se pudo cambiar el idioma.', error);
+                changingLanguage = false;
+                languageButtons.forEach((option) => {
+                    option.disabled = false;
+                });
             }
         });
-    }
-
-// Inicializamos ambos dropdowns
-    setupDropdown('#btnLanguage', '#languageDropdownMenuButton');
-    setupDropdown('#btnLanguageMobile', '#languageDropdownMobile');
-
-// Escape cierra todos los dropdowns
-    $(document).keydown(function (e) {
-        if (e.key === 'Escape') {
-            $('#languageDropdownMenuButton, #languageDropdownMobile').hide();
-            $('#btnLanguage, #btnLanguageMobile').attr('aria-expanded', 'false');
-        }
     });
-
-// Menú hamburguesa móvil
-    $('button[onclick*="mobileMenu"]').on('click', function () {
-        $('#mobileMenu').toggle();
-    });
-})
-;
+});

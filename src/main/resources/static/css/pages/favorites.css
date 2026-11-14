@@ -1,0 +1,109 @@
+.favorites-content {
+    width: min(100% - 2rem, 64rem);
+    margin-inline: auto;
+    padding-block: 1.5rem 3rem;
+}
+
+.favorites-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.favorites-heading h1 {
+    margin-bottom: .4rem;
+}
+
+.favorites-heading p {
+    color: var(--color-muted);
+}
+
+.favorites-list {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.favorites-list > div {
+    display: grid;
+    gap: 1rem;
+}
+
+.favorite-empty-state {
+    display: grid;
+    justify-items: center;
+    gap: .75rem;
+    padding: clamp(1.5rem, 5vw, 3rem);
+    border: 1px dashed var(--color-primary);
+    border-radius: var(--radius-medium);
+    background: var(--color-primary-soft);
+    text-align: center;
+}
+
+.favorite-empty-state > div:first-child {
+    display: grid;
+    width: 3.5rem;
+    height: 3.5rem;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--color-primary-text);
+    background: #fff;
+}
+
+.favorite-empty-state h2,
+.favorite-empty-state p {
+    margin-bottom: 0;
+}
+
+.station-name {
+    display: flex;
+    align-items: center;
+    gap: .65rem;
+}
+
+.station-id {
+    align-self: flex-start;
+    padding: .25rem .5rem;
+    border-radius: 999px;
+    color: var(--color-muted);
+    background: #f2ece7;
+    font-size: .8rem;
+    white-space: nowrap;
+}
+
+.station-sale-type {
+    justify-self: start;
+    padding: .2rem .45rem;
+    border-radius: var(--radius-small);
+    color: var(--color-info);
+    background: var(--color-info-soft);
+    font-size: .8rem;
+}
+
+.favorites-page .station-status-and-hours,
+.favorites-page .station-state-and-hours {
+    display: grid;
+    gap: .5rem;
+}
+
+.favorites-page .station-status {
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+}
+
+.favorites-page .station-status.is-open {
+    color: var(--color-success);
+}
+
+.favorites-page .station-status.is-closed {
+    color: var(--color-error);
+}
+
+@media (max-width: 38rem) {
+    .station-card .station-summary {
+        align-items: flex-start;
+    }
+}

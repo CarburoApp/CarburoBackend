@@ -1,0 +1,113 @@
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    min-width: 20rem;
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    color: var(--color-ink);
+    background: var(--color-background);
+    font-family: var(--font-body), serif;
+    font-size: 1rem;
+    line-height: 1.55;
+}
+
+body.site-body {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+body.site-body > main,
+body.site-body > .page-shell {
+    flex: 1 0 auto;
+}
+
+img,
+svg {
+    max-width: 100%;
+}
+
+img {
+    height: auto;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button,
+select {
+    cursor: pointer;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+    cursor: not-allowed;
+    opacity: .6;
+}
+
+a {
+    color: var(--color-primary-text);
+    text-underline-offset: .18em;
+}
+
+a:hover {
+    color: var(--color-primary-text-hover);
+}
+
+:focus-visible {
+    outline: .18rem solid var(--color-primary-text);
+    outline-offset: .18rem;
+}
+
+.is-hidden {
+    display: none !important;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    clip-path: inset(50%);
+}
+
+.icon {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    flex: 0 0 auto;
+    overflow: visible;
+    color: currentColor;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vertical-align: -.125em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+    }
+}

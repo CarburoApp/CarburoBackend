@@ -1,17 +1,10 @@
-<!-- templates/fragments/footer.html -->
-<footer th:fragment="footer" class="border-t border-border-color bg-surface py-5 mt-3">
-  <div class="max-w-[1400px] mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6">
-    <a th:href="@{/}">
-    <div class="flex items-center gap-3 size-8">
-      <img th:src="@{/images/Logo.png}" alt="Carburo Logo"/>
-      <span class="font-bold text-text-main" th:text="#{app.name}"></span>
-    </div>
+<footer th:fragment="footer" class="site-footer">
+    <a class="site-brand" th:href="@{/}">
+        <img th:src="@{/images/Logo_comprimido.png}" alt=""/>
+        <span th:text="#{app.name}"></span>
     </a>
-    <p class="text-text-secondary text-sm font-medium"
-       th:text="#{app.copy} + ' ' + ${#dates.format(#dates.createNow(), 'yyyy')}"></p>
-    <div class="flex gap-6">
-      <a class="text-text-secondary hover:text-primary text-sm font-medium transition-colors" th:href="@{/contacto}"
-         th:text="#{contacto.title}"></a>
-    </div>
-  </div>
+    <p th:text="#{app.copy} + ' ' + ${#dates.format(#dates.createNow(), 'yyyy')}"></p>
+    <nav th:aria-label="#{footer.nav.label}">
+        <a th:href="@{/contacto}" th:text="#{contacto.title}"></a>
+    </nav>
 </footer>

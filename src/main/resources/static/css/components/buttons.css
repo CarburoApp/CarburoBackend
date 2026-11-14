@@ -1,0 +1,81 @@
+body:not(.profile-page) button,
+body:not(.profile-page) [role="button"],
+body:not(.profile-page) .button {
+    min-height: 2.75rem;
+    padding: .65rem 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+    color: var(--color-ink);
+    background: var(--color-surface);
+    font-weight: 650;
+    line-height: 1.25;
+    transition: background-color .16s ease, border-color .16s ease, color .16s ease;
+}
+
+body:not(.profile-page) .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    text-decoration: none;
+}
+
+body:not(.profile-page) button > .icon,
+body:not(.profile-page) .button > .icon {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+body:not(.profile-page) button:hover,
+body:not(.profile-page) [role="button"]:hover,
+body:not(.profile-page) .button:hover {
+    border-color: var(--color-primary);
+    background: var(--color-primary-soft);
+}
+
+body:not(.profile-page) button[type="submit"],
+body:not(.profile-page) .button-primary {
+    border-color: var(--color-primary);
+    color: var(--color-ink);
+    background: var(--color-primary);
+}
+
+body:not(.profile-page) button[type="submit"]:hover,
+body:not(.profile-page) .button-primary:hover {
+    border-color: var(--color-primary-hover);
+    color: var(--color-ink);
+    background: var(--color-primary-hover);
+}
+
+body:not(.profile-page) button:focus-visible,
+body:not(.profile-page) a:focus-visible {
+    box-shadow: var(--focus-ring);
+}
+
+.favorite-button {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    border-radius: 50%;
+}
+
+.favorite-button .favorita-activa,
+.favorita-activa {
+    color: #a32424;
+    fill: currentColor;
+}
+
+.favorita-inactiva {
+    color: var(--color-muted);
+    fill: none;
+}
+
+.pagination-link {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+}
+
+.pagination-link.is-current {
+    border-color: var(--color-primary);
+    color: var(--color-ink);
+    background: var(--color-primary);
+}

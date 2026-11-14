@@ -1,59 +1,77 @@
 <!-- auth/restablecerContrasena.html -->
 <!DOCTYPE html>
-<html th:lang="${#locale.toLanguageTag()}" class="light">
+<html th:lang="${#locale.toLanguageTag()}">
 <!-- head -->
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
     <title th:text="#{app.name} + ' - ' + #{auth.restablecer.contrasena.title}"></title>
-
+    <script src="/script/auth/password.js" defer></script>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
+<body class="site-body auth-page">
 
 <!-- Header -->
 <th:block th:replace="~{fragments/header :: header}"></th:block>
 
 <!-- Contenido principal -->
-<main class="flex-1 flex flex-col items-center py-12 px-4 bg-[#fcfaf8]">
-    <div class="max-w-xl w-full">
-        <div class="bg-surface rounded-[2rem] border border-border-color p-8 md:p-12 shadow-xl shadow-primary/5 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-2 bg-primary"></div>
-            <div class="text-center mb-8">
-                <h1 class="text-2xl font-bold text-text-main mb-2"
-                    th:text="#{auth.restablecer.contrasena.titulo}"></h1>
-                <p class="text-text-secondary text-sm" th:text="#{auth.restablecer.contrasena.subtitulo}"></p>
+<main>
+    <div class="auth-layout">
+        <div class="auth-card">
+            <div class="auth-intro">
+                <h1 th:text="#{auth.restablecer.contrasena.titulo}"></h1>
+                <p th:text="#{auth.restablecer.contrasena.subtitulo}"></p>
             </div>
             <!--Mensaje de cambio de contraseña exitoso-->
-            <form class="space-y-6" th:action="@{/auth/reset-password}"
+            <form th:action="@{/auth/reset-password}"
                   method="post" th:object="${usuario}">
 
                 <input type="hidden" id="token" th:field="*{token}">
 
                 <div>
-                    <label class="block text-[10px] font-bold text-text-secondary uppercase tracking-[0.1em] mb-2 px-1"
+                    <label 
                            for="newPassword" th:text="#{auth.restablecer.contrasena.nueva.titulo}">
                     </label>
-                    <div class="relative mb-2">
-                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary/60">lock</span>
-                        <input class="w-full pl-12 pr-12 py-4 bg-background-light border border-border-color rounded-2xl text-lg font-bold text-text-main focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-                               id="newPassword" th:placeholder="#{auth.contrasena.placeholder}"
+                    <div class="input-with-icon">
+                        <svg class="icon input-icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                             aria-hidden="true">
+                            <use href="/images/icons.svg#lock"></use>
+                        </svg>
+                        <input id="newPassword" autocomplete="new-password"
+                               th:placeholder="#{auth.contrasena.placeholder}"
                                th:field="*{contrasena}" type="password"/>
+                        <button type="button" class="password-toggle" data-password-toggle
+                                aria-controls="newPassword"
+                                th:attr="aria-label=#{auth.contrasena.mostrar},data-show-label=#{auth.contrasena.mostrar},data-hide-label=#{auth.contrasena.ocultar}">
+                            <svg data-eye-open class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                                 aria-hidden="true">
+                                <use href="/images/icons.svg#eye"></use>
+                            </svg>
+                            <svg data-eye-closed class="icon is-hidden" focusable="false" width="24" height="24"
+                                 viewBox="0 0 24 24" aria-hidden="true">
+                                <use href="/images/icons.svg#eye-off"></use>
+                            </svg>
+                        </button>
                     </div>
-                    <p th:if="${#fields.hasErrors('contrasena')}" th:errors="*{contrasena}" class="text-red-600 text-xs mt-1 mb-2"></p>
+                    <p class="form-error" th:if="${#fields.hasErrors('contrasena')}" th:errors="*{contrasena}"></p>
 
-                    <div class="bg-background-light dark:bg-[#221910] p-3 rounded-lg border border-[#e8dbce] dark:border-[#4d3a29]">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-[10px] font-bold text-text-secondary uppercase tracking-wider"
-                                  th:text="#{auth.perfil.editar.contrasena.seguridad}"></span>
+                    <div>
+                        <div>
+                            <span class="section-label" th:text="#{auth.perfil.editar.contrasena.seguridad}"></span>
                         </div>
-                        <p class="text-[#9c7349] dark:text-[#b59b7c] text-xs font-medium mb-1" th:text="#{auth.contrasena.info}"></p>
-                        <ul class="text-[#9c7349] dark:text-[#b59b7c] text-xs grid grid-cols-2 gap-x-2">
-                            <li class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[10px] text-green-500">check_circle</span>
+                        <p th:text="#{auth.contrasena.info}"></p>
+                        <ul>
+                            <li>
+                                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                                     aria-hidden="true">
+                                    <use href="/images/icons.svg#circle-check"></use>
+                                </svg>
                                 <span th:text="#{auth.contrasena.info.caracteres}"></span>
                             </li>
-                            <li class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[10px] text-green-500">check_circle</span>
+                            <li>
+                                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                                     aria-hidden="true">
+                                    <use href="/images/icons.svg#circle-check"></use>
+                                </svg>
                                 <span th:text="#{auth.contrasena.info.letra.numero}"></span>
                             </li>
                         </ul>
@@ -61,33 +79,53 @@
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-bold text-text-secondary uppercase tracking-[0.1em] mb-2 px-1"
+                    <label 
                            for="confirmPassword" th:text="#{auth.restablecer.contrasena.confirmacion.titulo}">
                     </label>
-                    <div class="relative">
-                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary/60">task_alt</span>
-                        <input class="w-full pl-12 pr-12 py-4 bg-background-light border border-border-color rounded-2xl text-lg font-bold text-text-main focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-                               id="confirmPassword" th:placeholder="#{auth.contrasena.placeholder}" type="password"
+                    <div class="input-with-icon">
+                        <svg class="icon input-icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                             aria-hidden="true">
+                            <use href="/images/icons.svg#badge-check"></use>
+                        </svg>
+                        <input id="confirmPassword" autocomplete="new-password"
+                               th:placeholder="#{auth.contrasena.placeholder}" type="password"
                                th:field="*{confirmacionContrasena}"/>
+                        <button type="button" class="password-toggle" data-password-toggle
+                                aria-controls="confirmPassword"
+                                th:attr="aria-label=#{auth.contrasena.mostrar},data-show-label=#{auth.contrasena.mostrar},data-hide-label=#{auth.contrasena.ocultar}">
+                            <svg data-eye-open class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                                 aria-hidden="true">
+                                <use href="/images/icons.svg#eye"></use>
+                            </svg>
+                            <svg data-eye-closed class="icon is-hidden" focusable="false" width="24" height="24"
+                                 viewBox="0 0 24 24" aria-hidden="true">
+                                <use href="/images/icons.svg#eye-off"></use>
+                            </svg>
+                        </button>
                     </div>
-                    <p th:if="${#fields.hasErrors('confirmacionContrasena')}" th:errors="*{confirmacionContrasena}" class="text-red-600 text-xs mt-1"></p>
+                    <p class="form-error" th:if="${#fields.hasErrors('confirmacionContrasena')}"
+                       th:errors="*{confirmacionContrasena}"></p>
                 </div>
 
-                <div class="flex flex-col gap-4 pt-4">
-                    <button class="flex items-center justify-center gap-2 w-full h-14 rounded-xl bg-primary text-white hover:bg-primary/90 font-bold text-base transition-all shadow-lg shadow-primary/20"
+                <div>
+                    <button class="button-primary"
                             type="submit">
-                        <span class="material-symbols-outlined">sync_lock</span>
+                        <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                             aria-hidden="true">
+                            <use href="/images/icons.svg#key-round"></use>
+                        </svg>
                         <span th:text="#{auth.restablecer.contrasena.boton.enviar}"></span>
                     </button>
                 </div>
             </form>
-            <div class="mt-8 text-center">
-                <a class="text-primary font-bold hover:underline inline-flex items-center gap-2 text-sm"
-                   th:href="@{/login}">
-                    <span class="material-symbols-outlined text-sm">arrow_back</span>
+            <p class="auth-return-link">
+                <a th:href="@{/login}">
+                    <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                        <use href="/images/icons.svg#arrow-left"></use>
+                    </svg>
                     <span th:text="#{auth.recuperacion.volver.inicio.sesion}"></span>
                 </a>
-            </div>
+            </p>
         </div>
     </div>
 </main>
@@ -95,8 +133,7 @@
 <!-- Footer -->
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 
-</body>
-
 <script th:src="@{/script/auth/extractRecoverPathInformation.js}"></script>
 
+</body>
 </html>

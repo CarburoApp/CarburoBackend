@@ -1,44 +1,43 @@
 <!-- templates/fragments/paginacion.html -->
 
 <!-- Paginación -->
-<div th:fragment="paginacion" class="mt-8 flex justify-center"
+<nav th:fragment="paginacion" class="pagination" th:aria-label="#{paginacion.navegacion}"
      th:with="
         startPage=${page.number - 2 < 0 ? 0 : page.number - 2},
         endPage=${page.number + 2 > page.totalPages - 1 ? page.totalPages - 1 : page.number + 2}
         ">
-    <ul class="flex items-center gap-1">
+    <ul class="pagination-list">
 
         <!-- Primera -->
         <li>
-            <a class="pagination-link px-3 py-1 rounded-lg text-text-secondary hover:bg-[#f4ede7]"
+            <a class="pagination-link"
                href="?page=0"
-               th:classappend="${page.first} ? 'opacity-50 pointer-events-none'"
+               th:attr="aria-disabled=${page.first}"
                th:text="#{paginacion.primera}">
             </a>
         </li>
 
         <!-- Anterior -->
         <li>
-            <a class="pagination-link px-3 py-1 rounded-lg text-text-secondary hover:bg-[#f4ede7]"
+            <a class="pagination-link"
                th:href="'?page=' + ${page.number - 1}"
-               th:classappend="${page.first} ? 'opacity-50 pointer-events-none'">
+               th:attr="aria-disabled=${page.first}">
                 ←
             </a>
         </li>
 
         <!-- Ellipsis inicial -->
         <li th:if="${startPage > 0}">
-            <span class="px-2 text-text-secondary">…</span>
+            <span aria-hidden="true">…</span>
         </li>
 
         <!-- Páginas -->
         <li th:each="i : ${#numbers.sequence(startPage, endPage)}">
-            <a class="pagination-link w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-colors"
+            <a class="pagination-link"
                th:href="'?page=' + ${i}"
                th:text="${i + 1}"
-               th:class="${i == page.number}
-           ? 'bg-primary text-[#1c140d] font-bold'
-           : 'text-text-secondary hover:bg-[#f4ede7]'">
+               th:classappend="${i == page.number} ? 'is-current'"
+               th:attr="aria-current=${i == page.number ? 'page' : null}">
             </a>
         </li>
 
@@ -46,25 +45,25 @@
 
         <!-- Ellipsis final -->
         <li th:if="${endPage < page.totalPages - 1}">
-            <span class="px-2 text-text-secondary">…</span>
+            <span aria-hidden="true">…</span>
         </li>
 
         <!-- Siguiente -->
         <li>
-            <a class="pagination-link px-3 py-1 rounded-lg text-text-secondary hover:bg-[#f4ede7]"
+            <a class="pagination-link"
                th:href="'?page=' + ${page.number + 1}"
-               th:classappend="${page.last} ? 'opacity-50 pointer-events-none'">
+               th:attr="aria-disabled=${page.last}">
                 →
             </a>
         </li>
 
         <!-- Última -->
         <li>
-            <a class="pagination-link px-3 py-1 rounded-lg text-text-secondary hover:bg-[#f4ede7]"
+            <a class="pagination-link"
                th:href="'?page=' + ${page.totalPages - 1}"
-               th:classappend="${page.last} ? 'opacity-50 pointer-events-none'"
+               th:attr="aria-disabled=${page.last}"
                th:text="#{paginacion.ultima}">
             </a>
         </li>
     </ul>
-</div>
+</nav>

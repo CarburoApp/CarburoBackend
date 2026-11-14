@@ -4,11 +4,12 @@
 <!-- head -->
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/tailwind/output.css}"/>
     <title th:text="#{app.name} + ' - ' + #{auth.perfil.title}"></title>
 
 </head>
 
-<body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
+<body class="profile-page bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
 
 <!-- Header -->
 <th:block th:replace="~{fragments/header :: header}"></th:block>
@@ -31,18 +32,27 @@
                          alt="Avatar de usuario"
                          class="w-full h-full object-cover">
 
-                    <span th:unless="${avatar_url != null && !avatar_url.isBlank()}"
-                          class="material-symbols-outlined text-6xl text-primary/40">person</span>
+                    <svg th:unless="${avatar_url != null && !avatar_url.isBlank()}"
+                         class="icon text-6xl text-primary/40" focusable="false" width="24" height="24"
+                         viewBox="0 0 24 24" aria-hidden="true">
+                        <use href="/images/icons.svg#user-round"></use>
+                    </svg>
 
                 </div>
                 <button class="absolute bottom-0 right-0 size-10 bg-primary text-white rounded-full flex items-center justify-center border-4 border-white hover:scale-105 transition-transform shadow-sm">
-                    <span class="material-symbols-outlined text-xl">photo_camera</span>
+                    <svg class="icon text-xl" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                         aria-hidden="true">
+                        <use href="/images/icons.svg#camera"></use>
+                    </svg>
                 </button>
             </div>
             <!--Mensaje de cambio de contraseña exitoso-->
             <div class="mb-6 flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-100 rounded-xl text-red-800 animate-in fade-in duration-500"
                  th:if="${param.passwordChanged}">
-                <span class="material-symbols-outlined text-red-500 text-xl">info</span>
+                <svg class="icon text-red-500 text-xl" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                     aria-hidden="true">
+                    <use href="/images/icons.svg#info"></use>
+                </svg>
                 <p class="text-sm font-medium" th:text="#{auth.perfil.editar.contrasena.exitoso}"></p>
             </div>
             <div class="space-y-4 mb-10 text-left">
@@ -61,24 +71,36 @@
                        th:text="#{auth.perfil.provincia}"></p>
                     <div class="flex items-center justify-between">
                         <p class="text-lg font-bold text-text-main" th:text="${provincia}"></p>
-                        <span class="material-symbols-outlined text-primary">location_on</span>
+                        <svg class="icon text-primary" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                             aria-hidden="true">
+                            <use href="/images/icons.svg#map-pin"></use>
+                        </svg>
                     </div>
                 </div>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
                 <a class="flex items-center justify-center gap-2 h-11 px-4 rounded-xl border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold text-sm transition-all"
                    th:href="@{/perfil/editarNombre}">
-                    <span class="material-symbols-outlined text-sm">edit</span>
+                    <svg class="icon text-sm" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                         aria-hidden="true">
+                        <use href="/images/icons.svg#pencil"></use>
+                    </svg>
                     <span th:text="#{auth.perfil.nombre.modificar}"></span>
                 </a>
                 <a class="flex items-center justify-center gap-2 h-11 px-4 rounded-xl border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold text-sm transition-all"
                    th:href="@{/perfil/editarProvincia}">
-                    <span class="material-symbols-outlined text-sm">map</span>
+                    <svg class="icon text-sm" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                         aria-hidden="true">
+                        <use href="/images/icons.svg#map"></use>
+                    </svg>
                     <span th:text="#{auth.perfil.provincia.modificar}"></span>
                 </a>
                 <a class="flex items-center justify-center gap-2 h-11 px-4 rounded-xl border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold text-sm transition-all sm:col-span-2"
                    th:href="@{/perfil/change-password}">
-                    <span class="material-symbols-outlined text-sm">lock</span>
+                    <svg class="icon text-sm" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                         aria-hidden="true">
+                        <use href="/images/icons.svg#lock"></use>
+                    </svg>
                     <span th:text="#{auth.perfil.contrasena.cambiar}"></span>
                 </a>
             </div>
@@ -86,7 +108,10 @@
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <button class="flex items-center justify-center gap-2 w-full h-12 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white font-bold text-sm transition-all border border-red-100"
                         type="submit">
-                    <span class="material-symbols-outlined text-xl">logout</span>
+                    <svg class="icon text-xl" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                         aria-hidden="true">
+                        <use href="/images/icons.svg#log-out"></use>
+                    </svg>
                     <span th:text="#{auth.perfil.cerrar.sesion}"></span>
                 </button>
             </form>

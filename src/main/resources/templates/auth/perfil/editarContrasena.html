@@ -4,10 +4,11 @@
 <!-- head -->
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
+    <link rel="stylesheet" th:href="@{/css/tailwind/output.css}"/>
     <title th:text="#{app.name} + ' - ' + #{auth.perfil.editar.nombre.title}"></title>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
+<body class="profile-page bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
 
 <!-- Header -->
 <th:block th:replace="~{fragments/header :: header}"></th:block>
@@ -33,7 +34,10 @@
                 <p class="text-text-secondary text-sm" th:text="#{auth.perfil.editar.contrasena.subtitulo}"></p>
             </div>
             <div class="mb-8 p-4 bg-primary/10 border border-primary/20 rounded-2xl flex gap-4 items-start">
-                <span class="material-symbols-outlined text-primary">shield</span>
+                <svg class="icon text-primary" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                     aria-hidden="true">
+                    <use href="/images/icons.svg#shield-check"></use>
+                </svg>
                 <p class="text-sm text-text-main font-medium leading-relaxed"
                    th:text="#{auth.perfil.editar.contrasena.info}">
                 </p>
@@ -44,7 +48,10 @@
                            for="currentPassword" th:text="#{auth.perfil.editar.contrasena.actual.titulo}">
                     </label>
                     <div class="relative">
-                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary/60">lock_open</span>
+                        <svg class="icon absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary/60"
+                             focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                            <use href="/images/icons.svg#lock-open"></use>
+                        </svg>
                         <input class="w-full pl-12 pr-12 py-4 bg-background-light border border-border-color rounded-2xl text-lg font-bold text-text-main focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                                id="currentPassword" th:field="*{correo}" th:placeholder="#{auth.contrasena.placeholder}"
                                type="password"/>
@@ -57,7 +64,10 @@
                            for="newPassword" th:text="#{auth.perfil.editar.contrasena.nueva.titulo}">
                     </label>
                     <div class="relative mb-4">
-                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary/60">lock</span>
+                        <svg class="icon absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary/60"
+                             focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                            <use href="/images/icons.svg#lock"></use>
+                        </svg>
                         <input class="w-full pl-12 pr-12 py-4 bg-background-light border border-border-color rounded-2xl text-lg font-bold text-text-main focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                                id="newPassword" th:placeholder="#{auth.contrasena.placeholder}"
                                th:field="*{contrasena}" type="password"/>
@@ -73,15 +83,24 @@
                            th:text="#{auth.contrasena.info}"></p>
                         <ul class="text-[#9c7349] dark:text-[#b59b7c] text-xs grid grid-cols-2 gap-x-2">
                             <li class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[10px] text-green-500">check_circle</span>
+                                <svg class="icon text-[10px] text-green-500" focusable="false" width="24" height="24"
+                                     viewBox="0 0 24 24" aria-hidden="true">
+                                    <use href="/images/icons.svg#circle-check"></use>
+                                </svg>
                                 <span th:text="#{auth.contrasena.info.caracteres}"></span>
                             </li>
                             <li class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[10px] text-green-500">check_circle</span>
+                                <svg class="icon text-[10px] text-green-500" focusable="false" width="24" height="24"
+                                     viewBox="0 0 24 24" aria-hidden="true">
+                                    <use href="/images/icons.svg#circle-check"></use>
+                                </svg>
                                 <span th:text="#{auth.contrasena.info.letra.numero}"></span>
                             </li>
                             <li class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[10px] text-green-500">check_circle</span>
+                                <svg class="icon text-[10px] text-green-500" focusable="false" width="24" height="24"
+                                     viewBox="0 0 24 24" aria-hidden="true">
+                                    <use href="/images/icons.svg#circle-check"></use>
+                                </svg>
                                 <span th:text="#{auth.contrasena.info.simbolo}"></span>
                             </li>
                         </ul>
@@ -92,7 +111,10 @@
                            for="confirmPassword" th:text="#{auth.perfil.editar.contrasena.confirmacion.titulo}">
                     </label>
                     <div class="relative">
-                        <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary/60">task_alt</span>
+                        <svg class="icon absolute left-4 top-1/2 -translate-y-1/2 text-text-secondary/60"
+                             focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                            <use href="/images/icons.svg#badge-check"></use>
+                        </svg>
                         <input class="w-full pl-12 pr-12 py-4 bg-background-light border border-border-color rounded-2xl text-lg font-bold text-text-main focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
                                id="confirmPassword" th:placeholder="#{auth.contrasena.placeholder}" type="password"
                                th:field="*{confirmacionContrasena}"/>
@@ -103,7 +125,10 @@
                 <div class="flex flex-col gap-4 pt-4">
                     <button class="flex items-center justify-center gap-2 w-full h-14 rounded-xl bg-primary text-white hover:bg-primary/90 font-bold text-base transition-all shadow-lg shadow-primary/20"
                             type="submit">
-                        <span class="material-symbols-outlined">sync_lock</span>
+                        <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                             aria-hidden="true">
+                            <use href="/images/icons.svg#key-round"></use>
+                        </svg>
                         <span th:text="#{auth.perfil.editar.contrasena.boton.modificar}"></span>
                     </button>
                     <a class="flex items-center justify-center w-full h-12 rounded-xl text-text-secondary hover:text-text-main hover:bg-background-light font-bold text-sm transition-all"

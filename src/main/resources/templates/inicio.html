@@ -1,56 +1,52 @@
 <!-- templates/inicio.html -->
 <!DOCTYPE html>
-<html th:lang="${#locale.toLanguageTag()}" class="light">
+<html th:lang="${#locale.toLanguageTag()}">
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
     <title th:text="#{app.name} + ' - ' + #{home.title}"></title>
 
 </head>
 
-<body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
+<body class="site-body home-page">
 
 <!-- Header -->
 <th:block th:replace="~{fragments/header :: header}"></th:block>
 
 <!-- Contenido principal con layout asimétrico -->
-<main class="flex-auto flex flex-col md:flex-row gap-8 px-4 py-4 max-w-[1400px] mx-auto">
+<main class="home-layout">
 
     <!-- Columna izquierda: hero + búsqueda + estación -->
-    <div class="flex-1 flex flex-col gap-6">
+    <div class="home-primary">
 
         <!-- Hero y búsqueda -->
-        <section class="py-2 bg-gradient-to-b from-white to-background-light">
-            <div class="max-w-4xl mx-auto text-center">
-                <h1 class="text-4xl md:text-6xl font-bold text-text-main leading-tight mb-2 tracking-tight">
-                    <span th:text="#{home.titulo1}"></span>
-                    <span class="text-primary" th:text="#{home.titulo2}"></span>
-                    <span th:text="#{home.titulo3}"></span>
-                </h1>
-                <p class="text-lg text-text-secondary mb-1 max-w-xl mx-auto" th:text="#{home.subtitulo}"></p>
-                <div class="relative max-w-2xl mx-auto">
-                    <form class="flex items-center bg-surface border border-border-color shadow-xl rounded-2xl p-2 focus-within:ring-2 focus-within:ring-primary/20 transition-all"
+        <section class="home-hero">
+            <div>
+                <h1 th:text="#{home.titulo1}"></h1>
+                <p th:text="#{home.subtitulo}"></p>
+                <div>
+                    <form class="home-search"
                           th:action="@{/estaciones-de-servicio}" method="get">
-                        <div class="flex-auto flex items-center px-4">
-                            <span class="material-symbols-outlined text-text-secondary mr-3">search</span>
+                        <div>
+                            <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                                 aria-hidden="true">
+                                <use href="/images/icons.svg#search"></use>
+                            </svg>
                             <!-- Label accesible, invisible -->
-                            <label for="busqueda" class="sr-only" th:text="#{home.buscar.boton}"></label>
-                            <input class="w-full border-none focus:ring-0 text-text-main bg-transparent placeholder:text-text-secondary/50 py-3"
+                            <label for="busqueda" class="visually-hidden" th:text="#{home.buscar.boton}"></label>
+                            <input
                                    type="text" required id="busqueda" name="busqueda"
                                    th:placeholder="#{home.buscar.placeholder}" />
                         </div>
 
-                        <button type="submit"
-                                class="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-2 rounded-xl transition-colors"
-                                th:text="#{home.buscar.boton}">
-                        </button>
+                        <button type="submit" th:text="#{home.buscar.boton}"></button>
                     </form>
-                    <div class="mt-4 flex flex-wrap justify-center gap-2"
+                    <div class="popular-searches"
                          th:if="${busquedasPopulares != null and !#maps.isEmpty(busquedasPopulares)}">
-                        <span class="text-xs text-text-secondary font-medium" th:text="#{home.busqueda.popular}"></span>
+                        <span th:text="#{home.busqueda.popular}"></span>
                         <a th:each="entry : ${busquedasPopulares}"
                            th:href="@{${entry.value}}"
                            th:text="${entry.key}"
-                           class="text-xs text-primary hover:underline font-bold">
+                        >
                         </a>
                     </div>
                 </div>
@@ -58,31 +54,29 @@
         </section>
 
         <!-- Estación más cercana -->
-        <section class="py-2">
+        <section>
             <!-- Estación más cercana -->
-            <div class="flex items-center gap-3 mb-2">
-                <span class="material-symbols-outlined text-primary text-3xl">near_me</span>
-                <h2 class="text-2xl font-bold text-text-main" th:text="#{home.eess.cercana}"></h2>
+            <div class="nearby-heading">
+                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="/images/icons.svg#locate"></use>
+                </svg>
+                <h2 th:text="#{home.eess.cercana}"></h2>
             </div>
 
-            <div class="max-w-4xl" th:fragment="estacionCercanaFragment" id="estacionCercanaFragment">
-                <article
-                        class="bg-surface rounded-xl border border-[#e8dbce] shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden group"
-                        id="estacion-container">
+            <div th:fragment="estacionCercanaFragment" id="estacionCercanaFragment">
+                <article class="nearby-card" id="estacion-container">
 
                     <div th:if="${estacionCercana != null}" th:replace="~{fragments/estacionDeServicio}"></div>
 
                     <!-- Si no hay estación, mostramos mensaje bonito -->
                     <div th:if="${estacionCercana == null}"
-                         class="flex flex-col items-center justify-center py-12 space-y-4" id="loading-estacion">
+                         class="nearby-loading" id="loading-estacion">
                         <!-- Mensaje principal -->
-                        <p class="text-lg font-semibold text-text-primary"
-                           th:text="#{home.eess.cercana.calculando}"></p>
+                        <p th:text="#{home.eess.cercana.calculando}"></p>
                         <!-- Mensaje secundario opcional -->
-                        <p class="text-text-secondary text-sm text-center max-w-md"
-                           th:text="#{home.eess.cercana.tiempo.espera}"></p>
+                        <p th:text="#{home.eess.cercana.tiempo.espera}"></p>
                         <!-- Placeholder visual tipo tarjeta vacía -->
-                        <div class="w-full h-2 bg-gray-100 rounded-lg border border-dashed border-gray-300 animate-pulse"></div>
+                        <progress aria-hidden="true"></progress>
                     </div>
                 </article>
             </div>
@@ -91,30 +85,36 @@
     </div>
 
     <!-- Columna derecha: secciones inferiores apiladas -->
-    <div class="flex flex-col gap-6 md:w-1/4">
-        <div class="flex flex-col items-center text-center p-6 bg-surface rounded-2xl border border-border-color shadow-sm">
-            <div class="size-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-6">
-                <span class="material-symbols-outlined text-3xl">update</span>
+    <div class="home-highlights">
+        <section class="highlight-card highlight-card-updates">
+            <div>
+                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="/images/icons.svg#refresh-cw"></use>
+                </svg>
             </div>
-            <h3 class="text-lg font-bold text-text-main mb-3" th:text="#{home.precios.tiempo.real}"></h3>
-            <p class="text-text-secondary text-sm" th:text="#{home.precios.tiempo.real.descripcion}"></p>
-        </div>
+            <h3 th:text="#{home.precios.tiempo.real}"></h3>
+            <p th:text="#{home.precios.tiempo.real.descripcion}"></p>
+        </section>
 
-        <div class="flex flex-col items-center text-center p-6 bg-surface rounded-2xl border border-border-color shadow-sm">
-            <div class="size-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-6">
-                <span class="material-symbols-outlined text-3xl">favorite</span>
+        <section class="highlight-card highlight-card-favorites">
+            <div>
+                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="/images/icons.svg#heart"></use>
+                </svg>
             </div>
-            <h3 class="text-lg font-bold text-text-main mb-3" th:text="#{home.favoritos}"></h3>
-            <p class="text-text-secondary text-sm" th:text="#{home.favoritos.descripcion}"></p>
-        </div>
+            <h3 th:text="#{home.favoritos}"></h3>
+            <p th:text="#{home.favoritos.descripcion}"></p>
+        </section>
 
-        <div class="flex flex-col items-center text-center p-6 bg-surface rounded-2xl border border-border-color shadow-sm">
-            <div class="size-16 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-6">
-                <span class="material-symbols-outlined text-3xl">history</span>
+        <section class="highlight-card highlight-card-history">
+            <div>
+                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="/images/icons.svg#history"></use>
+                </svg>
             </div>
-            <h3 class="text-lg font-bold text-text-main mb-3" th:text="#{home.historial.repostajes}"></h3>
-            <p class="text-text-secondary text-sm" th:text="#{home.historial.repostajes.descripcion}"></p>
-        </div>
+            <h3 th:text="#{home.historial.repostajes}"></h3>
+            <p th:text="#{home.historial.repostajes.descripcion}"></p>
+        </section>
     </div>
 
 </main>

@@ -3,6 +3,20 @@ document.addEventListener('DOMContentLoaded', function () {
     const aside = document.getElementById('asideFiltros');
     const overlay = document.getElementById('overlayFiltros');
     const cabecera = document.getElementById('cabeceraFiltros');
+    const updateFiltersPanelHeight = () => {
+        if (!aside) return;
+        aside.style.setProperty('--filters-panel-height', `${aside.offsetHeight}px`);
+    };
+
+    if (aside && 'ResizeObserver' in window) {
+        const filtersPanelObserver = new ResizeObserver(updateFiltersPanelHeight);
+        filtersPanelObserver.observe(aside);
+        aside.filtersPanelObserver = filtersPanelObserver;
+        updateFiltersPanelHeight();
+    } else {
+        window.addEventListener('resize', updateFiltersPanelHeight);
+        updateFiltersPanelHeight();
+    }
 
     function abrirFiltros() {
         aside.classList.add('abierto');

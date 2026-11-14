@@ -1,66 +1,56 @@
 <!-- templates/contacto.html -->
 <!DOCTYPE html>
-<html th:lang="${#locale.toLanguageTag()}" class="light">
+<html th:lang="${#locale.toLanguageTag()}">
 <!-- head -->
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
     <title th:text="#{app.name} + ' - ' + #{contacto.title}"></title>
 </head>
 
-<body class="bg-background-light dark:bg-background-dark text-text-main min-h-screen flex flex-col font-display">
+<body class="site-body contact-page">
 
 <!-- Header -->
 <th:block th:replace="~{fragments/header :: header}"></th:block>
 
 <!-- Contenido principal -->
-<main class="flex-1 flex items-center justify-center py-4 px-4">
-    <div class="max-w-3xl w-full text-center">
-        <div class="flex justify-center gap-2 py-2 mb-8 text-sm">
-            <a class="text-text-secondary font-medium hover:underline" th:href="@{/}" th:text="#{home.title}"></a>
-            <span class="text-text-secondary font-medium">/</span>
-            <a class="text-text-main font-medium" th:href="@{/contacto}" th:text="#{contacto.title}"></a>
-        </div>
-        <h1 class="text-text-main text-4xl md:text-5xl font-bold leading-tight mb-8" th:text="#{contacto.title}">Contacto</h1>
-        <div class="bg-surface rounded-2xl border border-border-color p-8 md:p-12 shadow-sm mb-10 text-left">
-            <div class="flex items-start gap-4 mb-8">
-                <div class="p-3 bg-primary/10 rounded-xl text-primary shrink-0">
-                    <span class="material-symbols-outlined text-3xl">school</span>
+<main>
+    <div class="contact-content">
+        <nav class="breadcrumbs" th:aria-label="#{breadcrumb.label}">
+            <a th:href="@{/}" th:text="#{home.title}"></a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page" th:text="#{contacto.title}"></span>
+        </nav>
+        <h1 th:text="#{contacto.title}">Contacto</h1>
+        <div class="contact-card">
+            <div class="contact-project">
+                <div>
+                    <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                        <use href="/images/icons.svg#graduation-cap"></use>
+                    </svg>
                 </div>
                 <div>
-                    <h3 class="text-lg font-bold text-text-main mb-2" th:text="#{contacto.proyecto}">Proyecto</h3>
-                    <p class="text-text-secondary leading-relaxed" th:text="#{contacto.proyecto.descripcion}"></p>
+                    <h3 th:text="#{contacto.proyecto}">Proyecto</h3>
+                    <p th:text="#{contacto.proyecto.descripcion}"></p>
                 </div>
             </div>
-            <div class="grid md:grid-cols-2 gap-8 border-t border-border-color pt-8">
+            <dl class="contact-meta">
                 <div>
-                    <p class="text-xs font-bold text-text-secondary uppercase tracking-widest mb-1"
-                       th:text="#{contacto.autoria}"></p>
-                    <p class="text-lg font-medium text-text-main"
-                       th:text="#{app.copy} + ' ' + ${#dates.format(#dates.createNow(), 'yyyy')}"></p>
+                    <dt class="section-label" th:text="#{contacto.autoria}"></dt>
+                    <dd th:text="#{contacto.autoria.descripcion}"></dd>
                 </div>
                 <div>
-                    <p class="text-xs font-bold text-text-secondary uppercase tracking-widest mb-1"
-                       th:text="#{contacto.estado}"></p>
-                    <p class="text-lg font-medium text-text-main" th:text="#{contacto.estado.descripcion}"></p>
+                    <dt class="section-label" th:text="#{contacto.estado}"></dt>
+                    <dd th:text="#{contacto.estado.descripcion}"></dd>
                 </div>
-            </div>
+            </dl>
         </div>
-        <div class="flex flex-col items-center">
-            <p class="text-text-secondary mb-6 font-medium" th:text="#{contacto.email.etiqueta}"></p>
-            <a class="group relative flex items-center gap-4 bg-white border-2 border-primary rounded-2xl p-6 md:px-10 hover:bg-primary transition-all duration-300 shadow-lg hover:shadow-primary/20"
-               th:href="${'mailto:' + email}">
-                <div class="bg-primary group-hover:bg-white p-3 rounded-full text-white group-hover:text-primary transition-colors">
-                    <span class="material-symbols-outlined text-3xl flex items-center justify-center">mail</span>
-                </div>
-                <div class="text-left">
-                    <p class="text-xs font-bold text-primary group-hover:text-white/80 uppercase tracking-widest transition-colors"
-                       th:text="#{contacto.email}"></p>
-                    <p class="text-xl md:text-2xl font-bold text-text-main group-hover:text-white transition-colors"
-                       th:text="${email}"></p>
-                </div>
-                <div class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span class="material-symbols-outlined text-white">arrow_forward</span>
-                </div>
+        <div class="contact-email">
+            <p th:text="#{contacto.email.etiqueta}"></p>
+            <a th:href="${'mailto:' + email}">
+                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                    <use href="/images/icons.svg#mail"></use>
+                </svg>
+                <span><strong th:text="#{contacto.email}"></strong><br/><span th:text="${email}"></span></span>
             </a>
         </div>
     </div>
