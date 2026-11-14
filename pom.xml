@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>app.carburo</groupId>
 	<artifactId>CarburoBackend</artifactId>
-	<version>0.6</version>
+	<version>0.6.4</version>
 	<name>CarburoBackend</name>
 	<description>Backend para la gestión de la aplicación Carburo. TFG - Manuel García Baldó 2025-2026</description>
 
