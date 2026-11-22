@@ -107,9 +107,11 @@ export const estacionDeServicioController = {
 
                 document.title = estacion.rotulo + ' · ' + this.viewConfig.appName;
 
-                this.cargarCatalogos();
-                this.cargarHistorico();
-                this.calcularDistancia();
+                await Promise.all([
+                    this.cargarCatalogos(),
+                    this.cargarHistorico(),
+                    this.calcularDistancia()
+                ]);
             } catch (error) {
                 if (!this.desmontado)
                     this.estadoEstacion = error.status === 404 ? EstadoVista.NO_ENCONTRADO : EstadoVista.ERROR;

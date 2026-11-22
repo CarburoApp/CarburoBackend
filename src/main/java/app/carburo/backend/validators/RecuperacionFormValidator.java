@@ -1,12 +1,12 @@
 package app.carburo.backend.validators;
 
 import app.carburo.backend.dto.UsuarioDto;
+import app.carburo.backend.util.EmailValidation;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
-import java.util.regex.Pattern;
 
 import static app.carburo.backend.validators.RegistroFormValidator.USUARIO_DTO_FIELD_CORREO;
 
@@ -21,12 +21,6 @@ import static app.carburo.backend.validators.RegistroFormValidator.USUARIO_DTO_F
  */
 @Component
 public class RecuperacionFormValidator implements Validator {
-
-    /**
-     * Expresión regular básica para correo electrónico
-     */
-    private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
     /**
      * Indica qué clase soporta este validador.
@@ -50,7 +44,7 @@ public class RecuperacionFormValidator implements Validator {
         if (errors.hasErrors()) return;
 
         //  Validación del correo
-        if (!EMAIL_PATTERN.matcher(usuario.getCorreo()).matches()) {
+        if (!EmailValidation.isValid(usuario.getCorreo())) {
             errors.rejectValue(USUARIO_DTO_FIELD_CORREO,
                                "Error.auth.login.correo.formato");
         }

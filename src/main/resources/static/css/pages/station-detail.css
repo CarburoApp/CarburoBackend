@@ -140,6 +140,8 @@
     z-index: 2;
     top: 0.75rem;
     right: 0.75rem;
+    color: var(--color-error);
+    background: var(--color-error-soft);
 }
 
 .station-overview > .station-overview-header {
@@ -296,6 +298,14 @@
     display: grid;
     justify-items: center;
     gap: 0.5rem;
+    flex: 0 1 auto;
+    min-width: min(100%, 9rem);
+    max-width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-small);
+    background: var(--color-background);
+    text-align: center;
 }
 
 .fuel-card strong {
@@ -327,17 +337,6 @@
     justify-content: center;
     gap: 0.75rem;
     margin-block: 1rem 0;
-}
-
-.fuel-card {
-    flex: 0 1 auto;
-    min-width: min(100%, 9rem);
-    max-width: 100%;
-    padding: 1rem;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-small);
-    background: var(--color-background);
-    text-align: center;
 }
 
 .station-detail-sections > section {
@@ -635,11 +634,6 @@
 .station-detail-layout .technical-card meter::-moz-meter-bar {
     border-radius: 999px;
     background: var(--color-primary);
-}
-
-.station-overview > .favorite-button {
-    color: var(--color-error);
-    background: var(--color-error-soft);
 }
 
 .station-overview > .favorite-button .favorita-inactiva {

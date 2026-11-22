@@ -93,8 +93,11 @@ export const inicioController = {
                 posicion => this.cargarCercana(posicion.coords, solicitud),
                 error => {
                     if (solicitud !== this.solicitud) return;
-                    this.estadoEstaciones = error.code === 1 ? EstadoVista.UBICACION_DENEGADA
-                        : error.code === 3 ? EstadoVista.UBICACION_TIEMPO : EstadoVista.UBICACION_ERROR;
+                    switch (error.code) {
+                        case 1: this.estadoEstaciones = EstadoVista.UBICACION_DENEGADA; break;
+                        case 3: this.estadoEstaciones = EstadoVista.UBICACION_TIEMPO; break;
+                        default: this.estadoEstaciones = EstadoVista.UBICACION_ERROR;
+                    }
                 },
                 {enableHighAccuracy: true, timeout: 15000, maximumAge: 300000}
             );

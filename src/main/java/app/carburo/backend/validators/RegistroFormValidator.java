@@ -1,6 +1,7 @@
 package app.carburo.backend.validators;
 
 import app.carburo.backend.dto.UsuarioDto;
+import app.carburo.backend.util.EmailValidation;
 import app.carburo.backend.services.AuthService;
 import app.carburo.backend.services.ProvinciaService;
 import org.springframework.stereotype.Component;
@@ -53,11 +54,6 @@ public class RegistroFormValidator implements Validator {
     public static final Pattern PASSWORD_LOWERCASE = Pattern.compile(".*[a-z].*");
     public static final Pattern PASSWORD_DIGIT = Pattern.compile(".*\\d.*");
 
-    /**
-     * Expresión regular básica para correo electrónico
-     */
-    private static final Pattern EMAIL_PATTERN =
-            Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
     // Inyección de dependencias
     private final AuthService authService;
@@ -122,7 +118,7 @@ public class RegistroFormValidator implements Validator {
          * =========================== */
 
         // Formato del correo
-        if (!EMAIL_PATTERN.matcher(correo).matches()) {
+        if (!EmailValidation.isValid(correo)) {
             errors.rejectValue(USUARIO_DTO_FIELD_CORREO,
                                "Error.auth.login.correo.formato");
         }

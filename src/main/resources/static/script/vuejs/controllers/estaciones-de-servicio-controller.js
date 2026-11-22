@@ -453,7 +453,7 @@ export const estacionesDeServicioController = {
             // Si ya tenemos las EESS de esta CCAA en caché,
             // no hacemos otra petición.
             if (
-                Object.prototype.hasOwnProperty.call(
+                Object.hasOwn(
                     this.eessPorCCAA,
                     idCCAA
                 )
@@ -667,7 +667,7 @@ export const estacionesDeServicioController = {
                         .map(estacion => estacion.rotulo)
                         .filter(Boolean)
                 )
-            ].sort();
+            ].sort((a, b) => a.localeCompare(b, this.viewConfig.locale));
         },
 
         /*
@@ -814,10 +814,10 @@ export const estacionesDeServicioController = {
 
             if (this.filtros.combustibles.length > 0) {
                 const combustiblesSeleccionados =
-                    this.filtros.combustibles.map(Number);
+                    new Set(this.filtros.combustibles.map(Number));
 
                 preciosAConsiderar = preciosValidos.filter(precio =>
-                    combustiblesSeleccionados.includes(
+                    combustiblesSeleccionados.has(
                         Number(precio.id_combustible)
                     )
                 );

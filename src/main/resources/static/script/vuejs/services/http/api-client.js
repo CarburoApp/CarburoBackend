@@ -25,7 +25,8 @@ async function request(endpoint, {parameters = {}, method = 'GET', body, authent
     const {apiUrl, apiKey} = configuration;
     const query = new URLSearchParams(Object.entries(parameters)
         .filter(([, value]) => value !== undefined && value !== null));
-    const url = `${(apiUrl || '').replace(/\/$/, '')}${endpoint}${query.size ? `?${query}` : ''}`;
+    const queryString = query.size ? '?' + query : '';
+    const url = `${(apiUrl || '').replace(/\/$/, '')}${endpoint}${queryString}`;
     const headers = {Accept: 'application/json'};
 
     if (authenticated) {

@@ -29,7 +29,14 @@ export const ubicacionService = {
 
             navigator.geolocation.getCurrentPosition(
                 ({coords}) => finalizar(resolve, {latitud: coords.latitude, longitud: coords.longitude}),
-                ({code}) => finalizar(reject, new UbicacionError(code === 1 ? EstadoUbicacion.DENEGADA : code === 3 ? EstadoUbicacion.TIEMPO : EstadoUbicacion.NO_DISPONIBLE)),
+                ({code}) => {
+                    let estado = EstadoUbicacion.NO_DISPONIBLE;
+                    if (code === 1)
+                        estado = EstadoUbicacion.DENEGADA;
+                    else if (code === 3)
+                        estado = EstadoUbicacion.TIEMPO;
+                    finalizar(reject, new UbicacionError(estado));
+                },
                 {enableHighAccuracy: true, timeout: 15000, maximumAge: 300000}
             );
         });

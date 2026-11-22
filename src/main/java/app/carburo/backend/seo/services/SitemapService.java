@@ -19,7 +19,6 @@ public class SitemapService {
 
     private static final Set<String> ALLOWED_SCHEMES = Set.of("http", "https");
     private static final String ROOT_PATH = "/";
-    private static final String TRAILING_SLASHES_PATTERN = "/+$";
 
     private static final String XML_ENCODING = "UTF-8";
     private static final String XML_VERSION = "1.0";
@@ -54,7 +53,7 @@ public class SitemapService {
             throw new IllegalArgumentException("app.url debe ser el origen público HTTP(S), sin ruta.");
         }
 
-        this.publicUrl = publicUrl.replaceAll(TRAILING_SLASHES_PATTERN, "");
+        this.publicUrl = publicUrl.endsWith(ROOT_PATH) ? publicUrl.substring(0, publicUrl.length() - 1) : publicUrl;
         this.providers = List.copyOf(providers);
     }
 
