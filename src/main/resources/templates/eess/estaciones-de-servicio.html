@@ -14,8 +14,8 @@
      id="app"
      class="stations-layout"
      v-cloak
-     th:attr="data-api-key=${@environment.getProperty('security.api.public-key')}
-                ,data-api-url=${@environment.getProperty('security.api.public-url')}
+     th:attr="data-api-key=${publicApiKey}
+                ,data-api-url=${publicApiUrl}
                 ,data-introduccion=#{eess.list.introduccion},data-primera=#{paginacion.primera},data-ultima=#{paginacion.ultima}">
     <div class="filter-overlay"
          :class="{ visible: filtrosVisibles }"

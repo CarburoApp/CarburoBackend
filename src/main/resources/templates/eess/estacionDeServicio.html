@@ -12,7 +12,7 @@
 <main id="app"
       class="station-detail-layout"
       v-cloak
-      th:attr="data-station-id=${estacionId},data-app-name=#{app.name},data-locale=${#locale.toLanguageTag()},data-api-key=${@environment.getProperty('security.api.public-key')},data-api-url=${@environment.getProperty('security.api.public-url')}">
+      th:attr="data-station-id=${estacionId},data-app-name=#{app.name},data-locale=${#locale.toLanguageTag()},data-api-key=${publicApiKey},data-api-url=${publicApiUrl}">
             <span hidden
                   sec:authorize="isAuthenticated()"
                   data-favoritos

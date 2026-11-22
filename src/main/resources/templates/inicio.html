@@ -14,7 +14,7 @@
       id="app"
       class="home-layout"
       v-cloak
-      th:attr="data-api-key=${@environment.getProperty('security.api.public-key')},data-api-url=${@environment.getProperty('security.api.public-url')}">
+      th:attr="data-api-key=${publicApiKey},data-api-url=${publicApiUrl}">
 
     <!-- Búsqueda y estaciones cercanas -->
     <div class="home-primary">
