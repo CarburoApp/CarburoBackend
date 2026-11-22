@@ -1,21 +1,18 @@
 <!-- eess/favoritas.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html th:lang="${#locale.toLanguageTag()}">
 <!-- head -->
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
     <title th:text="#{app.name} + ' - ' + #{eess.list.title}"></title>
-
 </head>
 
 <body class="site-body favorites-page">
-
 <!-- Header -->
 <th:block th:replace="~{fragments/header :: header}"></th:block>
 
 <!-- Contenido principal -->
 <div class="favorites-content">
-
     <!-- Breadcrumbs -->
     <nav class="breadcrumbs" th:aria-label="#{breadcrumb.label}">
         <a th:href="@{/}"
@@ -26,32 +23,43 @@
         <span aria-hidden="true">/</span>
         <span aria-current="page" th:text="#{eess.favoritas.title}"></span>
     </nav>
+
     <div class="favorites-heading">
         <div>
             <h1 th:text="#{eess.favoritas.titulo}"></h1>
             <p th:text="#{eess.favoritas.subtitulo}"></p>
         </div>
     </div>
+
     <main class="favorites-list">
         <div>
             <section class="favorite-empty-state" th:if="${#lists.isEmpty(eess)}">
                 <div>
-                    <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                    <svg class="icon"
+                         focusable="false"
+                         width="24"
+                         height="24"
+                         viewBox="0 0 24 24"
+                         aria-hidden="true">
                         <use href="/images/icons.svg#heart"></use>
                     </svg>
                 </div>
+
                 <div>
                     <h2 th:text="#{eess.favoritas.anadir.titulo}"></h2>
                     <p th:text="#{eess.favoritas.anadir.subtitulo}"></p>
                 </div>
+
                 <a class="button button-primary" th:href="@{/estaciones-de-servicio}">
                     <span th:text="#{eess.favoritas.boton.buscar}"></span>
                 </a>
             </section>
+
             <!-- Station Card -->
             <article th:each="estacion : ${eess}"
-                     th:insert="~{fragments/estacionDeServicio :: card(estacion=${estacion})}"
+                     th:insert="~{fragments/estacionDeServicio :: card(estacion=${estacion}, favorita=true)}"
                      class="station-card">
+
             </article>
         </div>
     </main>
@@ -59,6 +67,5 @@
 
 <!-- Footer -->
 <footer th:replace="~{fragments/footer :: footer}"></footer>
-
 </body>
 </html>

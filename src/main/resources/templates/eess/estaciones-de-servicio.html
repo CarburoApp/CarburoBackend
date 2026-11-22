@@ -1,5 +1,4 @@
-<!-- eess/estacionDeServicio.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html th:lang="${#locale.toLanguageTag()}">
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
@@ -7,49 +6,81 @@
 </head>
 
 <body class="site-body stations-page">
-<div id="overlayFiltros" class="filter-overlay"></div>
-
-
-<!-- Header -->
+<!-- Cabecera -->
 <th:block th:replace="~{fragments/header :: header}"></th:block>
 
 <!-- Contenido principal -->
-<div id="app" class="stations-layout"
+<div th:attrappend="data-locale=${#locale.toLanguageTag()}"
+     id="app"
+     class="stations-layout"
+     v-cloak
      th:attr="data-api-key=${@environment.getProperty('security.api.public-key')}
-                ,data-api-url=${@environment.getProperty('security.api.public-url')}">
+                ,data-api-url=${@environment.getProperty('security.api.public-url')}
+                ,data-introduccion=#{eess.list.introduccion},data-primera=#{paginacion.primera},data-ultima=#{paginacion.ultima}">
+    <div class="filter-overlay"
+         :class="{ visible: filtrosVisibles }"
+         @click="filtrosVisibles = false"
+         aria-hidden="true">
+    </div>
 
-    <!-- Left Sidebar: Filters (desktop y móvil) -->
-    <aside id="asideFiltros" class="filters-panel" th:aria-label="#{eess.list.filtros}">
+    <!-- Panel de filtros -->
+    <aside id="asideFiltros"
+           ref="panelFiltros"
+           class="filters-panel"
+           :class="{ abierto: filtrosVisibles }"
+           :style="{ '--filters-panel-height': alturaPanelFiltros + 'px' }"
+           th:aria-label="#{eess.list.filtros}">
         <div>
-            <!-- Cabecera visible siempre -->
-            <div id="cabeceraFiltros">
-                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><use href="/images/icons.svg#sliders-horizontal"></use>
+            <!-- Cabecera de filtros -->
+            <header>
+                <svg class="icon"
+                     focusable="false"
+                     width="24"
+                     height="24"
+                     viewBox="0 0 24 24"
+                     aria-hidden="true">
+                    <use href="/images/icons.svg#sliders-horizontal"></use>
                 </svg>
-                <h3 th:text="#{eess.list.filtros}"></h3>
-            </div>
 
-            <div>
-                <!-- Search Text -->
+                <h2 id="filters-title" th:text="#{eess.list.filtros}"></h2>
+
+                <button type="button"
+                        class="filter-toggle filter-close"
+                        @click="filtrosVisibles = false"
+                        th:aria-label="#{eess.list.filtros.cerrar}">
+                    ×
+                </button>
+            </header>
+
+            <form aria-labelledby="filters-title" @submit.prevent>
+                <!-- Búsqueda por texto -->
                 <div>
-                    <label for="filtro_buscador"
-                           th:text="#{eess.list.filtros.buscar}"></label>
+                    <label for="filtro_buscador" th:text="#{eess.list.filtros.buscar}"></label>
                     <div class="filter-search-control">
                         <div>
-                            <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
-                                 aria-hidden="true"><use href="/images/icons.svg#search"></use>
+                            <svg class="icon"
+                                 focusable="false"
+                                 width="24"
+                                 height="24"
+                                 viewBox="0 0 24 24"
+                                 aria-hidden="true">
+                                <use href="/images/icons.svg#search"></use>
                             </svg>
                         </div>
-                        <input id="filtro_buscador" type="text"
+
+                        <input id="filtro_buscador"
+                               type="text"
                                v-model="filtros.busqueda"
                                th:placeholder="#{eess.list.filtros.buscar.placeholder}"/>
                     </div>
                 </div>
 
-                <!-- Location Filters -->
+                <!-- Filtros de ubicación -->
                 <fieldset>
                     <legend class="filter-section-title" th:text="#{eess.list.filtros.ubicacion}"></legend>
-                    <label for="filtro_ccaa"
-                           th:text="#{eess.list.filtros.ubicacion.ccaa}"></label>
+
+                    <label for="filtro_ccaa" th:text="#{eess.list.filtros.ubicacion.ccaa}"></label>
+
                     <select id="filtro_ccaa"
                             v-model="filtros.ccaa"
                             @change="cambioCCAA"
@@ -58,17 +89,15 @@
                         <option v-for="comunidad in comunidades"
                                 :key="comunidad.id"
                                 :value="String(comunidad.id)">
-                            {{comunidad.denominacion}}
+                            {{ comunidad.denominacion }}
                         </option>
                     </select>
 
-                    <label for="filtro_provincia"
-                           th:text="#{eess.list.filtros.ubicacion.provincia}"></label>
+                    <label for="filtro_provincia" th:text="#{eess.list.filtros.ubicacion.provincia}"></label>
                     <select id="filtro_provincia"
                             v-model="filtros.provincia"
                             @change="cambioProvincia"
-                            :disabled="filtros.ccaa === '0' || cargandoProvincias"
-                    >
+                            :disabled="filtros.ccaa === '0' || cargandoProvincias">
                         <option value="0" th:text="#{eess.list.filtros.indiferente}"></option>
                         <option v-for="provincia in provincias"
                                 :key="provincia.id"
@@ -77,12 +106,10 @@
                         </option>
                     </select>
 
-                    <label for="filtro_municipio"
-                           th:text="#{eess.list.filtros.ubicacion.municipio}"></label>
+                    <label for="filtro_municipio" th:text="#{eess.list.filtros.ubicacion.municipio}"></label>
                     <select id="filtro_municipio"
                             v-model="filtros.municipio"
-                            :disabled="filtros.provincia === '0' || cargandoMunicipios"
-                    >
+                            :disabled="filtros.provincia === '0' || cargandoMunicipios">
                         <option th:value="0" th:text="#{eess.list.filtros.indiferente}"></option>
                         <option v-for="municipio in municipiosProvincia"
                                 :key="municipio.id"
@@ -92,284 +119,138 @@
                     </select>
                 </fieldset>
 
-                <!-- Order By -->
+                <!-- Ordenación -->
                 <div>
-                    <label for="ordenacion"
-                           th:text="#{eess.list.filtros.ordenar.label}">
-                    </label>
+                    <label for="ordenacion" th:text="#{eess.list.filtros.ordenar.label}"></label>
 
-                    <select id="ordenacion"
-                            v-model="filtros.orden">
-                        <option value="price_asc"
-                                th:text="#{eess.list.filtros.orden.precio.asc}">
-                        </option>
+                    <select id="ordenacion" v-model="filtros.orden">
+                        <option value="price_asc" th:text="#{eess.list.filtros.orden.precio.asc}"></option>
 
-                        <option value="price_desc"
-                                th:text="#{eess.list.filtros.orden.precio.desc}">
-                        </option>
+                        <option value="price_desc" th:text="#{eess.list.filtros.orden.precio.desc}"></option>
 
-                        <option value="name_asc"
-                                th:text="#{eess.list.filtros.orden.alfabetico.asc}">
-                        </option>
+                        <option value="name_asc" th:text="#{eess.list.filtros.orden.alfabetico.asc}"></option>
 
-                        <option value="name_desc"
-                                th:text="#{eess.list.filtros.orden.alfabetico.desc}">
-                        </option>
+                        <option value="name_desc" th:text="#{eess.list.filtros.orden.alfabetico.desc}"></option>
                     </select>
                 </div>
 
-                <!-- Status Slider -->
+                <!-- Estado de apertura -->
                 <fieldset>
                     <legend class="filter-section-title" th:text="#{eess.list.filtros.estado}"></legend>
 
-                    <div id="filtro_estado" class="filter-state" role="group"
+                    <div id="filtro_estado"
+                         class="filter-state"
+                         role="group"
                          th:attr="aria-label=#{eess.list.filtros.estado}">
-
                         <!-- ABIERTO -->
                         <button type="button"
-                                @click="filtros.estado = 'ABIERTO'"
+                                @click="filtros.estado = EstadoApertura.ABIERTO"
                                 class="filter-state-option"
-                                :class="filtros.estado === 'ABIERTO'
+                                :class="filtros.estado === EstadoApertura.ABIERTO
                                     ? 'is-selected'
                                     : ''"
                                 th:text="#{eess.estado.abierto}">
+
                         </button>
 
                         <!-- CERRADO -->
                         <button type="button"
-                                @click="filtros.estado = 'CERRADO'"
+                                @click="filtros.estado = EstadoApertura.CERRADO"
                                 class="filter-state-option"
-                                :class="filtros.estado === 'CERRADO'
+                                :class="filtros.estado === EstadoApertura.CERRADO
                                     ? 'is-selected'
                                     : ''"
                                 th:text="#{eess.estado.cerrado}">
+
                         </button>
 
                         <!-- INDEFERENTE -->
                         <button type="button"
-                                @click="filtros.estado = 'INDEFERENTE'"
+                                @click="filtros.estado = EstadoApertura.INDEFERENTE"
                                 class="filter-state-option"
-                                :class="filtros.estado === 'INDEFERENTE'
+                                :class="filtros.estado === EstadoApertura.INDEFERENTE
                                     ? 'is-selected'
                                     : ''"
                                 th:text="#{eess.list.estado.indiferente}">
+
                         </button>
                     </div>
                 </fieldset>
 
-                <!-- Fuel Types -->
+                <!-- Combustibles -->
                 <fieldset>
                     <legend class="filter-section-title" th:text="#{eess.list.filtros.combustibles}"></legend>
-                    <div id="filtro_combustibles_disponibles"
-                         class="fuel-filter-list">
+                    <div id="filtro_combustibles_disponibles" class="fuel-filter-list">
                         <div>
-                            <label v-for="combustible in combustiblesDisponibles"
-                                   :key="combustible.id">
-                                <input
-                                       type="checkbox"
+                            <label v-for="combustible in combustiblesDisponibles" :key="combustible.id">
+                                <input type="checkbox"
                                        :value="String(combustible.id)"
                                        v-model="filtros.combustibles"/>
-                                <span>    {{ combustible.denominacion }}</span>
+                                <span>{{ combustible.denominacion }}</span>
                             </label>
                         </div>
                     </div>
                 </fieldset>
 
-                <!-- Brand -->
+                <!-- Marca -->
                 <div>
-                    <label for="filtro_marca"
-                           th:text="#{eess.list.filtros.marca}"></label>
-                    <select id="filtro_marca"
-                            v-model="filtros.marca">
-                        <option value="0NOTSELECTED"
-                                th:text="#{eess.list.filtros.indiferente}">
-                        </option>
+                    <label for="filtro_marca" th:text="#{eess.list.filtros.marca}"></label>
+                    <select id="filtro_marca" v-model="filtros.marca">
+                        <option value="0NOTSELECTED" th:text="#{eess.list.filtros.indiferente}"></option>
 
-                        <option v-for="marca in marcas"
-                                :key="marca"
-                                :value="marca">
-                            {{ marca }}
-                        </option>
+                        <option v-for="marca in marcas" :key="marca" :value="marca">{{ marca }}</option>
                     </select>
                 </div>
-            </div>
+            </form>
         </div>
     </aside>
 
-    <!-- Main Content Area -->
+    <!-- Resultados -->
     <main class="stations-results">
-        <!-- Breadcrumbs -->
+        <!-- Migas de pan -->
         <nav class="breadcrumbs" th:aria-label="#{breadcrumb.label}">
-            <a th:href="@{/}"
-               th:text="#{home.title}"></a>
+            <a th:href="@{/}" th:text="#{home.title}"></a>
             <span aria-hidden="true">/</span>
             <span aria-current="page" th:text="#{eess.list.title}"></span>
         </nav>
-        <!-- Page Header -->
+
+        <!-- Cabecera del listado -->
         <div class="stations-toolbar">
             <div>
                 <h1 th:text="#{eess.list.title}"></h1>
-                <p id="contadorEess"
-                   th:attr="data-texto=#{eess.list.introduccion}">
-                </p>
+                <p>{{ textoContador }}</p>
             </div>
-            <!-- Mobile Filter Toggle (Visible only on small screens) -->
-            <button id="btnMobileFiltros" type="button" class="filter-toggle">
-                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><use href="/images/icons.svg#sliders-horizontal"></use>
+
+            <!-- Abrir filtros en móvil -->
+            <button type="button"
+                    class="filter-toggle"
+                    @click="filtrosVisibles = !filtrosVisibles"
+                    :aria-expanded="filtrosVisibles"
+                    aria-controls="asideFiltros">
+                <svg class="icon"
+                     focusable="false"
+                     width="24"
+                     height="24"
+                     viewBox="0 0 24 24"
+                     aria-hidden="true">
+                    <use href="/images/icons.svg#sliders-horizontal"></use>
                 </svg>
+
                 <span th:text="#{eess.list.filtros}"></span>
             </button>
         </div>
-        <!-- Results List -->
-        <div class="station-list">
 
-            <!-- Sin CCAA seleccionada -->
-            <div v-if="filtros.ccaa === '0'"
-                 class="empty-state" role="status">
-                <div>
-                    <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><use href="/images/icons.svg#map-pin"></use>
-                    </svg>
-                    <h2 th:text="#{eess.list.seleccionar.ccaa.titulo}"></h2>
-                    <p th:text="#{eess.list.seleccionar.ccaa.subtitulo}"></p>
-                </div>
-            </div>
+        <h2 class="visually-hidden" th:text="#{eess.list.resultados}"></h2>
 
+        <!-- Listado de estaciones -->
+        <th:block th:replace="~{fragments/eess/estaciones-listado-vue :: listado}"></th:block>
 
-            <!-- Cargando estaciones -->
-            <div v-else-if="cargandoEstaciones"
-                 class="loading-state" role="status" aria-live="polite">
-                <div>
-                    <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><use href="/images/icons.svg#loader-circle"></use>
-                    </svg>
-
-                    <h2
-                        th:text="#{eess.list.cargando.titulo}">
-                    </h2>
-
-                    <p
-                       th:text="#{eess.list.cargando.subtitulo}">
-                    </p>
-
-                    <!-- Barra de carga indeterminada -->
-                    <progress></progress>
-
-                </div>
-            </div>
-
-
-            <!-- Error cargando estaciones -->
-            <div v-else-if="errorEstaciones"
-                 class="error-state" role="alert">
-                <div>
-                    <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><use href="/images/icons.svg#circle-alert"></use>
-                    </svg>
-                    <h2 th:text="#{eess.list.error.titulo}"></h2>
-                    <p th:text="#{eess.list.error.subtitulo}"></p>
-                </div>
-            </div>
-
-
-            <!-- No hay resultados -->
-            <div v-else-if="eessMostradas.length === 0"
-                 class="empty-state" role="status">
-                <div>
-                    <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><use href="/images/icons.svg#search-x"></use>
-                    </svg>
-
-                    <h2 th:text="#{eess.list.sin.resultados.titulo}"></h2>
-                    <p th:text="#{eess.list.sin.resultados.subtitulo}"></p>
-
-                </div>
-            </div>
-
-
-            <article v-for="estacion in eessMostradas" :key="estacion.id"
-                     class="station-card">
-                <a :href="`/estaciones-de-servicio/${estacion.id}`">
-                    <div>
-                        <div class="station-summary">
-                            <div class="station-name">
-                                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
-                                     aria-hidden="true"><use href="/images/icons.svg#fuel-pump"></use>
-                                </svg>
-                                <h3>
-                                    {{ estacion.rotulo }}
-                                </h3>
-                            </div>
-                            <span class="station-id">
-                                <span th:text="#{eess.id}"></span>&nbsp;{{ estacion.id }}
-                            </span>
-                        </div>
-
-                        <div class="station-location">
-                            <div>
-                                <div class="station-hours-row">
-                                    <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
-                                         aria-hidden="true"><use href="/images/icons.svg#map-pin"></use>
-                                    </svg>
-                                    <div>
-                                        <p>{{ estacion.direccion }}</p>
-                                        <p>{{ estacion.localidad }},
-                                            {{ estacion.codigo_postal }}</p>
-                                        <p>
-                                            {{ nombreMunicipio(estacion.id_municipio) }},
-                                            {{ nombreProvincia(estacion.id_provincia) }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="station-state-and-hours">
-                                <div class="station-status"
-                                     :class="estacion.abierto ? 'is-open' : 'is-closed'">
-                                    <span v-if="estacion.abierto" aria-hidden="true">●</span>
-                                    <svg v-else class="icon" focusable="false" width="24" height="24"
-                                         viewBox="0 0 24 24" aria-hidden="true"><use href="/images/icons.svg#ban"></use>
-                                    </svg>
-                                    <span v-if="estacion.abierto" th:text="#{eess.estado.abierto}"></span>
-                                    <span v-else th:text="#{eess.estado.cerrado}"></span>
-                                </div>
-                                <div>
-                                    <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
-                                         aria-hidden="true"><use href="/images/icons.svg#clock"></use>
-                                    </svg>
-                                    <span>{{ estacion.horario }}</span>
-                                </div>
-                                <span class="station-sale-type">{{ estacion.venta }}</span>
-                            </div>
-                        </div>
-
-                        <div class="station-prices" v-if="preciosOrdenados(estacion).length > 0">
-                            <p
-                               th:text="#{eess.list.combustible.precios}">
-                            </p>
-                            <div>
-                                <div v-for="precio in preciosOrdenados(estacion)"
-                                     :key="`${estacion.id}-${precio.id_combustible}`"
-                                     class="station-price">
-                        <span>
-                            {{ nombreCombustible(precio.id_combustible) }}
-                        </span>
-                                    <strong>
-                            {{ Number(precio.precio).toFixed(3).replace('.', ',') }} €
-                                    </strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-            </article>
-
-        </div>
-
-        <!-- Paginacion -->
+        <!-- Paginación -->
         <div v-if="totalPaginas() > 1"
              id="paginacion"
              class="pagination"
              th:attr="data-primera=#{paginacion.primera},data-ultima=#{paginacion.ultima}">
-
             <ul class="pagination-list">
-
                 <li>
                     <button type="button"
                             @click="irAPagina(1)"
@@ -423,18 +304,14 @@
                         {{ textoUltima }}
                     </button>
                 </li>
-
             </ul>
         </div>
-
     </main>
 </div>
 
-<!-- Footer -->
+<!-- Pie de página -->
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 
 <script type="module" th:src="@{/assets/estaciones-de-servicio.js}"></script>
-<script th:src="@{/script/filtrosListadoEstacionesDeServicio.js}"></script>
-
 </body>
 </html>

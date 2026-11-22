@@ -1,41 +1,49 @@
-<!-- templates/inicio.html -->
-<!DOCTYPE html>
+<!doctype html>
 <html th:lang="${#locale.toLanguageTag()}">
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
     <title th:text="#{app.name} + ' - ' + #{home.title}"></title>
-
 </head>
 
 <body class="site-body home-page">
-
-<!-- Header -->
+<!-- Cabecera -->
 <th:block th:replace="~{fragments/header :: header}"></th:block>
 
-<!-- Contenido principal con layout asimétrico -->
-<main class="home-layout">
+<!-- Contenido principal -->
+<main th:attrappend="data-locale=${#locale.toLanguageTag()}"
+      id="app"
+      class="home-layout"
+      v-cloak
+      th:attr="data-api-key=${@environment.getProperty('security.api.public-key')},data-api-url=${@environment.getProperty('security.api.public-url')}">
 
-    <!-- Columna izquierda: hero + búsqueda + estación -->
+    <!-- Búsqueda y estaciones cercanas -->
     <div class="home-primary">
-
-        <!-- Hero y búsqueda -->
+        <!-- Buscador -->
         <section class="home-hero">
             <div>
                 <h1 th:text="#{home.titulo1}"></h1>
                 <p th:text="#{home.subtitulo}"></p>
                 <div>
-                    <form class="home-search"
-                          th:action="@{/estaciones-de-servicio}" method="get">
+                    <form class="home-search" th:action="@{/estaciones-de-servicio}" method="get">
                         <div>
-                            <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                            <svg class="icon"
+                                 focusable="false"
+                                 width="24"
+                                 height="24"
+                                 viewBox="0 0 24 24"
                                  aria-hidden="true">
                                 <use href="/images/icons.svg#search"></use>
                             </svg>
                             <!-- Label accesible, invisible -->
-                            <label for="busqueda" class="visually-hidden" th:text="#{home.buscar.boton}"></label>
-                            <input
-                                   type="text" required id="busqueda" name="busqueda"
-                                   th:placeholder="#{home.buscar.placeholder}" />
+                            <label for="busqueda"
+                                   class="visually-hidden"
+                                   th:text="#{home.buscar.boton}">
+                            </label>
+                            <input type="text"
+                                   required
+                                   id="busqueda"
+                                   name="busqueda"
+                                   th:placeholder="#{home.buscar.placeholder}"/>
                         </div>
 
                         <button type="submit" th:text="#{home.buscar.boton}"></button>
@@ -43,10 +51,10 @@
                     <div class="popular-searches"
                          th:if="${busquedasPopulares != null and !#maps.isEmpty(busquedasPopulares)}">
                         <span th:text="#{home.busqueda.popular}"></span>
+
                         <a th:each="entry : ${busquedasPopulares}"
                            th:href="@{${entry.value}}"
-                           th:text="${entry.key}"
-                        >
+                           th:text="${entry.key}">
                         </a>
                     </div>
                 </div>
@@ -55,75 +63,90 @@
 
         <!-- Estación más cercana -->
         <section>
-            <!-- Estación más cercana -->
             <div class="nearby-heading">
-                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                <svg class="icon"
+                     focusable="false"
+                     width="24"
+                     height="24"
+                     viewBox="0 0 24 24"
+                     aria-hidden="true">
                     <use href="/images/icons.svg#locate"></use>
                 </svg>
-                <h2 th:text="#{home.eess.cercana}"></h2>
+                <h2 v-if="!modoManual" th:text="#{home.eess.cercana}"></h2>
+                <h2 v-else th:text="#{eess.list.title}"></h2>
             </div>
 
-            <div th:fragment="estacionCercanaFragment" id="estacionCercanaFragment">
-                <article class="nearby-card" id="estacion-container">
+            <th:block th:replace="~{fragments/eess/estaciones-listado-vue :: listado}"></th:block>
 
-                    <div th:if="${estacionCercana != null}" th:replace="~{fragments/estacionDeServicio}"></div>
+            <div v-if="modoManual &amp;&amp; estadoEstaciones === EstadoVista.LISTO" class="home-manual-location">
+                <th:block th:replace="~{fragments/eess/estaciones-estados-vue :: selectores}">
 
-                    <!-- Si no hay estación, mostramos mensaje bonito -->
-                    <div th:if="${estacionCercana == null}"
-                         class="nearby-loading" id="loading-estacion">
-                        <!-- Mensaje principal -->
-                        <p th:text="#{home.eess.cercana.calculando}"></p>
-                        <!-- Mensaje secundario opcional -->
-                        <p th:text="#{home.eess.cercana.tiempo.espera}"></p>
-                        <!-- Placeholder visual tipo tarjeta vacía -->
-                        <progress aria-hidden="true"></progress>
-                    </div>
-                </article>
+                </th:block>
             </div>
+
+            <a v-if="modoManual &amp;&amp; estadoEstaciones === EstadoVista.LISTO"
+               :href="enlaceListado"
+               th:text="#{eess.list.ver.todas}">
+            </a>
         </section>
-
     </div>
 
-    <!-- Columna derecha: secciones inferiores apiladas -->
-    <div class="home-highlights">
+    <!-- Funciones de la aplicación -->
+    <aside class="home-highlights">
         <section class="highlight-card highlight-card-updates">
             <div>
-                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                <svg class="icon"
+                     focusable="false"
+                     width="24"
+                     height="24"
+                     viewBox="0 0 24 24"
+                     aria-hidden="true">
                     <use href="/images/icons.svg#refresh-cw"></use>
                 </svg>
             </div>
+
             <h3 th:text="#{home.precios.tiempo.real}"></h3>
             <p th:text="#{home.precios.tiempo.real.descripcion}"></p>
         </section>
 
         <section class="highlight-card highlight-card-favorites">
             <div>
-                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                <svg class="icon"
+                     focusable="false"
+                     width="24"
+                     height="24"
+                     viewBox="0 0 24 24"
+                     aria-hidden="true">
                     <use href="/images/icons.svg#heart"></use>
                 </svg>
             </div>
+
             <h3 th:text="#{home.favoritos}"></h3>
             <p th:text="#{home.favoritos.descripcion}"></p>
         </section>
 
         <section class="highlight-card highlight-card-history">
             <div>
-                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                <svg class="icon"
+                     focusable="false"
+                     width="24"
+                     height="24"
+                     viewBox="0 0 24 24"
+                     aria-hidden="true">
                     <use href="/images/icons.svg#history"></use>
                 </svg>
             </div>
+
             <h3 th:text="#{home.historial.repostajes}"></h3>
             <p th:text="#{home.historial.repostajes.descripcion}"></p>
         </section>
-    </div>
-
+    </aside>
 </main>
 
-<!-- Footer -->
+<!-- Pie de página -->
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 
-<!-- Geolocalización del usuario -->
-<script src="/script/geolocalizacion.js"></script>
-
+<!-- Controlador de inicio -->
+<script type="module" th:src="@{/assets/inicio.js}"></script>
 </body>
 </html>

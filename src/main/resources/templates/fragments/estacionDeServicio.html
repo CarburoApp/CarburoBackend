@@ -1,77 +1,92 @@
-<!-- templates/fragments/estacionDeSercicio.html -->
-<th:block th:if="${estacion != null}" th:fragment="card(estacion)">
+<!-- Card de estación favorita -->
+<th:block th:if="${estacion != null}" th:fragment="card(estacion, favorita)">
+    <!-- Botón de favoritos -->
+    <form sec:authorize="isAuthenticated()"
+          method="post"
+          th:action="@{/perfil/estaciones-de-servicio/favoritas/{id}(id=${estacion.id})}">
+        <button type="submit"
+                class="favorite-button station-favorite-button"
+                th:attr="aria-pressed=${favorita},aria-label=${favorita} ? #{eess.favoritas.boton.retirar} : #{eess.favoritas.boton.anadir}">
+            <svg class="icon"
+                 th:classappend="${favorita} ? 'favorita-activa' : 'favorita-inactiva'"
+                 width="24"
+                 height="24"
+                 viewBox="0 0 24 24"
+                 aria-hidden="true">
+                <use href="/images/icons.svg#heart"></use>
+            </svg>
+        </button>
+    </form>
+
     <a th:href="@{/estaciones-de-servicio/{id}(id=${estacion.id})}">
         <div>
-            <!-- Card Header -->
+            <!-- Nombre y espacio reservado para favoritos -->
             <div class="station-summary">
                 <div class="station-name">
                     <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
                         <use href="/images/icons.svg#fuel-pump"></use>
                     </svg>
-                    <h3
-                        th:text="${estacion.getRotulo()}"></h3>
+                    <h3 th:text="${estacion.getRotulo()}"></h3>
                 </div>
-                <span class="station-id"
-                      th:text="'ID: ' + ${estacion.getId()}"></span>
             </div>
 
-
             <div class="station-location">
-                <!-- Info Column -->
-                <div>
-                    <div>
-                        <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
-                             aria-hidden="true">
-                            <use href="/images/icons.svg#map-pin"></use>
-                        </svg>
-                        <div>
-                            <p th:text="${estacion.getDireccion()}">
-                                Dirección</p>
-                            <p 
-                               th:text="${estacion.getLocalidad()} + ', ' + ${estacion.getCodigoPostal}">
-                                Localidad, CP</p>
-                            <p 
-                               th:text="${estacion.getMunicipio().getDenominacion()} + ', ' + ${estacion.getProvincia().getDenominacion()}">
-                                Provincia, Comunidad</p>
-                        </div>
-                    </div>
-                </div>
+                <!-- Dirección -->
+                <address>
+                    <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                        <use href="/images/icons.svg#map-pin"></use>
+                    </svg>
 
-                <!-- Status Column -->
+                    <div>
+                        <p th:text="${estacion.getDireccion()}">Dirección</p>
+                        <p th:text="${estacion.getLocalidad()} + ', ' + ${estacion.getCodigoPostal()}">Localidad, CP</p>
+                        <p th:text="${estacion.getMunicipio().getDenominacion()} + ', ' + ${estacion.getProvincia().getDenominacion()}">
+                            Provincia, Comunidad
+                        </p>
+                    </div>
+                </address>
+
+                <!-- Estado y horario -->
                 <div class="station-state-and-hours">
-                    <div class="station-status"
-                         th:classappend="${estacion.isAbierto()} ? 'is-open' : 'is-closed'">
-                        <svg class="icon station-status-icon" th:if="${!estacion.isAbierto()}"
-                             width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <div class="station-status" th:classappend="${estacion.isAbierto()} ? 'is-open' : 'is-closed'">
+                        <svg class="icon station-status-icon"
+                             th:if="${!estacion.isAbierto()}"
+                             width="24"
+                             height="24"
+                             viewBox="0 0 24 24"
+                             aria-hidden="true"
+                             focusable="false">
                             <use href="/images/icons.svg#ban"></use>
                         </svg>
                         <span class="station-status-icon" th:if="${estacion.isAbierto()}" aria-hidden="true"></span>
-                        <span th:text="${estacion.isAbierto()}    ? #{eess.estado.abierto}    : #{eess.estado.cerrado}"></span>
+                        <span th:text="${estacion.isAbierto()} ? #{eess.estado.abierto} : #{eess.estado.cerrado}"></span>
                     </div>
+
                     <div class="station-hours-row">
-                        <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
+                        <svg class="icon"
+                             focusable="false"
+                             width="24"
+                             height="24"
+                             viewBox="0 0 24 24"
                              aria-hidden="true">
                             <use href="/images/icons.svg#clock"></use>
                         </svg>
                         <span th:text="${estacion.getHorario()}"></span>
                     </div>
-                    <span class="station-sale-type"
-                          th:text="${#messages.msg(estacion.getVenta().getCodigoMensaje())}"></span>
 
+                    <span class="station-sale-type"
+                          th:text="${#messages.msg(estacion.getVenta().getCodigoMensaje())}">
+                    </span>
                 </div>
             </div>
 
-            <!-- Fuels Section -->
+            <!-- Precios de combustibles -->
             <div class="station-prices" th:if="${!#lists.isEmpty(estacion.getPreciosCombustiblesSorted())}">
-                <p
-                   th:text="#{eess.list.combustible.precios}"></p>
+                <p th:text="#{eess.list.combustible.precios}"></p>
                 <div>
-                    <div th:each="precioCombustible : ${estacion.getPreciosCombustiblesSorted()}"
-                         class="station-price">
-                                <span
-                                      th:text="${#messages.msg('combustible.' + precioCombustible.getCombustible().getCodigo().toLowerCase())}"></span>
-                        <strong
-                                th:text="${#numbers.formatDecimal(precioCombustible.getPrecio(), 1, 'COMMA', 3, 'POINT')} + ' €'"></strong>
+                    <div th:each="precioCombustible : ${estacion.getPreciosCombustiblesSorted()}" class="station-price">
+                        <span th:text="${#messages.msg('combustible.' + precioCombustible.getCombustible().getCodigo().toLowerCase())}"> </span>
+                        <strong th:text="${#numbers.formatDecimal(precioCombustible.getPrecio(), 1, 'COMMA', 3, 'POINT')} + ' €'"> </strong>
                     </div>
                 </div>
             </div>

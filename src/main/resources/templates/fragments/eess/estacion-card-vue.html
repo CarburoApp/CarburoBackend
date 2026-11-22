@@ -1,0 +1,77 @@
+<!-- Card de estación -->
+<article th:fragment="card" class="station-card">
+    <!-- Botón de favoritos -->
+    <button sec:authorize="isAuthenticated()"
+            type="button"
+            class="favorite-button station-favorite-button"
+            @click="cambiarFavorita(estacion.id)"
+            :disabled="cargandoFavoritas || errorFavoritas || favoritasPendientes.includes(estacion.id)"
+            :aria-pressed="esFavorita(estacion.id)"
+            :aria-label="esFavorita(estacion.id) ? textoRetirarFavorita : textoAnadirFavorita">
+        <svg class="icon"
+             :class="esFavorita(estacion.id) ? 'favorita-activa' : 'favorita-inactiva'"
+             width="24"
+             height="24"
+             viewBox="0 0 24 24"
+             aria-hidden="true">
+            <use href="/images/icons.svg#heart"></use>
+        </svg>
+    </button>
+    <a :href="`/estaciones-de-servicio/${estacion.id}`">
+        <div>
+            <!-- Nombre y espacio reservado para favoritos -->
+            <header class="station-summary">
+                <div class="station-name">
+                    <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                        <use href="/images/icons.svg#fuel-pump"></use>
+                    </svg>
+                    <h3>{{ estacion.rotulo }}</h3>
+                </div>
+            </header>
+
+            <!-- Dirección y horario -->
+            <div class="station-location">
+                <address>
+                    <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                        <use href="/images/icons.svg#map-pin"></use>
+                    </svg>
+                    <div>
+                        <p>{{ estacion.direccion }}</p>
+                        <p v-if="estacion.distancia_metros != null">{{ distanciaTexto(estacion.distancia_metros) }}</p>
+                        <p>{{ estacion.localidad }}, {{ String(estacion.codigo_postal).padStart(5, '0') }}</p>
+                        <p v-if="ubicacionTexto(estacion)">{{ ubicacionTexto(estacion) }}</p>
+                    </div>
+                </address>
+
+                <div class="station-state-and-hours">
+                    <div class="station-status" :class="estacion.abierto ? 'is-open' : 'is-closed'">
+                        <span class="station-status-icon" aria-hidden="true"></span>
+                        <span v-if="estacion.abierto" th:text="#{eess.estado.abierto}"></span>
+                        <span v-else th:text="#{eess.estado.cerrado}"></span>
+                    </div>
+
+                    <div class="station-hours-row">
+                        <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                            <use href="/images/icons.svg#clock"></use>
+                        </svg>
+                        <span>{{ estacion.horario }}</span>
+                    </div>
+
+                    <span class="station-sale-type">{{ estacion.venta }}</span>
+                </div>
+            </div>
+            <!-- Precios de combustibles -->
+            <div v-if="preciosOrdenados(estacion).length" class="station-prices">
+                <p th:text="#{eess.list.combustible.precios}"></p>
+                <div>
+                    <div v-for="precio in preciosOrdenados(estacion)"
+                         :key="precio.id_combustible"
+                         class="station-price">
+                        <span>{{ nombreCombustible(precio.id_combustible) }}</span>
+                        <strong>{{ precioTexto(precio.precio) }}</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </a>
+</article>

@@ -14,7 +14,14 @@ export default defineConfig({
         emptyOutDir: true,
         rolldownOptions: {
             input: {
-                'inicio': fileURLToPath(new URL('./src/main/resources/static/script/vuejs/entries/inicio.js', import.meta.url)),
+                'estacion-de-servicio': fileURLToPath(new URL(
+                    './src/main/resources/static/script/vuejs/entries/estacion-de-servicio.js'
+                    , import.meta.url
+                )),
+                'inicio': fileURLToPath(new URL(
+                    './src/main/resources/static/script/vuejs/entries/inicio.js'
+                    , import.meta.url
+                )),
                 'estaciones-de-servicio': fileURLToPath(new URL(
                     './src/main/resources/static/script/vuejs/entries/estaciones-de-servicio.js',
                     import.meta.url

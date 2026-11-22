@@ -1,0 +1,23 @@
+<!-- Listado de estaciones y estados -->
+<div th:fragment="listado" class="station-list" :aria-busy="estadoEstaciones === EstadoVista.CARGANDO">
+    <span hidden
+          sec:authorize="isAuthenticated()"
+          data-favoritos
+          th:attr="data-retirar=#{eess.favoritas.boton.retirar},data-anadir=#{eess.favoritas.boton.anadir}">
+    </span>
+
+    <!-- Error de favoritos -->
+    <div v-if="errorFavoritas" class="form-error" role="alert">
+        <span th:text="#{eess.favoritas.error}"></span>
+        <button type="button" @click="cargarFavoritas" th:text="#{eess.reintentar}"></button>
+    </div>
+
+    <th:block th:replace="~{fragments/eess/estaciones-estados-vue :: estados}"></th:block>
+
+    <!-- Cards de estaciones -->
+    <template v-if="estadoEstaciones === EstadoVista.LISTO">
+        <template v-for="estacion in eessMostradas" :key="estacion.id">
+            <th:block th:replace="~{fragments/eess/estacion-card-vue :: card}"></th:block>
+        </template>
+    </template>
+</div>

@@ -22,36 +22,36 @@
     box-shadow: var(--shadow-card);
 }
 
-.filters-panel > div > div:first-child {
+.filters-panel > div > header {
     display: flex;
     align-items: center;
-    gap: .5rem;
-    padding-bottom: .75rem;
+    gap: 0.5rem;
+    padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--color-border);
     color: var(--color-primary-text);
 }
 
-.filters-panel > div > div:first-child > .icon {
+.filters-panel > div > header > .icon {
     width: 1.3rem;
     height: 1.3rem;
     flex: 0 0 1.3rem;
 }
 
-.filters-panel h3 {
+.filters-panel > div > header h2 {
     margin: 0;
     color: var(--color-ink);
 }
 
-.filters-panel > div > div:nth-child(2) {
+.filters-panel > div > form {
     display: grid;
     gap: 1rem;
     padding-top: 1rem;
 }
 
-.filters-panel > div > div:nth-child(2) > div,
-.filters-panel > div > div:nth-child(2) > fieldset {
+.filters-panel > div > form > div,
+.filters-panel > div > form > fieldset {
     display: grid;
-    gap: .45rem;
+    gap: 0.45rem;
 }
 
 .filters-panel fieldset {
@@ -63,10 +63,10 @@
 
 .filter-section-title {
     width: 100%;
-    margin-bottom: .2rem;
-    padding-bottom: .35rem;
+    margin-bottom: 0.2rem;
+    padding-bottom: 0.35rem;
     border-bottom: 1px solid var(--color-border);
-    letter-spacing: .025em;
+    letter-spacing: 0.025em;
 }
 
 .filter-search-control {
@@ -100,8 +100,8 @@
 
 .filter-state {
     display: flex;
-    gap: .25rem;
-    padding: .25rem;
+    gap: 0.25rem;
+    padding: 0.25rem;
     border-radius: var(--radius-small);
     background: #f4ede7;
 }
@@ -135,7 +135,7 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
 }
 
 .fuel-filter-list {
-    padding: .75rem;
+    padding: 0.75rem;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-small);
     background: #fff;
@@ -144,7 +144,7 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
 .fuel-filter-list > div {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: .5rem;
+    gap: 0.5rem;
 }
 
 .fuel-filter-list label {
@@ -184,7 +184,8 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
 .station-card {
     overflow: hidden;
     border-color: var(--color-border);
-    transition: border-color .18s ease, box-shadow .18s ease;
+    transition: border-color 0.18s ease,
+    box-shadow 0.18s ease;
 }
 
 .station-card:hover {
@@ -204,7 +205,7 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
     display: flex;
     min-width: 0;
     align-items: center;
-    gap: .75rem;
+    gap: 0.75rem;
 }
 
 .station-card .station-name .icon {
@@ -216,16 +217,16 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
     border-radius: 50%;
     color: var(--color-primary-text);
     background: var(--color-primary-soft);
-    padding: .4rem;
+    padding: 0.4rem;
 }
 
-.station-card .station-location > div:first-child > div {
+.station-card .station-location > address {
     display: flex;
     align-items: flex-start;
-    gap: .65rem;
+    gap: 0.65rem;
 }
 
-.station-card .station-location > div:first-child > div > .icon {
+.station-card .station-location > address > .icon {
     width: 1.4rem;
     height: 1.4rem;
     flex: 0 0 1.4rem;
@@ -236,13 +237,13 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
     display: grid;
     align-content: start;
     justify-items: end;
-    gap: .5rem;
+    gap: 0.5rem;
     text-align: right;
 }
 
 .station-card .station-state-and-hours > .station-status,
 .station-card .station-state-and-hours > .station-hours-row {
-    padding: .4rem .6rem;
+    padding: 0.4rem 0.6rem;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-small);
     background: var(--color-surface);
@@ -252,9 +253,9 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: .45rem;
+    gap: 0.45rem;
     color: var(--color-muted);
-    font-size: .88rem;
+    font-size: 0.88rem;
     text-align: right;
 }
 
@@ -264,26 +265,26 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
     color: var(--color-primary-text);
 }
 
-.station-card .station-location > div:first-child > div > div {
+.station-card .station-location > address > div {
     display: grid;
-    gap: .25rem;
+    gap: 0.25rem;
 }
 
 .station-card .station-state-and-hours > div:nth-child(2) {
     display: flex;
     align-items: center;
-    gap: .4rem;
+    gap: 0.4rem;
     color: var(--color-muted);
-    font-size: .88rem;
+    font-size: 0.88rem;
 }
 
 .station-card .station-location p {
     margin: 0;
 }
 
-.stations-page .empty-state,
-.stations-page .loading-state,
-.stations-page .error-state {
+.station-feedback.empty-state,
+.station-feedback.loading-state,
+.station-feedback.error-state {
     display: grid;
     min-height: 14rem;
     place-items: center;
@@ -294,23 +295,23 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
     text-align: center;
 }
 
-.stations-page .empty-state > div,
-.stations-page .loading-state > div,
-.stations-page .error-state > div {
+.station-feedback.empty-state > div,
+.station-feedback.loading-state > div,
+.station-feedback.error-state > div {
     max-width: 34rem;
 }
 
-.stations-page .error-state {
+.station-feedback.error-state {
     border-color: #e7c5c1;
     color: var(--color-error);
     background: var(--color-error-soft);
 }
 
-.stations-page .loading-state > div > .icon {
+.station-feedback.loading-state > div > .icon {
     width: 1.25rem;
     height: 1.25rem;
     color: var(--color-primary-text);
-    animation: icon-spin .9s linear infinite;
+    animation: icon-spin 0.9s linear infinite;
 }
 
 @keyframes icon-spin {
@@ -320,7 +321,7 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .stations-page .loading-state > div > .icon {
+    .station-feedback.loading-state > div > .icon {
         animation: none;
     }
 }
@@ -328,19 +329,19 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
 .stations-page progress,
 .home-page progress {
     width: min(100%, 26rem);
-    height: .55rem;
+    height: 0.55rem;
     accent-color: var(--color-primary);
 }
 
-.station-card .station-location > div:first-child > div > div > p:first-child {
+.station-card .station-location > address > div > p:first-child {
     color: var(--color-ink);
     font-weight: 650;
 }
 
 .station-status-icon:not(.icon) {
     display: inline-block;
-    width: .6rem;
-    height: .6rem;
+    width: 0.6rem;
+    height: 0.6rem;
     border-radius: 50%;
     background: currentColor;
 }
@@ -349,9 +350,9 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
     grid-column: 1 / -1;
     margin: 0;
     color: var(--color-muted);
-    font-size: .82rem;
+    font-size: 0.82rem;
     font-weight: 700;
-    letter-spacing: .035em;
+    letter-spacing: 0.035em;
     text-transform: uppercase;
 }
 
@@ -391,7 +392,7 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     justify-content: stretch;
-    gap: .65rem;
+    gap: 0.65rem;
     padding-top: 1rem;
     border-top: 1px solid var(--color-border);
 }
@@ -399,7 +400,7 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
 .station-card .station-prices > div {
     display: flex;
     flex-wrap: wrap;
-    gap: .75rem;
+    gap: 0.75rem;
 }
 
 .station-price {
@@ -408,15 +409,15 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: .25rem;
-    padding: .75rem;
+    gap: 0.25rem;
+    padding: 0.75rem;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-small);
     background: var(--color-background);
     color: var(--color-ink);
-    font-size: .85rem;
+    font-size: 0.85rem;
     text-align: center;
-    transition: border-color .16s ease;
+    transition: border-color 0.16s ease;
 }
 
 .station-price:hover {
@@ -433,11 +434,11 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
     justify-self: end;
     margin-left: auto;
     width: fit-content;
-    padding: .2rem .55rem;
+    padding: 0.2rem 0.55rem;
     border-radius: 999px;
     color: var(--color-secondary);
     background: var(--color-secondary-soft);
-    font-size: .78rem;
+    font-size: 0.78rem;
     font-weight: 650;
 }
 
@@ -452,7 +453,7 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
 .station-status {
     display: flex;
     align-items: center;
-    gap: .4rem;
+    gap: 0.4rem;
     font-weight: 700;
 }
 
@@ -468,7 +469,7 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: .25rem;
+    gap: 0.25rem;
     margin: 1.5rem 0;
     padding: 0;
     list-style: none;
@@ -490,7 +491,7 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
     .filter-toggle {
         display: inline-flex;
         align-items: center;
-        gap: .5rem;
+        gap: 0.5rem;
         margin-bottom: 1rem;
     }
 
@@ -505,7 +506,9 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
         transform: translate(-50%, -1rem);
         visibility: hidden;
         opacity: 0;
-        transition: transform .18s ease, opacity .18s ease, visibility .18s ease;
+        transition: transform 0.18s ease,
+        opacity 0.18s ease,
+        visibility 0.18s ease;
     }
 
     .filters-panel.abierto {
@@ -550,4 +553,74 @@ body:not(.profile-page) .filter-state button.is-selected:hover {
     .filters-panel {
         width: calc(100vw - 1rem);
     }
+}
+
+[v-cloak] {
+    display: none !important;
+}
+
+.station-feedback > div {
+    width: 100%;
+}
+
+.station-location-selectors {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+    gap: 1rem;
+    margin-top: 1.25rem;
+    color: var(--color-ink);
+    text-align: left;
+}
+
+.station-location-selectors label {
+    display: grid;
+    gap: 0.4rem;
+    min-width: 0;
+}
+
+.station-geography-error {
+    grid-column: 1 / -1;
+}
+
+.station-card {
+    position: relative;
+}
+
+.station-card > a > div > .station-summary {
+    padding-right: 3.5rem;
+}
+
+.station-favorite-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1;
+}
+
+body:not(.profile-page) .station-card .station-favorite-button,
+body:not(.profile-page) .station-card .station-favorite-button:hover {
+    color: #a32424;
+    background: #fae8e8;
+    border-color: #e7c5c1;
+}
+
+.station-favorite-button .favorita-inactiva {
+    color: #a32424;
+}
+
+.station-card .station-name h3 {
+    overflow-wrap: anywhere;
+}
+
+.home-manual-location {
+    margin-block: 1rem;
+}
+
+.filter-close {
+    margin: 0 0 0 auto;
+}
+
+.station-card > a > div > .station-location > address {
+    margin: 0;
+    font-style: normal;
 }

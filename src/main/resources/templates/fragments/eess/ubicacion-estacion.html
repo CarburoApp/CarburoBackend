@@ -1,0 +1,92 @@
+<section th:fragment="ubicacion" class="station-location-panel" aria-labelledby="station-location-title">
+    <div class="section-heading">
+        <svg class="icon" width="24" height="24" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+            <use href="/images/icons.svg#map-pin"></use>
+        </svg>
+        <h2 id="station-location-title" th:text="#{eess.ubicacion.titulo}"></h2>
+    </div>
+    <!-- Distancia desde tu ubicación -->
+    <div class="station-location-grid">
+        <div class="station-distance" :aria-busy="estadoDistancia === EstadoVista.CARGANDO">
+            <p class="station-location-label" th:text="#{eess.distancia.desde.tu.ubicacion}"></p>
+
+            <div class="station-distance-feedback" role="status" aria-live="polite" aria-atomic="true">
+                <template v-if="estadoDistancia === EstadoVista.LISTO">
+                    <strong class="station-distance-value">{{ distanciaFormateada }}</strong>
+                    <p th:text="#{eess.distancia.linea.recta}"></p>
+                </template>
+
+                <p v-else-if="estadoDistancia === EstadoVista.CARGANDO" class="station-distance-loading">
+                    <svg class="icon" width="24" height="24" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                        <use href="/images/icons.svg#loader-circle"></use>
+                    </svg>
+                    <span th:text="#{eess.distancia.calculando}"></span>
+                </p>
+
+                <p v-else-if="estadoDistancia === EstadoUbicacion.DENEGADA" th:text="#{eess.distancia.denegada}"></p>
+                <p v-else-if="estadoDistancia === EstadoUbicacion.TIEMPO" th:text="#{eess.distancia.tiempo}"></p>
+                <p v-else-if="estadoDistancia === EstadoUbicacion.NO_COMPATIBLE" th:text="#{eess.distancia.no.compatible}"></p>
+                <p v-else-if="estadoDistancia === EstadoVista.ERROR" th:text="#{eess.distancia.error}"></p>
+                <p v-else th:text="#{eess.distancia.no.disponible}"></p>
+            </div>
+            <button v-if="estadoDistancia !== EstadoUbicacion.NO_COMPATIBLE"
+                    type="button"
+                    class="station-distance-retry"
+                    @click="calcularDistancia"
+                    :disabled="estadoDistancia === EstadoVista.CARGANDO">
+                
+                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                    <use href="/images/icons.svg#locate"></use>
+                </svg>
+                <span v-if="estadoDistancia === EstadoVista.LISTO" th:text="#{eess.distancia.actualizar}"></span>
+                <span v-else th:text="#{eess.distancia.reintentar}"></span>
+            </button>
+        </div>
+        <!-- Coordenadas de la estación -->
+        <div v-if="coordenadasValidas" class="station-location-coordinates">
+            <p class="station-location-label" th:text="#{eess.ubicacion.coordenadas}"></p>
+            <dl>
+                <div>
+                    <dt th:text="#{eess.ubicacion.latitud}"></dt>
+                    <dd v-text="coordenadaFormateada(estacion.latitud)"></dd>
+                </div>
+                <div>
+                    <dt th:text="#{eess.ubicacion.longitud}"></dt>
+                    <dd v-text="coordenadaFormateada(estacion.longitud)"></dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+    <!-- Accesos a Google Maps -->
+    <div class="station-location-navigation">
+        <div class="station-location-links">
+            <a
+                    class="button button-primary"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-describedby="station-maps-hint"
+                    :href="enlaceRuta"
+                    v-if="coordenadasValidas"
+            >
+                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                    <use href="/images/icons.svg#road"></use>
+                </svg>
+                <span th:text="#{eess.ubicacion.como.llegar}"></span>
+            </a>
+            <a
+                    class="button"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-describedby="station-maps-hint"
+                    :href="enlaceMapa"
+                    v-if="coordenadasValidas"
+            >
+                <svg class="icon" width="24" height="24" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                    <use href="/images/icons.svg#map"></use>
+                </svg>
+                <span th:text="#{eess.ubicacion.google.maps}"></span>
+            </a>
+        </div>
+        <p id="station-maps-hint" th:text="#{eess.ubicacion.maps.aviso}"></p>
+    </div>
+</section>

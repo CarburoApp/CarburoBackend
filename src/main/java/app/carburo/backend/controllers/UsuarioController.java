@@ -11,6 +11,8 @@ import app.carburo.backend.services.UsuarioService;
 import app.carburo.backend.validators.PerfilCambioDeNombreFormValidator;
 import app.carburo.backend.validators.PerfilCambioDeProvinciaFavoritaFormValidator;
 import org.springframework.stereotype.Controller;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static app.carburo.backend.controllers.AuthController.RUTA_CAMBIAR_CONTRASENA;
 import static app.carburo.backend.controllers.AuthController.RUTA_LOGIN;
@@ -59,6 +62,8 @@ public class UsuarioController {
     private final EstacionDeServicioService estacionDeServicioService;
     private final PerfilCambioDeProvinciaFavoritaFormValidator perfilCambioDeProvinciaFavoritaFormValidator;
     private final PerfilCambioDeNombreFormValidator perfilCambioDeNombreFormValidator;
+
+    public record FavoritaState(boolean favorita) {}
 
     /**
      * Constructor con inyección de dependencias de servicios y validadores.
@@ -215,6 +220,46 @@ public class UsuarioController {
         Set<EstacionDeServicio> eess = usuario.get().getEessFavoritas();
         model.addAttribute("eess", eess);
         return VISTA_ESTACIONES_DE_SERVICIO_FAVORITAS;
+    }
+
+    /** Estado privado de favoritos para los cards Vue; usa la sesión del sitio. */
+    @GetMapping(RUTA_ESTACIONES_DE_SERVICIO_FAVORITAS_SIN_PERFIL + "/estado")
+    @ResponseBody
+    public ResponseEntity<Set<Integer>> getFavoritasEstado() {
+        Optional<Usuario> usuario = authService.getUsuarioAutenticado();
+
+        if (usuario.isEmpty())
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        return ResponseEntity.ok(usuario.get().getEessFavoritas().stream()
+                .map(EstacionDeServicio::getId).collect(Collectors.toSet()));
+    }
+
+    /** Guarda el estado solicitado, manteniendo la protección CSRF de los formularios. */
+    @PostMapping(RUTA_ESTACION_DE_SERVICIO_FAVORITA_SIN_PERFIL + "{id}/estado")
+    @ResponseBody
+    public ResponseEntity<FavoritaState> guardarFavoritaEstado(
+            @PathVariable int id,
+            @RequestParam boolean favorita
+    ) {
+        Optional<Usuario> usuario = authService.getUsuarioAutenticado();
+
+        if (usuario.isEmpty())
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+
+        if (id <= 0)
+            return ResponseEntity.badRequest().build();
+
+        EstacionDeServicio estacion = estacionDeServicioService.getEstacionDeServicioById(id);
+        if (estacion == null)
+            return ResponseEntity.notFound().build();
+
+        if (favorita)
+            usuarioService.addEstacionDeServicioFavorita(usuario.get(), estacion);
+        else
+            usuarioService.removeEstacionDeServicioFavorita(usuario.get(), estacion);
+
+        return ResponseEntity.ok(new FavoritaState(favorita));
     }
 
     /**

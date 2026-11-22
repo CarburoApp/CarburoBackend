@@ -1,6 +1,16 @@
-import { createApp } from 'vue/dist/vue.esm-bundler.js';
+import {EstadoApertura, EstadoVista} from '../enums/estados.js';
+import {filtrosPanelMixin} from '../mixins/filtros-panel-mixin.js';
+import {favoritosMixin} from '../mixins/favoritos-mixin.js';
+import {estacionCardMixin} from '../mixins/estacion-card-mixin.js';
 
-createApp({
+export const estacionesDeServicioController = {
+    inject: [
+        'estacionesDeServicioService',
+        'geografiaService',
+        'combustiblesService',
+        'viewConfig'
+    ],
+    mixins: [favoritosMixin, estacionCardMixin, filtrosPanelMixin],
     data() {
         return {
             textoIntroduccion: "",
@@ -46,7 +56,7 @@ createApp({
                 ccaa: "0",
                 provincia: "0",
                 municipio: "0",
-                estado: "INDEFERENTE",
+                estado: EstadoApertura.INDEFERENTE,
                 combustibles: [],
                 marca: "0NOTSELECTED",
                 busqueda: "",
@@ -61,23 +71,16 @@ createApp({
             cargandoMunicipios: false,
             cargandoEstaciones: false,
 
+            errorGeografia: false,
             errorEstaciones: false
         };
     },
 
     async mounted() {
-        const contadorEess = document.getElementById('contadorEess');
-
-        this.textoIntroduccion =
-            contadorEess.dataset.texto;
-
-        const paginacion = document.getElementById('paginacion');
-
-        this.textoPrimera =
-            paginacion?.dataset.primera || "";
-
-        this.textoUltima =
-            paginacion?.dataset.ultima || "";
+        const {introduccion, primera, ultima} = this.viewConfig;
+        this.textoIntroduccion = introduccion || '';
+        this.textoPrimera = primera || '';
+        this.textoUltima = ultima || '';
 
         await Promise.all([
             this.cargarComunidades(),
@@ -86,9 +89,24 @@ createApp({
 
         await this.inicializarFiltrosDesdeURL();
 
-        this.actualizarTextoIntroduccion();
     },
 
+    beforeUnmount() {
+        clearTimeout(this.timeoutBusqueda);
+    },
+    computed: {
+        textoContador() {
+            return this.textoIntroduccion
+                .replace('{0}', this.eessMostradas.length)
+                .replace('{1}', this.eessFiltradas.length);
+        },
+        estadoEstaciones() {
+            if (this.filtros.ccaa === '0') return EstadoVista.SELECCION;
+            if (this.cargandoEstaciones) return EstadoVista.CARGANDO;
+            if (this.errorEstaciones) return EstadoVista.ERROR;
+            return this.eessMostradas.length ? EstadoVista.LISTO : EstadoVista.VACIO;
+        }
+    },
     watch: {
         // Estos filtros se aplican inmediatamente al cambiar.
         'filtros.estado'() {
@@ -131,6 +149,10 @@ createApp({
     },
 
     methods: {
+        async reintentarGeografia() {
+            await this.cargarComunidades();
+            if (this.filtros.ccaa !== "0") await this.cambioCCAA();
+        },
 
         async inicializarFiltrosDesdeURL() {
             const params = new URLSearchParams(window.location.search);
@@ -209,35 +231,8 @@ createApp({
         /*
          * Realiza una petición GET a la API.
          */
-        async apiGet(endpoint) {
-
-            const app = document.getElementById('app');
-            const apiKey = app.dataset.apiKey;
-            const apiURL = app.dataset.apiUrl;
-
-            const response = await fetch(
-                `${apiURL}${endpoint}`,
-                {
-                    headers: {
-                        'X-API-KEY': apiKey,
-                        'Accept': 'application/json'
-                    }
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error(`Error HTTP ${response.status}`);
-            }
-
-            const json = await response.json();
-
-            if (!json.success) {
-                throw new Error(
-                    json.error?.message || 'Error desconocido de la API'
-                );
-            }
-
-            return json.data;
+        reintentarEstaciones() {
+            return this.cambioCCAA();
         },
 
         /*
@@ -245,12 +240,12 @@ createApp({
          */
         async cargarComunidades() {
             this.cargandoComunidades = true;
+            this.errorGeografia = false;
 
             try {
-                this.comunidades = await this.apiGet(
-                    '/api/v1/public/comunidades-autonomas'
-                );
+                this.comunidades = await this.geografiaService.listarComunidades();
             } catch (error) {
+                this.errorGeografia = true;
                 console.error('Error cargando CCAA:', error);
                 this.comunidades = [];
             } finally {
@@ -285,6 +280,9 @@ createApp({
             this.marcas = [];
 
             this.errorEstaciones = false;
+            this.cargandoEstaciones = false;
+            this.cargandoProvincias = false;
+            this.cargandoMunicipios = false;
 
             // 0 significa que no hay CCAA seleccionada.
             if (idCCAA === "0") {
@@ -311,9 +309,10 @@ createApp({
             this.cargandoProvincias = true;
 
             try {
-                this.provincias = await this.apiGet(
-                    `/api/v1/public/provincias/comunidad-autonoma/${idCCAA}`
-                );
+                const provincias = await this.geografiaService.listarProvinciasPorComunidad(idCCAA);
+
+                if (idCCAA !== this.filtros.ccaa) return;
+                this.provincias = provincias;
 
                 // Si solo hay una provincia, la seleccionamos automáticamente.
                 if (this.provincias.length === 1) {
@@ -326,6 +325,8 @@ createApp({
                     await this.cargarMunicipiosProvincia(idProvincia);
                 }
             } catch (error) {
+                if (idCCAA !== this.filtros.ccaa) return;
+                this.errorGeografia = true;
                 console.error(
                     'Error cargando provincias:',
                     error
@@ -333,7 +334,7 @@ createApp({
 
                 this.provincias = [];
             } finally {
-                this.cargandoProvincias = false;
+                if (idCCAA === this.filtros.ccaa) this.cargandoProvincias = false;
             }
         },
 
@@ -373,9 +374,10 @@ createApp({
             this.cargandoMunicipios = true;
 
             try {
-                this.municipiosProvincia = await this.apiGet(
-                    `/api/v1/public/municipios/provincia/${idProvincia}/con-estaciones-de-servicio`
-                );
+                const municipios = await this.geografiaService.listarMunicipiosConEstacionesPorProvincia(idProvincia);
+
+                if (idProvincia !== this.filtros.provincia) return;
+                this.municipiosProvincia = municipios;
 
                 // Si solo hay un municipio, lo seleccionamos automáticamente.
                 if (this.municipiosProvincia.length === 1) {
@@ -391,7 +393,7 @@ createApp({
 
                 this.municipiosProvincia = [];
             } finally {
-                this.cargandoMunicipios = false;
+                if (idProvincia === this.filtros.provincia) this.cargandoMunicipios = false;
             }
         },
 
@@ -403,9 +405,8 @@ createApp({
          */
         async cargarMunicipiosCCAA(idCCAA) {
             try {
-                this.municipios = await this.apiGet(
-                    `/api/v1/public/municipios/comunidad-autonoma/${idCCAA}/con-estaciones-de-servicio`
-                );
+                const municipios = await this.geografiaService.listarMunicipiosConEstacionesPorComunidad(idCCAA);
+                if (idCCAA === this.filtros.ccaa) this.municipios = municipios;
             } catch (error) {
                 console.error(
                     'Error cargando municipios de la CCAA:',
@@ -427,9 +428,7 @@ createApp({
             this.cargandoCombustibles = true;
 
             try {
-                this.combustibles = await this.apiGet(
-                    '/api/v1/public/combustibles'
-                );
+                this.combustibles = await this.combustiblesService.listar();
             } catch (error) {
                 console.error(
                     'Error cargando combustibles:',
@@ -468,17 +467,18 @@ createApp({
             this.cargandoEstaciones = true;
 
             try {
-                const estaciones = await this.apiGet(
-                    `/api/v1/public/estaciones-de-servicio/comunidad-autonoma/${idCCAA}`
-                );
+                const estaciones = await this.estacionesDeServicioService.listarPorComunidad(idCCAA);
 
                 // Guardar en caché.
                 this.eessPorCCAA[idCCAA] = estaciones;
+
+                if (idCCAA !== this.filtros.ccaa) return;
 
                 // EESS de la CCAA actualmente seleccionada.
                 this.eessRecuperadas = estaciones;
 
             } catch (error) {
+                if (idCCAA !== this.filtros.ccaa) return;
                 console.error(
                     'Error cargando estaciones:',
                     error
@@ -493,7 +493,7 @@ createApp({
                 this.errorEstaciones = true;
 
             } finally {
-                this.cargandoEstaciones = false;
+                if (idCCAA === this.filtros.ccaa) this.cargandoEstaciones = false;
             }
         },
 
@@ -550,11 +550,11 @@ createApp({
             // -------------------------
 
             if (excluirFiltro !== 'estado') {
-                if (this.filtros.estado === "ABIERTO") {
+                if (this.filtros.estado === EstadoApertura.ABIERTO) {
                     estaciones = estaciones.filter(
                         estacion => estacion.abierto
                     );
-                } else if (this.filtros.estado === "CERRADO") {
+                } else if (this.filtros.estado === EstadoApertura.CERRADO) {
                     estaciones = estaciones.filter(
                         estacion => !estacion.abierto
                     );
@@ -792,89 +792,10 @@ createApp({
 
             // Mostrar únicamente las EESS de la página actual.
             this.actualizarPagina();
-
-            this.actualizarTextoIntroduccion();
         },
 
         /*
-         * Devuelve el nombre de un combustible a partir de su ID.
-         */
-        nombreCombustible(id) {
-            const combustible =
-                this.combustibles.find(
-                    c =>
-                        Number(c.id) === Number(id)
-                );
-
-            return combustible
-                ? combustible.denominacion
-                : `Combustible ${id}`;
-        },
-
-        /*
-         * Devuelve el nombre de un municipio a partir de su ID.
-         */
-        nombreMunicipio(id) {
-            const municipio =
-                this.municipios.find(
-                    m =>
-                        Number(m.id) === Number(id)
-                );
-
-            return municipio
-                ? municipio.denominacion
-                : '';
-        },
-
-        /*
-         * Devuelve el nombre de una provincia a partir de su ID.
-         */
-        nombreProvincia(id) {
-            const provincia =
-                this.provincias.find(
-                    p =>
-                        Number(p.id) === Number(id)
-                );
-
-            return provincia
-                ? provincia.denominacion
-                : '';
-        },
-
-        /*
-         * Devuelve los precios de una EESS ordenados por ID de combustible.
-         */
-        preciosOrdenados(estacion) {
-            let precios = [
-                ...(estacion.precios_de_combustibles || [])
-            ];
-
-            if (this.filtros.combustibles.length > 0) {
-                const seleccionados =
-                    this.filtros.combustibles.map(Number);
-
-                precios = precios.filter(precio =>
-                    seleccionados.includes(
-                        Number(precio.id_combustible)
-                    )
-                );
-            }
-
-            return precios.sort(
-                (a, b) =>
-                    Number(a.id_combustible) -
-                    Number(b.id_combustible)
-            );
-        },
-
-        /*
-         * Devuelve el precio que se utilizará para ordenar una EESS.
-         *
-         * Si hay combustibles seleccionados, se utiliza el precio
-         * más bajo de esos combustibles.
-         *
-         * Si no hay combustibles seleccionados, se utiliza
-         * el precio más bajo de todos los combustibles.
+         * Devuelve el precio de referencia para ordenar una estación.
          */
         precioOrdenacion(estacion) {
             const precios = estacion.precios_de_combustibles || [];
@@ -984,20 +905,6 @@ createApp({
             return resultado;
         },
 
-        actualizarTextoIntroduccion() {
-            const contadorEess =
-                document.getElementById('contadorEess');
-
-            if (!contadorEess) {
-                return;
-            }
-
-            contadorEess.textContent =
-                this.textoIntroduccion
-                    .replace('{0}', this.eessMostradas.length)
-                    .replace('{1}', this.eessFiltradas.length);
-        },
-
         totalPaginas() {
             return Math.ceil(
                 this.eessFiltradas.length / this.elementosPorPagina
@@ -1025,14 +932,12 @@ createApp({
 
             this.paginaActual = pagina;
             this.actualizarPagina();
-            this.actualizarTextoIntroduccion();
         },
 
         paginaSiguiente() {
             if (this.paginaActual < this.totalPaginas()) {
                 this.paginaActual++;
                 this.actualizarPagina();
-                this.actualizarTextoIntroduccion();
             }
         },
 
@@ -1040,7 +945,6 @@ createApp({
             if (this.paginaActual > 1) {
                 this.paginaActual--;
                 this.actualizarPagina();
-                this.actualizarTextoIntroduccion();
             }
         },
 
@@ -1076,4 +980,4 @@ createApp({
             return paginas;
         }
     }
-}).mount('#app');
+};

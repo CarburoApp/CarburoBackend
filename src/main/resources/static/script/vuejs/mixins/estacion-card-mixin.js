@@ -1,5 +1,19 @@
+import {formatearDistancia, formatearPrecio} from '../utils/formato.js';
+
 export const estacionCardMixin = {
+    inject: [
+        'viewConfig'
+    ],
     methods: {
+        ubicacionTexto(estacion) {
+            return [this.nombreMunicipio(estacion.id_municipio), this.nombreProvincia(estacion.id_provincia)].filter(Boolean).join(', ');
+        },
+        distanciaTexto(metros) {
+            return formatearDistancia(metros, this.viewConfig.locale);
+        },
+        precioTexto(precio) {
+            return formatearPrecio(precio, this.viewConfig.locale);
+        },
         nombreCombustible(id) {
             return this.combustibles.find(c => Number(c.id) === Number(id))?.denominacion || `Combustible ${id}`;
         },

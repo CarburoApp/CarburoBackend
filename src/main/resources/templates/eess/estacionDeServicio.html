@@ -1,280 +1,301 @@
-<!-- eess/estacionDeServicio.html -->
-<!DOCTYPE html>
-<html th:lang="${#locale.toLanguageTag()}" xmlns:sec="http://www.w3.org/1999/xhtml">
+<!doctype html>
+<html th:lang="${#locale.toLanguageTag()}">
 <head>
     <th:block th:replace="~{fragments/head :: head}"></th:block>
-    <title th:text="#{app.name} + ' - ' + ${estacion.getRotulo()}"></title>
+    <title th:text="#{app.name} + ' - ' + #{eess.title}"></title>
 </head>
-
 <body class="site-body station-detail-page">
-
-<!-- Header -->
+<!-- Cabecera -->
 <th:block th:replace="~{fragments/header :: header}"></th:block>
 
-<!-- Contenido principal -->
-<div class="station-detail-layout">
-    <main class="station-detail-main">
-        <!-- Breadcrumbs -->
-        <nav class="breadcrumbs" th:aria-label="#{breadcrumb.label}">
-            <a th:href="@{/}"
-               th:text="#{home.title}"></a>
-            <span aria-hidden="true">/</span>
-            <a th:href="@{/estaciones-de-servicio}"
-               th:text="#{eess.list.title}"></a>
-            <span aria-hidden="true">/</span>
-            <span th:text="${estacion.getProvincia().getDenominacion()}"></span>
-            <span aria-hidden="true">/</span>
-            <span aria-current="page" th:text="|${estacion.rotulo} (#{eess.id}${estacion.id})|"></span>
-        </nav>
+<!-- Detalle de la estación -->
+<main id="app"
+      class="station-detail-layout"
+      v-cloak
+      th:attr="data-station-id=${estacionId},data-app-name=#{app.name},data-locale=${#locale.toLanguageTag()},data-api-key=${@environment.getProperty('security.api.public-key')},data-api-url=${@environment.getProperty('security.api.public-url')}">
+            <span hidden
+                  sec:authorize="isAuthenticated()"
+                  data-favoritos
+                  th:attr="data-retirar=#{eess.favoritas.boton.retirar},data-anadir=#{eess.favoritas.boton.anadir}">
+            </span>
 
-        <section class="station-overview">
-            <!-- Botón de me gusta-->
-            <form th:fragment="botonFavorita(estacion, favorita)" method="post" sec:authorize="isAuthenticated()"
-                  th:action="@{/perfil/estaciones-de-servicio/favoritas/{id}(id=${estacion.id})}">
-                <button type="submit"
+    <!-- Migas de pan -->
+    <nav class="breadcrumbs" th:aria-label="#{breadcrumb.label}">
+        <a th:href="@{/}" th:text="#{home.title}"></a>
+        <span aria-hidden="true">/</span>
+        <a th:href="@{/estaciones-de-servicio}" th:text="#{eess.list.title}"></a>
+        <span aria-hidden="true">/</span>
+        <span v-if="estacion" aria-current="page">{{ estacion.rotulo }}</span>
+        <span v-else aria-current="page" th:text="#{eess.title}"></span>
+    </nav>
+
+    <!-- Card de carga del detalle -->
+    <section v-if="estadoEstacion === EstadoVista.CARGANDO"
+             class="station-feedback loading-state"
+             role="status"
+             aria-busy="true">
+        <div>
+            <h1 th:text="#{eess.detalle.cargando}"></h1>
+            <progress th:aria-label="#{eess.detalle.cargando}"></progress>
+        </div>
+    </section>
+
+    <!-- Card de error del detalle -->
+    <section v-else-if="estadoEstacion !== EstadoVista.LISTO" class="station-feedback error-state" role="alert">
+        <div>
+            <h1 v-if="estadoEstacion === EstadoVista.NO_ENCONTRADO" th:text="#{eess.detalle.no.encontrada}"></h1>
+            <h1 v-else th:text="#{eess.detalle.error}"></h1>
+            <button type="button" @click="cargarEstacion" th:text="#{eess.reintentar}"></button>
+            <a th:href="@{/estaciones-de-servicio}" th:text="#{eess.list.title}"></a>
+        </div>
+    </section>
+
+    <template v-else>
+        <!-- Resumen y favoritos -->
+        <section class="station-overview" aria-labelledby="station-title">
+            <button sec:authorize="isAuthenticated()"
+                    type="button"
                         class="favorite-button"
-                        th:attr="aria-label=#{${favorita}? 'eess.favoritas.boton.retirar': 'eess.favoritas.boton.anadir'},
-                        title=#{${favorita}? 'eess.favoritas.boton.retirar': 'eess.favoritas.boton.anadir'}">
-                    <svg
-                            th:classappend="${favorita} ? 'favorita-activa' : 'favorita-inactiva'" class="icon"
-                            focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-                        <use href="/images/icons.svg#heart"></use>
-                    </svg>
-                </button>
-            </form>
-            <div class="station-overview-header">
+                    @click="cambiarFavorita(estacion.id)"
+                    :disabled="cargandoFavoritas || errorFavoritas || favoritasPendientes.includes(estacion.id)"
+                    :aria-pressed="esFavorita(estacion.id)"
+                    :aria-label="esFavorita(estacion.id) ? textoRetirarFavorita : textoAnadirFavorita">
+                <svg class="icon"
+                     :class="esFavorita(estacion.id) ? 'favorita-activa' : 'favorita-inactiva'"
+                     width="24"
+                     height="24"
+                     viewBox="0 0 24 24"
+                     aria-hidden="true">
+                    <use href="/images/icons.svg#heart"></use>
+                </svg>
+            </button>
+            <header class="station-overview-header">
                 <div class="station-primary-info">
-                    <div class="station-brand-icon">
-                        <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
-                             aria-hidden="true">
+                    <div class="station-brand-icon" aria-hidden="true">
+                        <svg class="icon" width="24" height="24" viewBox="0 0 24 24">
                             <use href="/images/icons.svg#fuel-pump"></use>
                         </svg>
                     </div>
+
                     <div>
                         <div class="station-heading">
-                            <h1
-                                th:text="${estacion.getRotulo()}">Rotulo</h1>
-                            <span
-                                    th:text="|#{eess.id}${estacion.id}|"></span>
+                            <h1 id="station-title">{{ estacion.rotulo }}</h1>
+
+                            <span>
+                                <span th:text="#{eess.id}"></span>
+                                {{ estacion.id }}
+                            </span>
                         </div>
-                        <div class="station-address">
-                            <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
-                                 aria-hidden="true">
+
+                        <address class="station-address">
+                            <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
                                 <use href="/images/icons.svg#map-pin"></use>
                             </svg>
+
                             <div>
-                                    <!-- Dirección -->
-                                <p th:text="${estacion.getDireccion()}">Dirección</p>
-                                    <!-- Localidad y Código Postal -->
-                                    <p th:text="${estacion.getLocalidad() + ' (' + estacion.getCodigoPostal() + ')'}">
-                                        Localidad (CP)
-                                    </p>
-
-                                    <!-- Municipio y Provincia -->
-                                <p th:text="${estacion.getMunicipio().getDenominacion() + ', ' + estacion.getProvincia().getDenominacion()}">
-                                        Municipio, Provincia
-                                    </p>
-                                </div>
+                                <p>{{ estacion.direccion }}</p>
+                                <p>
+                                    {{ estacion.localidad }} ({{ String(estacion.codigo_postal).padStart(5, '0') }})
+                                </p>
+                                <p>{{ ubicacionTexto(estacion) }}</p>
                             </div>
-
-                        </div>
+                        </address>
+                    </div>
 
                     <div class="station-summary-status">
-                        <div class="station-status"
-                             th:classappend="${estacion.abierto} ? 'is-open' : 'is-closed'">
+                        <div class="station-status" :class="estacion.abierto ? 'is-open' : 'is-closed'">
                             <span class="station-status-icon" aria-hidden="true"></span>
-                                <span th:text="${estacion.isAbierto()} ? #{eess.estado.abierto} : #{eess.estado.cerrado}"></span>
-                            </div>
+                            <span v-if="estacion.abierto" th:text="#{eess.estado.abierto}"></span>
+                            <span v-else th:text="#{eess.estado.cerrado}"></span>
+                        </div>
 
-                        <div class="station-hours">
-                            <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
-                                 aria-hidden="true">
+                        <p class="station-hours">
+                            <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
                                 <use href="/images/icons.svg#clock"></use>
                             </svg>
-                                <span th:text="${estacion.getHorario()}"></span>
-                            </div>
-                        </div>
+                            <span>{{ estacion.horario }}</span>
+                        </p>
                     </div>
                 </div>
-            <div class="station-actions">
-                <a class="button button-primary"
-                       th:href="@{'https://www.google.com/maps/search/?api=1&query=' +${estacion.coordenada.latitud}+ ','+${estacion.coordenada.longitud}}"
-                   target="_blank" rel="noopener noreferrer">
-                    <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-                        <use href="/images/icons.svg#map"></use>
-                    </svg>
-                        <span th:text="#{eess.ubicacion.google.maps}"></span>
-                    </a>
-                <div
-                         th:text="|#{eess.ubicacion.latitud} ${estacion.coordenada.latitud}, #{eess.ubicacion.longitud} ${estacion.coordenada.longitud}|"></div>
-                </div>
+            </header>
+
+            <p v-if="errorFavoritas" class="form-error" role="alert">
+                <span th:text="#{eess.favoritas.error}"></span>
+                <button type="button" @click="cargarFavoritas" th:text="#{eess.reintentar}"></button>
+            </p>
+
+            <p v-if="errorCatalogos" class="form-error" role="alert">
+                <span th:text="#{eess.detalle.catalogos.error}"></span>
+                <button type="button" @click="cargarCatalogos" th:text="#{eess.reintentar}"></button>
+            </p>
+
+            <!-- Ubicación, distancia y mapas -->
+            <th:block th:replace="~{fragments/eess/ubicacion-estacion :: ubicacion}"></th:block>
         </section>
+
         <div class="station-detail-columns">
             <div class="station-detail-sections">
-                <section class="available-fuels"
-                         th:if="${preciosCombMap != null and !#maps.isEmpty(preciosCombMap)}">
-                    <div class="section-heading">
-                        <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
-                             aria-hidden="true">
+                <!-- Precios actuales -->
+                <section class="available-fuels" aria-labelledby="station-fuels-title">
+                    <header class="section-heading">
+                        <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
                             <use href="/images/icons.svg#fuel-pump"></use>
                         </svg>
-                        <h2 th:text="#{eess.combustible.disponible}">Combustible Disponible</h2>
-                    </div>
-                    <div class="fuel-card-list">
-                        <div class="fuel-card"
-                             th:each="entrySetPorCombustible : ${preciosCombMap.values().stream().findFirst().get()}">
-                            <span 
-                                  th:text="${#messages.msg('combustible.' + entrySetPorCombustible.getKey().getCodigo().toLowerCase())}"></span>
-                            <span 
-                                  th:text="${#numbers.formatDecimal( entrySetPorCombustible.getValue(), 1, 'COMMA', 3, 'POINT')} + ' €'"></span>
-                        </div>
-                    </div>
+                        <h2 id="station-fuels-title" th:text="#{eess.combustible.disponible}"></h2>
+                    </header>
+
+                    <ul v-if="preciosOrdenados(estacion).length" class="fuel-card-list">
+                        <li v-for="precio in preciosOrdenados(estacion)"
+                            :key="precio.id_combustible"
+                            class="fuel-card">
+                            <span>{{ nombreCombustible(precio.id_combustible) }}</span>
+                            <strong>{{ precioFormateado(precio.precio) }}</strong>
+                            <small>{{ fechaFormateada(precio.fecha) }}</small>
+                        </li>
+                    </ul>
+
+                    <p v-else th:text="#{eess.detalle.precios.vacio}"></p>
                 </section>
+
+                <!-- Histórico de precios -->
                 <section class="price-history"
-                         th:if="${preciosCombMap != null and !#maps.isEmpty(preciosCombMap)}">
-                    <div>
-                        <div>
-                            <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
-                                 aria-hidden="true">
-                                <use href="/images/icons.svg#history"></use>
-                            </svg>
-                            <h2
-                                th:text="#{eess.combustible.precios.historico}"></h2>
-                        </div>
-                        <form method="get"
-                              th:action="@{/estaciones-de-servicio/{id}(id=${estacion.id})}">
-                            <label
-                                   th:text="#{eess.combustible.precios.historico.desde}" for="precios_calendario"></label>
-                            <input
-                                   id="precios_calendario"
+                         aria-labelledby="station-history-title"
+                         :aria-busy="estadoHistorico === EstadoVista.CARGANDO">
+                    <header>
+                        <h2 id="station-history-title" th:text="#{eess.combustible.precios.historico}"></h2>
+                        <form @submit.prevent>
+                            <label for="precios-calendario"
+                                   th:text="#{eess.combustible.precios.historico.desde}">
+                            </label>
+
+                            <input id="precios-calendario"
                                    name="fechaInicio"
                                    type="date"
-                                   th:value="${fechaInicio}"
-                                   th:max="${T(java.time.LocalDate).now()}"
-                                   th:min="${T(java.time.LocalDate).now().minusDays(30)}"
-                                   onchange="this.form.submit()"/>
+                                   required
+                                   v-model="fechaInicio"
+                                   :min="fechaMinima"
+                                   :max="fechaMaxima"
+                                   @change="cargarHistorico"/>
                         </form>
-                    </div>
-                    <div class="table-scroll custom-scrollbar">
+                    </header>
+
+                    <p v-if="estadoHistorico === EstadoVista.CARGANDO"
+                       role="status"
+                       th:text="#{eess.detalle.historico.cargando}">
+                    </p>
+
+                    <p v-else-if="estadoHistorico === EstadoVista.ERROR" role="alert">
+                        <span th:text="#{eess.detalle.historico.error}"></span>
+                        <button type="button" @click="cargarHistorico" th:text="#{eess.reintentar}"></button>
+                    </p>
+                    <p v-else-if="estadoHistorico === EstadoVista.VACIO"
+                       role="status"
+                       th:text="#{eess.detalle.historico.vacio}">
+                    </p>
+
+                    <div v-else
+                         class="table-scroll custom-scrollbar"
+                         role="region"
+                         tabindex="0"
+                         aria-labelledby="station-history-title">
                         <table>
-                            <!-- Cabecera dinámica de combustibles -->
+                            <caption class="visually-hidden"
+                                     th:text="#{eess.combustible.precios.historico}">
+                            </caption>
+
                             <thead>
                             <tr>
-                                <th th:text="#{eess.combustible.precios.historico.fecha}"></th>
-                                <!-- Cabecera de combustibles dinámica sin streams -->
-                                <th th:each="combustible : ${preciosCombMap.values().stream().findFirst().get().keySet()}"
-
-                                    th:text="#{${'combustible.'+combustible.getCodigo().toLowerCase()}}"></th>
+                                <th scope="col" th:text="#{eess.combustible.precios.historico.fecha}"></th>
+                                <th v-for="id in combustiblesHistorico" :key="id" scope="col">
+                                    {{ nombreCombustible(id) }}
+                                </th>
                             </tr>
                             </thead>
 
                             <tbody>
-                            <tr th:each="entryXFecha : ${preciosCombMap}">
-                                <td
-                                    th:text="${#temporals.format(entryXFecha.getKey(), 'dd/MM/yy')}"></td>
-                                <td
-                                    th:each="precio : ${preciosCombMap.get(entryXFecha.getKey()).values()}"
-                                    th:text="${precio + ' €'}"></td>
+                            <tr v-for="fila in filasHistorico" :key="fila.fecha">
+                                <th scope="row">
+                                    <time :datetime="fila.fecha">{{ fechaFormateada(fila.fecha) }}</time>
+                                </th>
+                                <td v-for="id in combustiblesHistorico" :key="id">
+                                    {{ precioFormateado(fila.precios[id]) }}
+                                </td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
                 </section>
             </div>
-            <aside class="station-aside">
-                <div class="technical-card">
-                    <div>
-                        <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
-                             aria-hidden="true">
-                            <use href="/images/icons.svg#info"></use>
-                        </svg>
-                        <h3 th:text="#{eess.datos.tecnicos}"></h3>
-                    </div>
-                    <ul>
-                        <li>
-                            <div>
-                                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
-                                     aria-hidden="true">
-                                    <use href="/images/icons.svg#globe"></use>
-                                </svg>
-                                <span th:text="#{eess.datos.venta}"></span>
-                            </div>
-                            <span
-                                    th:text="#{${estacion.getVenta().getCodigoMensaje() + '.descripcion'}}"></span>
-                        </li>
-                        <li>
-                            <div>
-                                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
-                                     aria-hidden="true">
-                                    <use href="/images/icons.svg#road"></use>
-                                </svg>
-                                <span th:text="#{eess.datos.margen}"></span>
-                            </div>
-                            <span
-                                    th:text="#{${estacion.getMargen().getCodigoMensaje()}}"></span>
-                        </li>
-                        <li>
-                            <div>
-                                <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
-                                     aria-hidden="true">
-                                    <use href="/images/icons.svg#store"></use>
-                                </svg>
-                                <span th:text="#{eess.datos.remision}"></span>
-                            </div>
-                            <span
-                                      th:text="#{${estacion.getRemision().getCodigoMensaje() + '.descripcion'}}"></span>
-                        </li>
-                    </ul>
-                </div>
-                <div class="technical-card">
-                    <div>
-                        <svg class="icon" focusable="false" width="24" height="24" viewBox="0 0 24 24"
-                             aria-hidden="true">
-                            <use href="/images/icons.svg#flask"></use>
-                        </svg>
-                        <h3 th:text="#{eess.datos.composicion}"></h3>
-                    </div>
-                    <div>
+
+            <!-- Datos técnicos y composición -->
+            <aside class="station-aside" th:aria-label="#{eess.datos.tecnicos}">
+                <section class="technical-card">
+                    <header><h2 th:text="#{eess.datos.tecnicos}"></h2></header>
+                    <dl>
                         <div>
-                            <div>
-                                <span 
-                                      th:text="#{eess.datos.composicion.bioetanol}"></span>
-                                <span 
-                                      th:text="${estacion.getX100BioEtanol() + '%'}"></span>
-                            </div>
-                            <div class="composition-track" role="meter" aria-valuemin="0" aria-valuemax="100"
-                                 th:attr="aria-valuenow=${estacion.getX100BioEtanol()},aria-label=#{eess.datos.composicion.bioetanol}">
-                                <div
-                                     th:style="|width: ${estacion.getX100BioEtanol()}%|"></div>
-                            </div>
+                            <dt th:text="#{eess.datos.venta}"></dt>
+                            <dd v-if="estacion.venta === 'PUBLICA'" th:text="#{venta.publica.descripcion}"></dd>
+                            <dd v-else-if="estacion.venta === 'RESTRINGIDA'"
+                                th:text="#{venta.restringida.descripcion}">
+                            </dd>
+                            <dd v-else>{{ estacion.venta }}</dd>
                         </div>
                         <div>
-                            <div>
-                                <span 
-                                      th:text="#{eess.datos.composicion.ester}"></span>
-                                <span 
-                                      th:text="${estacion.getX100EsterMetilico() + '%'}"></span>
-                            </div>
-                            <div class="composition-track" role="meter" aria-valuemin="0" aria-valuemax="100"
-                                 th:attr="aria-valuenow=${estacion.getX100EsterMetilico()},aria-label=#{eess.datos.composicion.ester}">
-                                <div
-                                     th:style="|width: ${estacion.getX100EsterMetilico()}%|"></div>
-                            </div>
+                            <dt th:text="#{eess.datos.margen}"></dt>
+                            <dd v-if="estacion.margen === 'DERECHO'" th:text="#{margen.derecho}"></dd>
+                            <dd v-else-if="estacion.margen === 'IZQUIERDO'" th:text="#{margen.izquierdo}"></dd>
+                            <dd v-else th:text="#{margen.no_aplica}"></dd>
                         </div>
-                    </div>
-                </div>
+                        <div>
+                            <dt th:text="#{eess.datos.remision}"></dt>
+                            <dd v-if="estacion.remision === 'OM'" th:text="#{remision.om.descripcion}"></dd>
+                            <dd v-else-if="estacion.remision === 'DM'"
+                                th:text="#{remision.dm.descripcion}">
+                            </dd>
+                            <dd v-else>{{ estacion.remision }}</dd>
+                        </div>
+                    </dl>
+                </section>
+
+                <section class="technical-card">
+                    <header><h2 th:text="#{eess.datos.composicion}"></h2></header>
+                    <dl>
+                        <div>
+                            <dt th:text="#{eess.datos.composicion.bioetanol}"></dt>
+                            <dd>
+                                <meter min="0" max="100"
+                                       :value="porcentaje(estacion.x100BioEtanol)"
+                                       th:aria-label="#{eess.datos.composicion.bioetanol}">
+                                </meter>
+                                <span>{{ porcentaje(estacion.x100BioEtanol) }} %</span>
+                            </dd>
+                        </div>
+
+                        <div>
+                            <dt th:text="#{eess.datos.composicion.ester}"></dt>
+                            <dd>
+                                <meter min="0" max="100"
+                                       :value="porcentaje(estacion.x100EsterMetilico)"
+                                       th:aria-label="#{eess.datos.composicion.ester}">
+                                </meter>
+                                <span>{{ porcentaje(estacion.x100EsterMetilico) }} %</span>
+                            </dd>
+                        </div>
+                    </dl>
+                </section>
+
                 <div class="station-notice">
                     <p th:text="#{eess.info.incorrecta.pregunta}"></p>
-                    <a
-                       th:text="#{eess.info.incorrecta.reporta}" th:href="@{/contacto}"></a>
+                    <a th:href="@{/contacto}" th:text="#{eess.info.incorrecta.reporta}"></a>
                 </div>
             </aside>
         </div>
+    </template>
+</main>
+<noscript><p class="surface-card" th:text="#{eess.detalle.sin.javascript}"></p></noscript>
 
-    </main>
-</div>
-
-<!-- Footer -->
+<!-- Pie de página -->
 <footer th:replace="~{fragments/footer :: footer}"></footer>
-
+<script type="module" th:src="@{/assets/estacion-de-servicio.js}"></script>
 </body>
 </html>

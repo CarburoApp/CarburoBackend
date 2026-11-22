@@ -1,14 +1,10 @@
 package app.carburo.backend.controllers;
 
-import app.carburo.backend.entities.EstacionDeServicio;
 import app.carburo.backend.seo.SitemapUrlProvider;
-import app.carburo.backend.services.EstacionDeServicioService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,7 +19,6 @@ import static app.carburo.backend.controllers.EstacionDeServicioController.RUTA_
  * <ul>
  *     <li>Redirigir la raíz "/".</li>
  *     <li>Mostrar la página principal con búsquedas populares y la estación más cercana.</li>
- *     <li>Obtener la estación de servicio más cercana a una ubicación proporcionada.</li>
  *     <li>Mostrar la página de contacto con el correo configurado en application.properties.</li>
  * </ul>
  * </p>
@@ -42,18 +37,6 @@ public class HomeController implements SitemapUrlProvider {
 
 	// Rutas
 	public static final String RUTA_CONTACTO = "/contacto";
-	public static final String RUTA_INICIO_UBICACION = "/inicio/ubicacion";
-
-	// Dependencias
-	private final EstacionDeServicioService estacionDeServicioService;
-
-	/**
-	 * Constructor del controlador para la inyección de dependencias.
-	 */
-	public HomeController(EstacionDeServicioService estacionDeServicioService) {
-		this.estacionDeServicioService = estacionDeServicioService;
-	}
-
 	/**
 	 * Maneja las solicitudes GET a "/".
 	 *
@@ -61,7 +44,6 @@ public class HomeController implements SitemapUrlProvider {
 	 * <ul>
 	 *     <li>El nombre de la página actual ("inicio").</li>
 	 *     <li>Un mapa de búsquedas populares con nombre y URL correspondiente.</li>
-	 *     <li>Un atributo "estacionCercana" inicializado en null si no existe.</li>
 	 * </ul>
 	 * </p>
 	 *
@@ -78,10 +60,6 @@ public class HomeController implements SitemapUrlProvider {
 		// Se añade al modelo solo si el mapa contiene elementos
 		model.addAttribute("busquedasPopulares", busquedasPopulares);
 
-		// Inicializamos la estación cercana a null si no ha sido pasada
-		if (!model.containsAttribute("estacionCercana")) {
-			model.addAttribute("estacionCercana", null);
-		}
 
 		return VISTA_INICIO;
 	}
@@ -104,27 +82,6 @@ public class HomeController implements SitemapUrlProvider {
 		busquedasPopulares.put("León", RUTA_ESTACIONES_DE_SERVICIO +
 				"?comunidadSeleccionada=8&provinciaSeleccionada=24");
 		return busquedasPopulares;
-	}
-
-	/**
-	 * Recibe la ubicación del usuario y devuelve la estación de servicio más cercana.
-	 *
-	 * <p>Se invoca mediante AJAX desde la vista, devolviendo solo
-	 * el fragmento "estacionCercanaFragment".</p>
-	 *
-	 * @param lat latitud del usuario (WGS84)
-	 * @param lon longitud del usuario (WGS84)
-	 * @param model modelo para pasar la estación encontrada a la vista
-	 * @return el fragmento "inicio :: estacionCercanaFragment" con la estación más cercana
-	 */
-	@PostMapping(RUTA_INICIO_UBICACION)
-	public String obtenerEstacionMasCercanaFragment(@RequestParam double lat,
-													@RequestParam double lon,
-													Model model) {
-		// Obtenemos la estación más cercana usando el servicio
-		EstacionDeServicio e = estacionDeServicioService.getEstacionDeServicioMasProxima(lat, lon);
-		model.addAttribute("estacion", e);
-		return VISTA_INICIO + " :: estacionCercanaFragment";
 	}
 
 	// Inyección del correo de contacto desde application.properties

@@ -1,0 +1,105 @@
+<th:block th:fragment="estados">
+    <!-- Card de selección de ubicación -->
+    <div v-if="estadoEstaciones === EstadoVista.SELECCION" class="station-feedback empty-state" role="status">
+        <div>
+            <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/images/icons.svg#map-pin"></use>
+            </svg>
+            <h2 th:text="#{eess.list.seleccionar.ccaa.titulo}"></h2>
+            <p th:text="#{eess.list.seleccionar.ccaa.subtitulo}"></p>
+            <th:block th:replace="~{fragments/eess/estaciones-estados-vue :: selectores}"></th:block>
+        </div>
+    </div>
+
+    <!-- Card de carga de estaciones -->
+    <div v-else-if="estadoEstaciones === EstadoVista.CARGANDO"
+         class="station-feedback loading-state"
+         role="status"
+         aria-live="polite">
+        <div>
+            <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/images/icons.svg#loader-circle"></use>
+            </svg>
+            <h2 th:text="#{eess.list.cargando.titulo}"></h2>
+            <p th:text="#{eess.list.cargando.subtitulo}"></p>
+            <progress th:aria-label="#{eess.list.cargando.titulo}"></progress>
+        </div>
+    </div>
+
+    <!-- Card de error de estaciones -->
+    <div v-else-if="estadoEstaciones === EstadoVista.ERROR" class="station-feedback error-state" role="alert">
+        <div>
+            <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/images/icons.svg#circle-alert"></use>
+            </svg>
+            <h2 th:text="#{eess.list.error.titulo}"></h2>
+            <p th:text="#{eess.list.error.subtitulo}"></p>
+            <button type="button" @click="reintentarEstaciones" th:text="#{eess.reintentar}"></button>
+            <th:block th:replace="~{fragments/eess/estaciones-estados-vue :: selectores}"></th:block>
+        </div>
+    </div>
+
+    <!-- Card de error de ubicación -->
+    <div v-else-if="estadosErrorUbicacion.includes(estadoEstaciones)"
+         class="station-feedback empty-state"
+         role="status"
+         aria-live="polite">
+        <div>
+            <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/images/icons.svg#locate"></use>
+            </svg>
+
+            <h2 th:text="#{home.ubicacion.titulo}"></h2>
+            <p v-if="estadoEstaciones === EstadoVista.UBICACION_DENEGADA" th:text="#{home.ubicacion.denegada}"></p>
+            <p v-else-if="estadoEstaciones === EstadoVista.UBICACION_NO_COMPATIBLE"
+               th:text="#{home.ubicacion.no.compatible}"></p>
+            <p v-else-if="estadoEstaciones === EstadoVista.UBICACION_TIEMPO" th:text="#{home.ubicacion.tiempo}"></p>
+            <p v-else th:text="#{home.ubicacion.error}"></p>
+
+            <button type="button" @click="localizar" th:text="#{home.ubicacion.reintentar}"></button>
+            <th:block th:replace="~{fragments/eess/estaciones-estados-vue :: selectores}"></th:block>
+        </div>
+    </div>
+
+    <!-- Card sin resultados -->
+    <div v-else-if="estadoEstaciones === EstadoVista.VACIO" class="station-feedback empty-state" role="status">
+        <div>
+            <svg class="icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                <use href="/images/icons.svg#search"></use>
+            </svg>
+            <h2 th:text="#{eess.list.sin.resultados.titulo}"></h2>
+            <p th:text="#{eess.list.sin.resultados.subtitulo}"></p>
+            <th:block th:replace="~{fragments/eess/estaciones-estados-vue :: selectores}"></th:block>
+        </div>
+    </div>
+</th:block>
+
+<!-- Selectores de comunidad y provincia -->
+<div th:fragment="selectores" class="station-location-selectors">
+    <label>
+        <span th:text="#{eess.list.filtros.ubicacion.ccaa}"></span>
+        <select v-model="filtros.ccaa" @change="cambioCCAA" :disabled="cargandoComunidades">
+            <option value="0" th:text="#{eess.list.filtros.indiferente}"></option>
+            <option v-for="comunidad in comunidades" :key="comunidad.id" :value="String(comunidad.id)">
+                {{ comunidad.denominacion }}
+            </option>
+        </select>
+    </label>
+
+    <label>
+        <span th:text="#{eess.list.filtros.ubicacion.provincia}"></span>
+        <select v-model="filtros.provincia"
+                @change="cambioProvincia"
+                :disabled="filtros.ccaa === '0' || cargandoProvincias">
+            <option value="0" th:text="#{eess.list.filtros.indiferente}"></option>
+            <option v-for="provincia in provincias" :key="provincia.id" :value="String(provincia.id)">
+                {{ provincia.denominacion }}
+            </option>
+        </select>
+    </label>
+
+    <div v-if="errorGeografia" class="station-geography-error" role="alert">
+        <p th:text="#{eess.geografia.error}"></p>
+        <button type="button" @click="reintentarGeografia" th:text="#{eess.reintentar}"></button>
+    </div>
+</div>
