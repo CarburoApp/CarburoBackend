@@ -3,7 +3,6 @@ package app.carburo.backend.entities.converter;
 import app.carburo.backend.entities.enums.fromcode.FromCode;
 import app.carburo.backend.entities.enums.fromcode.FromCode.GetCodeEnumInterface;
 import jakarta.persistence.AttributeConverter;
-import jakarta.persistence.Converter;
 
 /**
  * Converter genérico para enums que implementan {@link GetCodeEnumInterface}.
@@ -13,8 +12,7 @@ import jakarta.persistence.Converter;
  *
  * @param <T> Tipo de enum que implementa {@link GetCodeEnumInterface}
  */
-@Converter(autoApply = true)
-public class EnumConverter<T extends Enum<T> & GetCodeEnumInterface>
+public abstract class EnumConverter<T extends Enum<T> & GetCodeEnumInterface>
 		implements AttributeConverter<T, String> {
 
 	/**
