@@ -556,10 +556,6 @@
     list-style: none;
 }
 
-.station-detail-layout .fuel-card small {
-    color: var(--color-muted);
-}
-
 .station-detail-layout .technical-card h2 {
     font-size: 1.1rem;
 }
@@ -613,15 +609,16 @@
     }
 }
 
-.station-detail-layout .technical-card dd:has(> meter) {
+.station-detail-layout .composition-heading {
     display: flex;
-    flex-direction: column;
+    align-items: baseline;
     gap: 0.5rem;
 }
 
-.station-detail-layout .technical-card dd > span {
-    align-self: flex-end;
-    order: -1;
+.station-detail-layout .composition-percentage {
+    flex-shrink: 0;
+    color: var(--color-ink);
+    font-variant-numeric: tabular-nums;
 }
 
 .station-detail-layout .technical-card meter::-webkit-meter-bar {

@@ -150,7 +150,6 @@
                             class="fuel-card">
                             <span>{{ nombreCombustible(precio.id_combustible) }}</span>
                             <strong>{{ precioFormateado(precio.precio) }}</strong>
-                            <small>{{ fechaFormateada(precio.fecha) }}</small>
                         </li>
                     </ul>
 
@@ -261,24 +260,28 @@
                     <header><h2 th:text="#{eess.datos.composicion}"></h2></header>
                     <dl>
                         <div>
-                            <dt th:text="#{eess.datos.composicion.bioetanol}"></dt>
+                            <dt class="composition-heading">
+                                <span class="composition-percentage">{{ porcentaje(estacion.x100BioEtanol) }} %</span>
+                                <span th:text="#{eess.datos.composicion.bioetanol}"></span>
+                            </dt>
                             <dd>
                                 <meter min="0" max="100"
                                        :value="porcentaje(estacion.x100BioEtanol)"
                                        th:aria-label="#{eess.datos.composicion.bioetanol}">
                                 </meter>
-                                <span>{{ porcentaje(estacion.x100BioEtanol) }} %</span>
                             </dd>
                         </div>
 
                         <div>
-                            <dt th:text="#{eess.datos.composicion.ester}"></dt>
+                            <dt class="composition-heading">
+                                <span class="composition-percentage">{{ porcentaje(estacion.x100EsterMetilico) }} %</span>
+                                <span th:text="#{eess.datos.composicion.ester}"></span>
+                            </dt>
                             <dd>
                                 <meter min="0" max="100"
                                        :value="porcentaje(estacion.x100EsterMetilico)"
                                        th:aria-label="#{eess.datos.composicion.ester}">
                                 </meter>
-                                <span>{{ porcentaje(estacion.x100EsterMetilico) }} %</span>
                             </dd>
                         </div>
                     </dl>

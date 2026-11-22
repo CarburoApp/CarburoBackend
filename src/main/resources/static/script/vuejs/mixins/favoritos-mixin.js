@@ -21,6 +21,7 @@ export const favoritosMixin = {
             return this.favoritas.includes(Number(id));
         },
         async cargarFavoritas() {
+            if (!this.favoritosConfig) return;
             this.cargandoFavoritas = true;
             this.errorFavoritas = false;
             try {
@@ -32,7 +33,9 @@ export const favoritosMixin = {
             }
         },
         async cambiarFavorita(id) {
-            if (this.cargandoFavoritas || this.errorFavoritas || this.favoritasPendientes.includes(id)) return;
+            id = Number(id);
+            if (!this.favoritosConfig || !Number.isSafeInteger(id) || id <= 0
+                || this.cargandoFavoritas || this.errorFavoritas || this.favoritasPendientes.includes(id)) return;
             this.favoritasPendientes.push(id);
             try {
                 const estado = await this.favoritosService.guardarEstado(id, !this.esFavorita(id));
